@@ -1,0 +1,1 @@
+dotnet publish -f net8.0 -c Release -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true -p:DebugType=None -p:DebugSymbols=false

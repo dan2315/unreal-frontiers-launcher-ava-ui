@@ -1,0 +1,30 @@
+{
+    "app-id": "dod.unrealfrontiers.launcher",
+    "runtime": "org.freedesktop.Platform",
+    "runtime-version": "21.08",
+    "sdk": "org.freedesktop.Sdk",
+    "command": "my-app",
+    "finish-args": [
+      "--share=ipc",
+      "--socket=wayland",
+      "--socket=x11",
+      "--device=dri",
+      "--filesystem=home"
+    ],
+    "modules": [
+      {
+        "name": "my-app",
+        "buildsystem": "simple",
+        "build-commands": [
+          "cp -r * /app"
+        ],
+        "sources": [
+          {
+            "type": "dir",
+            "path": "./publish"
+          }
+        ]
+      }
+    ]
+  }
+  
