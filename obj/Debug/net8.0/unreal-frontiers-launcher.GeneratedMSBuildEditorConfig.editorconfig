@@ -22,5 +22,8 @@ build_property.EnableGeneratedComInterfaceComImportInterop =
 [X:/Projects/UnrealFrontiers/unreal-frontiers-launcher/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[X:/Projects/UnrealFrontiers/unreal-frontiers-launcher/Views/MainWindow.axaml]
+[X:/Projects/UnrealFrontiers/unreal-frontiers-launcher/AuthPage/AuthPage.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[X:/Projects/UnrealFrontiers/unreal-frontiers-launcher/NavigationFrame/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

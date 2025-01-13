@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using unreal_frontiers_launcher.ViewModels;
+using UnrealFrontiersLauncher.ViewModels;
 
-namespace unreal_frontiers_launcher;
+namespace UnrealFrontiersLauncher;
 
 public class ViewLocator : IDataTemplate
 {

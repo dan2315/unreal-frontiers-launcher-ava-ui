@@ -1,23 +1,28 @@
+# Base Image
 FROM debian:bullseye
 
+# Install Flatpak and Flatpak Builder
 RUN apt-get update && apt-get install -y \
     flatpak \
     flatpak-builder \
-    git \
-    python3 \
-    build-essential \
+    wget \
+    ca-certificates \
     && apt-get clean
 
-# Set up Flatpak repository
+# Add Flathub as a remote repository
 RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# Install the Freedesktop SDK and Platform (21.08 version)
 RUN flatpak install -y flathub org.freedesktop.Sdk//21.08 org.freedesktop.Platform//21.08
 
 # Set working directory
 WORKDIR /app
 
-# Copy your Flatpak manifest and application code
-COPY ./manifest.json ./manifest.json
-COPY ./publish/ ./publish/
+# Copy project files
+COPY . .
 
-# Command to build the Flatpak
-CMD ["flatpak-builder", "--force-clean", "build-dir", "manifest.json"]
+# Build the Flatpak and create a bundle
+CMD flatpak-builder --force-clean build-dir manifest.json && \
+    flatpak build-export repo build-dir && \
+    flatpak build-bundle repo myapp.flatpak dod.unrealfrontiers.launcher 1.0 && \
+    echo "Flatpak bundle created: myapp.flatpak"

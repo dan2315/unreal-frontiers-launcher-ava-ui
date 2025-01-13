@@ -1,0 +1,98 @@
+
+namespace launcher
+{
+    public partial class TabView : ContentView
+    {
+        public TabView()
+        {
+            InitializeComponent();
+        }
+
+        public static readonly BindableProperty TextProperty =
+            BindableProperty.Create(nameof(Text), typeof(string), typeof(TabView), string.Empty);
+
+        public static readonly BindableProperty IconProperty =
+            BindableProperty.Create(nameof(Icon), typeof(string), typeof(TabView), string.Empty);
+
+        public static readonly BindableProperty CommandParameterProperty =
+            BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(TabView), null,
+                propertyChanged: OnCommandParameterChanged);
+
+
+        private static void OnCommandParameterChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is TabView tabView)
+            {
+                tabView.UpdateTabBackgroundColor();
+            }
+        }
+        public string Text
+        {
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
+        }
+
+        public string Icon
+        {
+            get => (string)GetValue(IconProperty);
+            set => SetValue(IconProperty, value);
+        }
+
+        public object CommandParameter
+        {
+            get => GetValue(CommandParameterProperty);
+            set => SetValue(CommandParameterProperty, value);
+        }
+
+        public static readonly BindableProperty TabBackgroundColorProperty =
+            BindableProperty.Create(nameof(TabBackgroundColor), typeof(Color), typeof(TabView), Colors.Transparent);
+
+        public Color TabBackgroundColor
+        {
+            get => (Color)GetValue(TabBackgroundColorProperty);
+            set => SetValue(TabBackgroundColorProperty, value);
+        }
+
+        public MainPageViewModel? ViewModel => BindingContext as MainPageViewModel;
+
+        private void UpdateTabBackgroundColor()
+        {
+            if (ViewModel != null)
+            {
+                bool wtf = ViewModel.SelectedTab.Equals(CommandParameter.ToString());
+                if (ViewModel.SelectedTab.Equals(CommandParameter.ToString()))
+                {
+                    TabBackgroundColor = Color.FromArgb("#EE4AEF");
+                }
+                else if (ViewModel.HoveredTab?.Equals(CommandParameter.ToString()) == true)
+                {
+                    TabBackgroundColor = Color.FromArgb("#22EE4AEF");
+                }
+                else
+                {
+                    TabBackgroundColor = Colors.Transparent;
+                }
+            }
+        }
+
+        protected override void OnBindingContextChanged()
+        {
+            base.OnBindingContextChanged();
+
+            if (ViewModel != null)
+            {
+                ViewModel.PropertyChanged += (sender, args) =>
+                {
+                    if (args.PropertyName == nameof(ViewModel.SelectedTab) ||
+                        args.PropertyName == nameof(ViewModel.HoveredTab))
+                    {
+                        UpdateTabBackgroundColor();
+                    }
+                };
+            }
+
+            UpdateTabBackgroundColor();
+        }
+
+    }
+}

@@ -1,21 +1,55 @@
-﻿using Avalonia;
-using System;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using Avalonia;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace unreal_frontiers_launcher;
-
-sealed class Program
+namespace UnrealFrontiersLauncher
 {
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
-    [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static class Program
+    {
+        [STAThread]
+        public static void Main(string[] args)
+        {
+            CreateAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
 
-    // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .WithInterFont()
-            .LogToTrace();
+        public static AppBuilder CreateAvaloniaApp()
+        {
+            var builder = AppBuilder.Configure(() => new App(ConfigureServices()));
+
+            builder.UsePlatformDetect()
+                   .LogToTrace()
+                   .With(new Win32PlatformOptions());
+
+            return builder;
+        }
+
+        private static IServiceProvider ConfigureServices()
+        {
+            // Set up dependency injection
+            var services = new ServiceCollection();
+
+            // Register services
+            services.AddSingleton<AuthService>();
+            services.AddSingleton<GameLauncher>();
+            services.AddSingleton<InstanceManager>();
+            services.AddSingleton<PlayerProfileProvider>();
+
+            services.AddTransient<MainWindow>();
+            // Register Views and ViewModels
+            // services.AddTransient<MainPage>();
+            services.AddTransient<AuthPage>();
+            // services.AddTransient<EntryModal>();
+
+            // // Add logging
+            // services.AddLogging(logging =>
+            // {
+            //     logging.AddDebug(); // Add debug logging
+            //     logging.AddConsole(); // Optional: Log to console
+            // });
+
+            return services.BuildServiceProvider();
+        }
+    }
 }

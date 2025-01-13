@@ -1,0 +1,144 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using Microsoft.Maui.Graphics;
+
+namespace launcher;
+
+public class MainPageViewModel : INotifyPropertyChanged
+{
+    private MainPage _pageReference;
+    public ObservableCollection<Modpack> Modpacks { get; set; }
+    private Modpack _selectedModpack;
+    public Modpack SelectedModpack
+    {
+        get
+            {
+                if (_selectedModpack == null) {
+                    _selectedModpack = Modpacks[0];
+                }
+                return _selectedModpack;
+            }
+        set
+        {
+            if (_selectedModpack != value)
+            {
+                _selectedModpack = value;
+                OnPropertyChanged(nameof(SelectedModpack));
+            }
+        }
+    }
+
+    public string SelectedModpackName => SelectedModpack.Name;
+    public string SelectedModpackIcon => SelectedModpack.Icon;
+
+    private string _hoveredTab;
+    public string? HoveredTab
+    {
+        get => _hoveredTab;
+        set
+        {
+            if (_hoveredTab != value)
+            {
+                _hoveredTab = value;
+                OnPropertyChanged(nameof(HoveredTab));
+            }
+        }
+    }
+    private string _selectedTab;
+    public string SelectedTab
+    {
+        get => _selectedTab;
+        set
+        {
+            if (_selectedTab != value)
+            {
+                _selectedTab = value;
+                OnPropertyChanged(nameof(SelectedTab));
+                OnPropertyChanged(nameof(IsSettingsPanelVisible));
+            }
+        }
+    }
+
+    public bool IsSettingsPanelVisible => SelectedTab == "settings";
+
+    public string PlayText
+    {
+        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.PlayerProfile.Nickname}"; }
+    }
+
+    public string PlayerName
+    {
+        get { return _pageReference.PlayerProfile.Nickname; }
+    }
+
+    public ICommand OnTabSelectedCommand
+    {
+        get
+        {
+            return new Command<string>(selectedTab =>
+            {
+                SelectedTab = selectedTab;
+            });
+        }
+    }
+
+    public ICommand OnTabHoveredCommand
+    {
+        get
+        {
+            return new Command<string>(hoveredTab =>
+            {
+                HoveredTab = hoveredTab;
+            });
+        }
+    }
+
+    public ICommand OnTabUnhoveredCommand
+    {
+        get
+        {
+            return new Command<string>(hoveredTab =>
+            {
+                HoveredTab = null;
+            });
+        }
+    }
+
+    public MainPageViewModel(MainPage page)
+    {
+        _pageReference = page;
+        Modpacks = new ObservableCollection<Modpack>
+        {
+            new Modpack { Name = "All The Mods 9", Value = "all_the_mods_nine", IsSelected=true },
+            new Modpack { Name = "(Beta) Create", Value = "create"  },
+            new Modpack { Name = "Unreal Zaruba", Value = "unreal_zaruba", IsEnabled = false },
+        };
+
+        if (Modpacks.Count > 0)
+        {
+            Modpacks[Modpacks.Count - 1].IsLastItem = true;
+        }
+        SelectedTab = "game";
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public Color GetTabBackgroundColor(string tabName)
+    {
+        if (SelectedTab == tabName)
+        {
+            return Color.FromArgb("#EE4AEF"); // Pink for selected
+        }
+        else if (HoveredTab == tabName)
+        {
+            return Color.FromArgb("#B0B0B0"); // Gray for hovered
+        }
+        return Color.FromArgb("#00000000"); // Transparent by default
+    }
+}

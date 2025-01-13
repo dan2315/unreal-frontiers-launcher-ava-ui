@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch Avalonia App (.NET 8.0)",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${workspaceFolder}/bin/Debug/net8.0/unreal-frontiers-launcher.exe",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "console": "internalConsole",
+        "stopAtEntry": false,
+        "env": {
+          "DOTNET_ROOT": "${env:HOME}/.dotnet"
+        }
+      }
+    ]
+  }
+  

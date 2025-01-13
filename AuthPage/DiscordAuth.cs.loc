@@ -1,0 +1,41 @@
+using System.Collections.Specialized;
+
+namespace launcher;
+
+class DiscordAuth
+{
+    public static void OnDiscordAuthResponseRecieved(Uri uri, IServiceProvider services, INavigation navigation)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var requestNickname = queryParams["requestNickname"];
+
+            if (string.Equals(requestNickname, "true"))
+            {
+                await CreateNewDiscordBindingAndProceed(services, navigation, queryParams);
+            }
+            else
+            {
+                await AuthPage.GrantAccessAndProceed(services.GetRequiredService<PlayerProfileProvider>(), navigation, queryParams);
+            }
+        });
+    }
+
+    private static async Task CreateNewDiscordBindingAndProceed(IServiceProvider services, INavigation navigation, NameValueCollection queryParams)
+    {
+        string state = queryParams["state"];
+        var nicknameRequestModal = services.GetRequiredService<EntryModal>();
+        var authService = services.GetRequiredService<AuthService>();
+        await navigation.PushAsync(new NavigationPage(nicknameRequestModal));
+        nicknameRequestModal.InitializeComponentOverride("Введите никнейм для вашего аккаунта", async (inputNickname) =>
+        {
+            var response = await authService.CompleteDiscordAuthSession(state, inputNickname);
+            if (response.success)
+            {
+                AuthPage.GrantAccess(services.GetRequiredService<PlayerProfileProvider>(), new() {nickname = response.nickname, accessToken = response.accessToken, refreshToken = response.refreshToken});
+                await AuthPage.ProceedToMainPage(navigation);
+            }
+        });
+    }
+}

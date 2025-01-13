@@ -1,15 +1,21 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="unreal_frontiers_launcher.App"
-             xmlns:local="using:unreal_frontiers_launcher"
+             x:Class="UnrealFrontiersLauncher.App"
+             xmlns:local="using:UnrealFrontiersLauncher"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.Styles>
+        <SimpleTheme />
+        <StyleInclude Source="avares://Citrus.Avalonia/Citrus.xaml"/>
+  </Application.Styles>
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+
+    <Application.Resources>
+        <FontFamily x:Key="MontserratRegular">/Assets/Fonts/Montserrat-Regular.ttf</FontFamily>
+        <FontFamily x:Key="MontserratBold">/Assets/Fonts/Montserrat-Bold.ttf</FontFamily>
+    </Application.Resources>
   
-    <Application.Styles>
-        <FluentTheme />
-    </Application.Styles>
 </Application>

@@ -1,7 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+namespace UnrealFrontiersLauncher.ViewModels;
 
-namespace unreal_frontiers_launcher.ViewModels;
-
-public class ViewModelBase : ObservableObject
+public abstract class ViewModelBase
 {
+    // Common ViewModel logic
 }

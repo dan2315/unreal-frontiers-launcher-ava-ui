@@ -8,7 +8,7 @@
       "version": "1.0.0",
       "restore": {
         "projectUniqueName": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
-        "projectName": "UnrealFrontiersLauncher",
+        "projectName": "unreal-frontiers-launcher",
         "projectPath": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
         "packagesPath": "C:\\Users\\danyl\\.nuget\\packages\\",
         "outputPath": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\obj\\",
@@ -41,11 +41,11 @@
           "dependencies": {
             "Avalonia": {
               "target": "Package",
-              "version": "[11.2.1, )"
+              "version": "[11.2.3, )"
             },
             "Avalonia.Desktop": {
               "target": "Package",
-              "version": "[11.2.1, )"
+              "version": "[11.2.3, )"
             },
             "Avalonia.Diagnostics": {
               "target": "Package",
@@ -55,9 +55,17 @@
               "target": "Package",
               "version": "[11.2.1, )"
             },
+            "Avalonia.ReactiveUI": {
+              "target": "Package",
+              "version": "[11.2.3, )"
+            },
             "Avalonia.Themes.Fluent": {
               "target": "Package",
               "version": "[11.2.1, )"
+            },
+            "Citrus.Avalonia": {
+              "target": "Package",
+              "version": "[2.1.1, )"
             },
             "CmlLib.Core": {
               "target": "Package",
@@ -70,6 +78,14 @@
             "CommunityToolkit.Mvvm": {
               "target": "Package",
               "version": "[8.2.1, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             },
             "SharpNBT": {
               "target": "Package",
@@ -87,46 +103,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
-              "version": "[8.0.0, 8.0.0]"
-            },
-            {
-              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
-              "version": "[8.0.0, 8.0.0]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.linux-x64",
-              "version": "[8.0.0, 8.0.0]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Runtime.linux-x64",
-              "version": "[8.0.0, 8.0.0]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Runtime.win-x64",
-              "version": "[8.0.0, 8.0.0]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
-              "version": "[8.0.0, 8.0.0]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
-        }
-      },
-      "runtimes": {
-        "linux-x64": {
-          "#import": []
-        },
-        "win-x64": {
-          "#import": []
         }
       }
     }
