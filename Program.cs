@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Svg.Skia;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UnrealFrontiersLauncher
@@ -17,6 +18,9 @@ namespace UnrealFrontiersLauncher
         public static AppBuilder BuildAvaloniaApp()
         {
             var serviceProvider = ConfigureServices();
+            
+            GC.KeepAlive(typeof(SvgImageExtension).Assembly);
+            GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
             
             // Pass serviceProvider to App's constructor
             return AppBuilder.Configure<App>()

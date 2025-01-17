@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using UnrealFrontiersLauncher.ViewModels;
 
 namespace UnrealFrontiersLauncher;
@@ -33,4 +35,14 @@ public partial class MainWindow : Window
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
+
+    private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        ((Button) sender).Background = new SolidColorBrush(Color.Parse("#212121"));
+    }
+
+    private void InputElement_OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        ((Button) sender).Background = new SolidColorBrush(Color.Parse("#000000"));
+    }
 }
