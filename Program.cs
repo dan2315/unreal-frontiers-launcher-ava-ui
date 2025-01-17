@@ -11,18 +11,23 @@ namespace UnrealFrontiersLauncher
         [STAThread]
         public static void Main(string[] args)
         {
-            CreateAvaloniaApp().StartWithClassicDesktopLifetime(args);
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
-        public static AppBuilder CreateAvaloniaApp()
+        public static AppBuilder BuildAvaloniaApp()
         {
-            var builder = AppBuilder.Configure(() => new App(ConfigureServices()));
-
-            builder.UsePlatformDetect()
-                   .LogToTrace()
-                   .With(new Win32PlatformOptions());
-
-            return builder;
+            var serviceProvider = ConfigureServices();
+            
+            // Pass serviceProvider to App's constructor
+            return AppBuilder.Configure<App>()
+                             .UsePlatformDetect()
+                             .LogToTrace()
+                             .With(new Win32PlatformOptions())
+                             .AfterSetup(_ =>
+                             {
+                                 var app = (App)App.Current;
+                                 app.IncludeServices(serviceProvider);
+                             });
         }
 
         private static IServiceProvider ConfigureServices()

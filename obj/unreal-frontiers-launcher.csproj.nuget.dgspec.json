@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj": {}
+    "x:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj": {}
   },
   "projects": {
-    "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj": {
+    "x:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
+        "projectUniqueName": "x:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
         "projectName": "UnrealFrontiersLauncher",
-        "projectPath": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
+        "projectPath": "x:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
         "packagesPath": "C:\\Users\\danyl\\.nuget\\packages\\",
-        "outputPath": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\obj\\",
+        "outputPath": "x:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\danyl\\AppData\\Roaming\\NuGet\\NuGet.Config"

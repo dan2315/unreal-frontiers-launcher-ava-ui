@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UnrealFrontiersLauncher")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7633b8f3be0382a340e151d9967e7393866ddd70")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37110a716b9a3ce34191b07f610b874421ee1419")]
 [assembly: System.Reflection.AssemblyProductAttribute("UnrealFrontiersLauncher")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UnrealFrontiersLauncher")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

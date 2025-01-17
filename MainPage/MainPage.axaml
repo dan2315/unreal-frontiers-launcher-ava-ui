@@ -95,6 +95,7 @@
             <Grid ColumnDefinitions="*, 250" RowDefinitions="*, 200">
                 <!-- Tab Content -->
                 <StackPanel Grid.Column="0"
+                              
                             Background="Red"
                             HorizontalAlignment="Stretch"
                             Orientation="Horizontal"

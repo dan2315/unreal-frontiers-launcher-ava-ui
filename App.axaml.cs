@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace UnrealFrontiersLauncher;
 
-public partial class App : Application
+public class App : Application
 {
     public static new App Current => (App)Application.Current;
 
@@ -16,12 +16,14 @@ public partial class App : Application
 
     private bool _internetConnection = false;
 
-    public App(IServiceProvider serviceProvider) {
-        Services = serviceProvider;
-    }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this); 
+    }
+
+    public void IncludeServices(IServiceProvider serviceProvider)
+    {
+        Services = serviceProvider;
     }
 
     public async override void OnFrameworkInitializationCompleted()
