@@ -3,9 +3,6 @@
              xmlns:local="using:UnrealFrontiersLauncher"
              x:Class="UnrealFrontiersLauncher.AuthPage"
              x:DataType="local:AuthPageViewModel">
-    <!-- <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </UserControl.Resources> -->
     <Grid>
         <Grid.Background>
             <ImageBrush Source="/Assets/Images/backgorund2.png" />
@@ -68,29 +65,26 @@
                 <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}" 
                            Foreground="Red" />
 
-                <!-- Action Button -->
-                <local:PrimaryButton x:Name="ActionButton" 
-                                     Content="{Binding ActionButtonText}" 
-                                     FontFamily="MontserratBold" 
-                                     Height="48" 
-                                     FontSize="18" 
-                                     Click="AuthAction" />
+                <Button x:Name="ActionButton" 
+                        Content="{Binding ActionButtonText}" 
+                        FontFamily="MontserratBold" 
+                        Height="48" 
+                        FontSize="18" 
+                        Click="AuthAction" />
 
-                <!-- Discord Auth Button -->
-                <local:PrimaryButton x:Name="StartDiscordAuthButton" 
-                                     Content="Discord Вход" 
-                                     FontFamily="MontserratBold" 
-                                     Height="48" 
-                                     FontSize="18" 
-                                     Background="Transparent"
-                                     Click="InitiateDiscordAuth" />
+                <Button x:Name="StartDiscordAuthButton" 
+                        Content="Discord Вход" 
+                        FontFamily="MontserratBold" 
+                        Height="48" 
+                        FontSize="18" 
+                        Background="Transparent"
+                        Click="InitiateDiscordAuth" />
 
-                <!-- Google Button -->
-                <local:PrimaryButton Content="Google (WIP)" 
-                                     FontFamily="MontserratBold" 
-                                     Height="48" 
-                                     FontSize="18" 
-                                     IsEnabled="False" />
+                <Button Content="Google (WIP)" 
+                        FontFamily="MontserratBold" 
+                        Height="48" 
+                        FontSize="18" 
+                        IsEnabled="False" />
 
                 <!-- Toggle Message -->
                 <TextBlock Text="{Binding ToggleMessage}" 

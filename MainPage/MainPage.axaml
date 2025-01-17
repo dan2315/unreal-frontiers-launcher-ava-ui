@@ -77,27 +77,14 @@
                                  Command=""/>
         </StackPanel>
 
-        <!-- Bottom Gradient -->
-        <!-- <Border Grid.ColumnSpan="2"
-                VerticalAlignment="Bottom"
-                Height="200">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                    <GradientStop Color="#83000000" Offset="0.0"/>
-                    <GradientStop Color="Transparent" Offset="1.0"/>
-                </LinearGradientBrush>
-            </Border.Background>
-        </Border> -->
-
-        <!-- Right Side Panel -->
+        <!-- Right Side Panel --> 
         <StackPanel Grid.Column="1" Background="Transparent">
 
-            <Grid ColumnDefinitions="*, 250" RowDefinitions="*, 200">
+            <Grid ColumnDefinitions="*, 250" RowDefinitions="*, Auto">
                 <!-- Tab Content -->
                 <StackPanel Grid.Column="0"
-                              
                             Background="Red"
-                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
                             Orientation="Horizontal"
                             Margin="20,0,0,0">
                     <TabControl Margin="5">
@@ -167,7 +154,7 @@
                                            Margin="10" />
                             </StackPanel>
                         </Border>
-                        <TextBlock Height="276" />
+                        <TextBlock/>
                         <Border Height="100" Background="#444444">
                             <StackPanel>
                                 <TextBlock Text="Выбранный сервер:"
@@ -187,7 +174,7 @@
 
                 <!-- Bottom Launch Panel -->
                 <StackPanel Grid.Row="1"
-                            Grid.ColumnSpan="1"
+                            Grid.ColumnSpan="2"
                             Background="Blue">
                     <Grid ColumnDefinitions="*, 250">
                         <StackPanel Grid.Column="0">
@@ -202,19 +189,19 @@
                                         Value="50"
                                         Foreground="#EE4AEF" />
                         </StackPanel>
-                        <elements:PrimaryButton x:Name="LaunchButton"
+                        <Button x:Name="LaunchButton"
                                             Grid.Column="1"
                                             Click="OnLaunchButtonClicked"
                                             Content="Играть"
                                             Background="#6D208F"
                                             Foreground="White"
                                             FontFamily="MontserratBold"
-                                            FontSize="22"
-                                            Width="240" />
+                                            FontSize="22" />
                     </Grid>
                 </StackPanel>
             </Grid>
 
         </StackPanel>
+
     </Grid>
 </UserControl>

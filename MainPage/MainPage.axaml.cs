@@ -23,6 +23,7 @@ public partial class MainPage : UserControl
 	private MainPageViewModel _viewModel;
 	public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
+	public MainPage() {}
 	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider)
 	{
 		_playerProfileProvider = playerProfileProvider;
@@ -89,15 +90,15 @@ public partial class MainPage : UserControl
 		bool answer = await _popUpService.ShowYesNoDialogAsync("Launching...", "Вы намерены запустить майнкрафт?");
 		if (!answer)
 		{
-			LaunchButton.Unlock();
+			LaunchButton.IsEnabled = true;
 			return;
 		}
-		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, PlayerProfile, OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, LaunchButton.Unlock);
+		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, PlayerProfile, OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, () => LaunchButton.IsEnabled = true);
 	}
 
     private void OnDownloadSpeedChanged(string speedText)
     {
-        DownloadSpeed.Text = speedText;
+        // DownloadSpeed.Text = speedText;
     }
 	
 private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
@@ -120,8 +121,7 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
     }
     else
     {
-        // If nothing is selected, reset to the first modpack
-        // ModpackCollectionView.SelectedItem = _viewModel.Modpacks.FirstOrDefault();
+        ModpackCollectionView.SelectedItem = _viewModel.Modpacks.FirstOrDefault();
     }
 }
 
