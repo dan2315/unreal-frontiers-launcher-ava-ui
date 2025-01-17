@@ -20,12 +20,13 @@
             </Border>
 
             <!-- Form Layout -->
-            <StackPanel Spacing="0" Width="350">
+            <StackPanel Spacing="-5" Width="350">
                 <!-- Auth Error -->
                 <TextBlock Text="{Binding AuthError}" 
                            Background="Red" 
                            Foreground="White" 
                            Padding="5" 
+                           Margin="10"
                            HorizontalAlignment="Center" 
                            FontFamily="{StaticResource MontserratBold}"/>
 
@@ -73,16 +74,16 @@
                                      FontFamily="MontserratBold" 
                                      Height="48" 
                                      FontSize="18" 
-                                     PointerPressed="AuthAction" />
+                                     Click="AuthAction" />
 
                 <!-- Discord Auth Button -->
                 <local:PrimaryButton x:Name="StartDiscordAuthButton" 
-                                     Content="Discord" 
+                                     Content="Discord Вход" 
                                      FontFamily="MontserratBold" 
                                      Height="48" 
                                      FontSize="18" 
                                      Background="Transparent"
-                                     PointerPressed="InitiateDiscordAuth" />
+                                     Click="InitiateDiscordAuth" />
 
                 <!-- Google Button -->
                 <local:PrimaryButton Content="Google (WIP)" 

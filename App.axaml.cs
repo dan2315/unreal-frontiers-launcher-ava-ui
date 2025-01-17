@@ -14,26 +14,50 @@ public partial class App : Application
 
     public IServiceProvider Services { get; private set; }
 
+    private bool _internetConnection = false;
+
     public App(IServiceProvider serviceProvider) {
         Services = serviceProvider;
     }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this); 
-        
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public async override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();
 
-            var window = Services.GetRequiredService<MainWindow>();
-            var firstPage = Services.GetRequiredService<AuthPage>();
+            Services.GetRequiredService<PopupService>();
 
-            desktop.MainWindow = window;
-            window.CurrentPage = firstPage;
+            var navigation = Services.GetRequiredService<NavigationService>();
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.Init(navigation);
+            desktop.MainWindow = mainWindow;
+            
+
+            var authPage = Services.GetRequiredService<AuthPage>();
+            var mainPage = Services.GetRequiredService<MainPage>();
+            var entryModal = Services.GetRequiredService<EntryModal>();
+
+            navigation.RegisterPage(authPage);
+            navigation.RegisterPage(mainPage);
+            navigation.RegisterPage(entryModal);
+
+            _internetConnection = await BackendConnectionDetector.ConnectionStatus();
+
+            if (_internetConnection) 
+            {
+                navigation.NavigateTo(authPage);
+                await authPage.TryAutoAuth();
+            }
+            else
+            {
+                Services.GetRequiredService<PlayerProfileProvider>().SetProfile(new PlayerProfile("OfflinePlayer"));
+                navigation.NavigateTo(mainPage);
+            }
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -41,7 +65,6 @@ public partial class App : Application
 
     private void DisableAvaloniaDataAnnotationValidation()
     {
-        // Remove Avalonia's default data annotation validation
         var dataValidationPluginsToRemove =
             BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 

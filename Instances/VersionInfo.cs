@@ -1,6 +1,5 @@
 namespace UnrealFrontiersLauncher
 {
-
     public class VersionInfo
     {
         public string modpackName { get; set; }
@@ -12,5 +11,3 @@ namespace UnrealFrontiersLauncher
         public int minRam {get; set; }
     }
 }
-
-

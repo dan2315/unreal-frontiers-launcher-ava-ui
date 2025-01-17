@@ -62,7 +62,7 @@ namespace UnrealFrontiersLauncher
                 if (minecraftInstances.ContainsKey(instanceId))
                 {
                     selectedInstance = minecraftInstances[instanceId];
-                    Console.WriteLine($"selected instance set from existed: {selectedInstance.Name}");
+                    Console.WriteLine($"selected instance set from existing: {selectedInstance.Name}");
                 }
                 else
                 {

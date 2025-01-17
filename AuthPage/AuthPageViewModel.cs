@@ -19,6 +19,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     private AuthService _authService;
     private readonly PlayerProfileProvider _playerProfileProvider;
+    private NavigationService _navigationService;
 
     private string _authError;
 
@@ -61,10 +62,11 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
     public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
 
-    public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider)
+    public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider, NavigationService navigationService)
     {
         _authService = authService;
         _playerProfileProvider = playerProfileProvider;
+        _navigationService = navigationService;
         NicknameEntry = new ValidatableEntry(ValidateNickname, this);
         EmailEntry = new ValidatableEntry(ValidateEmail, this);
         PasswordEntry = new ValidatableEntry(ValidatePassword, this);
@@ -110,7 +112,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
             else
             {
                 AuthPage.GrantAccess(_playerProfileProvider, new() { nickname = response.Nickname, accessToken = response.AccessToken, refreshToken = response.RefreshToken });
-                // await AuthPage.ProceedToMainPage(PageReference.Navigation);
+                _navigationService.NavigateTo<MainPage>();
             }
         }
     }

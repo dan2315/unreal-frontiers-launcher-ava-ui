@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace UnrealFrontiersLauncher
 {
@@ -10,39 +11,38 @@ namespace UnrealFrontiersLauncher
     {
         private readonly AuthService _authService;
         private readonly PlayerProfileProvider _playerProfileProvider;
+        private readonly NavigationService _navigationService;
 
         public PrimaryButton ActionButtonRef => ActionButton;
         public PrimaryButton StartDiscordAuthButtonRef => StartDiscordAuthButton;
 
-        public AuthPage(AuthService authService, PlayerProfileProvider profileProvider)
+        public AuthPage(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigationService)
         {
             InitializeComponent();
             _authService = authService;
             _playerProfileProvider = profileProvider;
+            _navigationService = navigationService;
 
-            // Set ViewModel as DataContext
-            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider);
+            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, navigationService);
             viewModel.PageReference = this;
             DataContext = viewModel;
 
-            // Attempt auto-authentication
-            _ = TryAutoAuth(authService);
         }
 
-        private async Task TryAutoAuth(AuthService authService)
+        public async Task TryAutoAuth()
         {
-            (bool success, string? nickname) = await authService.TryAuthWithTokens();
+            (bool success, string? nickname) = await _authService.TryAuthWithTokens();
             if (!success) return;
 
             GrantAccess(_playerProfileProvider, new() { nickname = nickname });
-            ProceedToMainPage();
+            _navigationService.NavigateTo<MainPage>();
         }
 
-        public static void GrantAccessAndProceed(PlayerProfileProvider profileProvider, NameValueCollection queryParams)
+        public static void GrantAccessAndProceed(PlayerProfileProvider profileProvider, NavigationService navigationService, NameValueCollection queryParams)
         {
             var parameters = ReadAuthParams(queryParams);
             GrantAccess(profileProvider, parameters);
-            ProceedToMainPage();
+            navigationService.NavigateTo<MainPage>();
         }
 
         public static void GrantAccess(PlayerProfileProvider profileProvider, AccessData parameters)
@@ -56,27 +56,17 @@ namespace UnrealFrontiersLauncher
             profileProvider.SetProfile(profile);
         }
 
-        public static void ProceedToMainPage()
-        {
-            // TODO: Navigate to MainPage
-            // var mainPage = App.Current.Services.GetRequiredService<MainPage>();
-            // if (App.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            // {
-            //     desktop.MainWindow.Content = mainPage;
-            // }
-        }
-
-        public void AuthAction(object? sender, PointerPressedEventArgs e) 
+        public void AuthAction(object? sender, RoutedEventArgs  e) 
         {
             ((AuthPageViewModel) DataContext).AuthAction();
         }
 
-        public void InitiateDiscordAuth(object? sender, PointerPressedEventArgs e) 
+        public void InitiateDiscordAuth(object? sender, RoutedEventArgs  e) 
         {
             ((AuthPageViewModel) DataContext).InitiateDiscordAuth(null);
         }
 
-        public void ToggleView(object? sender, PointerPressedEventArgs e) 
+        public void ToggleView(object? sender, RoutedEventArgs  e) 
         {
             ((AuthPageViewModel) DataContext).ToggleView();
         }

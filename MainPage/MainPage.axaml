@@ -1,0 +1,219 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:UnrealFrontiersLauncher.ViewModels"
+        xmlns:converters="using:UnrealFrontiersLauncher.Converters"
+        xmlns:elements="using:UnrealFrontiersLauncher"
+        x:Class="UnrealFrontiersLauncher.MainPage"
+        x:DataType="local:MainPageViewModel">
+
+    <UserControl.Resources>
+        <converters:MultiConditionColorConverter x:Key="MultiConditionColorConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Background Image -->
+        <Image Source="/Assets/Images/background_image.png"
+               Stretch="UniformToFill"
+               Grid.ColumnSpan="2" />
+
+        
+        <!-- Left Side Panel -->
+        <StackPanel Grid.Column="0"
+                    Background="#201E24"
+                    Width="230">
+            <TextBlock Text="Modpacks"
+                       FontSize="24"
+                       Foreground="White"
+                       Margin="0,0,0,20"
+                       FontFamily="MontserratBold" />
+
+            <!-- Modpack Collection -->
+            <ListBox x:Name="ModpackCollectionView"
+                          ItemsSource="{Binding Modpacks}"
+                          SelectedItem="{Binding SelectedModpack}"
+                          SelectionChanged="OnInstanceSelected">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Background="#201E24">
+                            <Border Background="{Binding BackgroundColor}"
+                                    Margin="0,10,0,10"
+                                    Padding="5"
+                                    CornerRadius="10"
+                                    BorderBrush="Transparent">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding Icon}"
+                                           Width="30"
+                                           Height="30"
+                                           Margin="0,0,10,0"/>
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="16"
+                                               VerticalAlignment="Center"
+                                               Foreground="{Binding SelectionAndHoverState, Converter={StaticResource MultiConditionColorConverter}}"
+                                               FontFamily="MontserratLight"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Divider Line -->
+                            <Rectangle Height="1"
+                                       Fill="#404040"
+                                       HorizontalAlignment="Stretch"
+                                       IsVisible="{Binding IsLastItem}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Settings Button -->
+            <elements:PrimaryButton Content="Показать папку"
+                                 Foreground="White"
+                                 Background="MediumPurple"
+                                 FontFamily="MontserratRegular"
+                                 VerticalAlignment="Bottom"
+                                 Margin="0,0,0,50"
+                                 Command=""/>
+        </StackPanel>
+
+        <!-- Bottom Gradient -->
+        <!-- <Border Grid.ColumnSpan="2"
+                VerticalAlignment="Bottom"
+                Height="200">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                    <GradientStop Color="#83000000" Offset="0.0"/>
+                    <GradientStop Color="Transparent" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border> -->
+
+        <!-- Right Side Panel -->
+        <StackPanel Grid.Column="1" Background="Transparent">
+
+            <Grid ColumnDefinitions="*, 250" RowDefinitions="*, 200">
+                <!-- Tab Content -->
+                <StackPanel Grid.Column="0"
+                            Background="Red"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Horizontal"
+                            Margin="20,0,0,0">
+                    <TabControl Margin="5">
+                        <TabItem Header="Играть!">
+                            <TextBlock Margin="5">This is tab 1 content</TextBlock>
+                        </TabItem>
+                        <TabItem Header="Настройки">
+                            <Border Grid.Column="0"
+                                Background="#201E24"
+                                Margin="10">
+                            <StackPanel>
+                                <TextBlock Text="Настройки"
+                                        FontSize="18"
+                                        FontFamily="MontserratBold"
+                                        Margin="10" />
+                                <StackPanel Orientation="Horizontal"
+                                            Background="#444444"
+                                            Spacing="15">
+                                    <TextBlock Text="RAM:"
+                                            VerticalAlignment="Center"
+                                            FontFamily="MontserratRegular" />
+                                    <Slider x:Name="RamSlider"
+                                            Width="400"
+                                            VerticalAlignment="Center" />
+                                    <TextBox x:Name="RamEntry"
+                                            Width="140"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal"
+                                            Background="#444444"
+                                            Spacing="15">
+                                    <TextBlock Text="Открыть консоль:"
+                                            VerticalAlignment="Center"
+                                            FontFamily="MontserratRegular" />
+                                    <CheckBox IsEnabled="False" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal"
+                                            Background="#444444"
+                                            Spacing="15">
+                                    <TextBlock Text="Закрыть лаунчер при запуске:"
+                                            VerticalAlignment="Center"
+                                            FontFamily="MontserratRegular" />
+                                    <CheckBox IsEnabled="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        </TabItem>
+                        <TabItem Header="Tab 3">
+                            <TextBlock Margin="5">This is tab 3 content</TextBlock>
+                        </TabItem>
+                    </TabControl>
+                </StackPanel>
+
+                <!-- Player Profile -->
+                <Border Grid.Column="1"
+                        Background="#201E24"
+                        Margin="10">
+                    <StackPanel>
+                        <Border Height="60" Background="#444444">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Assets/Images/stevehead.png"
+                                       Width="30"
+                                       Height="30" />
+                                <TextBlock Text="{Binding PlayerName}"
+                                           FontFamily="MontserratRegular"
+                                           Margin="10" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Height="276" />
+                        <Border Height="100" Background="#444444">
+                            <StackPanel>
+                                <TextBlock Text="Выбранный сервер:"
+                                           FontFamily="MontserratBold"
+                                           Margin="0,0,0,6" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding SelectedModpack.Icon}"
+                                           Width="30" />
+                                    <TextBlock Text="{Binding SelectedModpack.Name}"
+                                               FontFamily="MontserratRegular"
+                                               Margin="10" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Bottom Launch Panel -->
+                <StackPanel Grid.Row="1"
+                            Grid.ColumnSpan="1"
+                            Background="Blue">
+                    <Grid ColumnDefinitions="*, 250">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="DownloadSpeed"
+                                    HorizontalAlignment="Right"
+                                    Text="zzz..."
+                                    FontFamily="MontserratLight" />
+                            <TextBlock x:Name="TaskName"
+                                    Text="Чего смотришь, иди игру играть..."
+                                    FontFamily="MontserratLight" />
+                            <ProgressBar x:Name="LaunchProgressBar"
+                                        Value="50"
+                                        Foreground="#EE4AEF" />
+                        </StackPanel>
+                        <elements:PrimaryButton x:Name="LaunchButton"
+                                            Grid.Column="1"
+                                            Click="OnLaunchButtonClicked"
+                                            Content="Играть"
+                                            Background="#6D208F"
+                                            Foreground="White"
+                                            FontFamily="MontserratBold"
+                                            FontSize="22"
+                                            Width="240" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="UnrealFrontiersLauncher.EntryModal">
+    <Grid Width="600" Height="500">
+        <StackPanel Spacing="15" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- Label -->
+            <TextBlock x:Name="InfoLabel"
+                       Text="Enter your input"
+                       FontSize="20"
+                       FontFamily="MontserratBold"
+                       HorizontalAlignment="Center" />
+            
+            <!-- Entry -->
+            <TextBox x:Name="UserInput"
+                     Watermark="Type here..." />
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                <Button Content="Submit"
+                        FontFamily="MontserratBold"
+                        Padding="15"
+                        FontSize="18"
+                        Name="SubmitButton" />
+                <Button Content="Cancel"
+                        FontFamily="MontserratBold"
+                        Padding="15"
+                        FontSize="18"
+                        Name="CancelButton" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

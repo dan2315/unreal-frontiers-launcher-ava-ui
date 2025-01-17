@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "l63gQhEaeFQNRuGPDHSBLPxFTMpZWtiNtv6y4FBcXBsD4l1Ly+Na14scDFkq39qxq2vOs93BGLXCkPQ/8qGmUg==",
+  "dgSpecHash": "ik62QtTRrvo=",
   "success": true,
   "projectFilePath": "X:\\Projects\\UnrealFrontiers\\unreal-frontiers-launcher\\unreal-frontiers-launcher.csproj",
   "expectedPackageFiles": [
@@ -57,7 +57,11 @@
     "C:\\Users\\danyl\\.nuget\\packages\\system.text.encodings.web\\8.0.0\\system.text.encodings.web.8.0.0.nupkg.sha512",
     "C:\\Users\\danyl\\.nuget\\packages\\system.text.json\\8.0.4\\system.text.json.8.0.4.nupkg.sha512",
     "C:\\Users\\danyl\\.nuget\\packages\\system.threading.tasks.dataflow\\8.0.1\\system.threading.tasks.dataflow.8.0.1.nupkg.sha512",
-    "C:\\Users\\danyl\\.nuget\\packages\\tmds.dbus.protocol\\0.20.0\\tmds.dbus.protocol.0.20.0.nupkg.sha512"
+    "C:\\Users\\danyl\\.nuget\\packages\\tmds.dbus.protocol\\0.20.0\\tmds.dbus.protocol.0.20.0.nupkg.sha512",
+    "C:\\Users\\danyl\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.11\\microsoft.netcore.app.ref.8.0.11.nupkg.sha512",
+    "C:\\Users\\danyl\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.11\\microsoft.windowsdesktop.app.ref.8.0.11.nupkg.sha512",
+    "C:\\Users\\danyl\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.11\\microsoft.aspnetcore.app.ref.8.0.11.nupkg.sha512",
+    "C:\\Users\\danyl\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.11\\microsoft.netcore.app.host.win-x64.8.0.11.nupkg.sha512"
   ],
   "logs": []
 }

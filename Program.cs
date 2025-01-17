@@ -27,20 +27,21 @@ namespace UnrealFrontiersLauncher
 
         private static IServiceProvider ConfigureServices()
         {
-            // Set up dependency injection
             var services = new ServiceCollection();
 
-            // Register services
             services.AddSingleton<AuthService>();
             services.AddSingleton<GameLauncher>();
             services.AddSingleton<InstanceManager>();
             services.AddSingleton<PlayerProfileProvider>();
+            
+            services.AddSingleton<MainWindow>();
+            services.AddSingleton<PopupService>(); 
 
-            services.AddTransient<MainWindow>();
-            // Register Views and ViewModels
-            // services.AddTransient<MainPage>();
-            services.AddTransient<AuthPage>();
-            // services.AddTransient<EntryModal>();
+            services.AddTransient<EntryModal>();
+            services.AddSingleton<AuthPage>();
+            services.AddTransient<MainPage>();
+            services.AddSingleton<NavigationService>();
+
 
             // // Add logging
             // services.AddLogging(logging =>

@@ -6,6 +6,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyName>UnrealFrontiersLauncher</AssemblyName>
     <ApplicationTitle>Unreal Frontiers Launcher</ApplicationTitle>
   </PropertyGroup>
 

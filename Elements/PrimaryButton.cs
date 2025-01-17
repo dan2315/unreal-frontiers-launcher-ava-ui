@@ -11,7 +11,6 @@ public class PrimaryButton : Button, IStyleable
 {
     Type IStyleable.StyleKey => typeof(Button);
 
-    // AutoLock Property
     public static readonly StyledProperty<bool> AutoLockProperty =
         AvaloniaProperty.Register<PrimaryButton, bool>(nameof(AutoLock), true);
 
@@ -85,7 +84,7 @@ public class PrimaryButton : Button, IStyleable
     {
         if (IsEnabled)
         {
-            Background = HoverColor;
+            Background = NormalColor;
         }
     }
 
