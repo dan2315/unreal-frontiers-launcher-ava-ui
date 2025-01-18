@@ -18,8 +18,8 @@
 
         <!-- Background Image -->
         <Image Source="/Assets/Images/background_image.png"
-               Stretch="UniformToFill"
-               Grid.ColumnSpan="2" />
+           Stretch="UniformToFill"
+           Grid.ColumnSpan="2" />
 
         
         <!-- Left Side Panel -->
@@ -27,24 +27,24 @@
                     Background="#201E24"
                     Width="230">
             <TextBlock Text="Modpacks"
-                       FontSize="24"
+                       TextAlignment="Center"
+                       FontSize="34"
                        Foreground="White"
-                       Margin="0,0,0,20"
+                       Margin="0,5,0,20"
                        FontFamily="MontserratBold" />
 
             <!-- Modpack Collection -->
             <ListBox x:Name="ModpackCollectionView"
-                          ItemsSource="{Binding Modpacks}"
-                          SelectedItem="{Binding SelectedModpack}"
-                          SelectionChanged="OnInstanceSelected">
+                              ItemsSource="{Binding Modpacks}"
+                              SelectedItem="{Binding SelectedModpack}"
+                              SelectionChanged="OnInstanceSelected">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Background="#201E24">
                             <Border Background="{Binding BackgroundColor}"
                                     Margin="0,10,0,10"
                                     Padding="5"
-                                    CornerRadius="10"
-                                    BorderBrush="Transparent">
+                                    CornerRadius="10">
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="{Binding Icon}"
                                            Width="30"
@@ -65,15 +65,29 @@
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Opacity" Value="75"></Setter>
+                        <!-- <Setter Property="CornerRadius" Value="16"></Setter> -->
+                    </Style>
+                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="VerticalAlignment" Value="Bottom"></Setter>
+                        <!-- <Setter Property="Opacity" Value="75"></Setter> -->
+                        <!-- <Setter Property="CornerRadius" Value="16"></Setter> -->
+                    </Style>
+                </ListBox.Styles>
             </ListBox>
 
             <!-- Settings Button -->
             <elements:PrimaryButton Content="Показать папку"
-                                 Foreground="White"
-                                 Background="MediumPurple"
-                                 FontFamily="MontserratRegular"
-                                 VerticalAlignment="Bottom"
-                                 Margin="0,0,0,50">
+                Foreground="White"
+                Background="MediumPurple"
+                FontFamily="MontserratBold"
+
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,50">
             </elements:PrimaryButton>    
         </StackPanel>
 
@@ -84,14 +98,27 @@
                 <StackPanel Grid.Column="0"
                             VerticalAlignment="Stretch"
                             Orientation="Horizontal">
-                    <TabControl Margin="5">
-                        <TabItem Header="Играть!">
+                    <TabControl Margin="10 0 10 0">
+                        <TabItem Background="MediumPurple" Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                            <TabItem.Header>
+                                <StackPanel HorizontalAlignment="Stretch">
+                                    <Image Source="../Assets/Images/sword.png" Width="30" Height="30"></Image>
+                                    <TextBlock Margin="10 0 0 0" Foreground="Black" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
+                                </StackPanel>
+                            </TabItem.Header>
                             <TextBlock Margin="5">This is tab 1 content</TextBlock>
                         </TabItem>
-                        <TabItem Header="Настройки">
+                        
+                        <TabItem Background="MediumPurple" Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                            <TabItem.Header>
+                                <StackPanel HorizontalAlignment="Stretch" Background="Red">
+                                    <Image Source="../Assets/Images/settings.png" Width="30" Height="30"></Image>
+                                    <TextBlock Margin="10 0 0 0" Foreground="Black" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Настройки"></TextBlock>
+                                </StackPanel>
+                            </TabItem.Header>
                             <Border Grid.Column="0"
-                                Background="#201E24"
-                                Margin="10">
+                                    Background="#201E24"
+                                    Margin="10">
                             <StackPanel>
                                 <TextBlock Text="Настройки"
                                         FontSize="18"
@@ -130,39 +157,56 @@
                             </StackPanel>
                         </Border>
                         </TabItem>
-                        <TabItem Header="Tab 3">
-                            <TextBlock Margin="5">This is tab 3 content</TextBlock>
-                        </TabItem>
                     </TabControl>
                 </StackPanel>
 
                 <!-- Player Profile -->
                 <Border Grid.Column="1"
                         Background="#201E24"
-                        Margin="10">
+                        Margin="10 10 20 10"
+                        CornerRadius="20">
                     <StackPanel>
-                        <Border Height="60" Background="#444444">
-                            <StackPanel Orientation="Horizontal">
+                        <Border Height="60" Opacity="40" CornerRadius="20 20 0 0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                    <GradientStop Color="#201e24" Offset="0.0"></GradientStop>
+                                    <GradientStop Color="#444444" Offset="0.5"></GradientStop>
+                                    <GradientStop Color="#333333" Offset="1.0"></GradientStop>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            
+                            <StackPanel Orientation="Horizontal" Margin="20 0 0 0">
                                 <Image Source="/Assets/Images/stevehead.png"
                                        Width="30"
                                        Height="30" />
                                 <TextBlock Text="{Binding PlayerName}"
                                            FontFamily="MontserratRegular"
-                                           Margin="10" />
+                                           Margin="10"
+                                           FontSize="20"/>
                             </StackPanel>
                         </Border>
+                        
                         <TextBlock/>
-                        <Border Height="100" Background="#444444">
-                            <StackPanel>
+                        
+                        <Border Height="100" Opacity="40" >
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                    <GradientStop Color="#201e24" Offset="0.0"></GradientStop>
+                                    <GradientStop Color="#444444" Offset="0.5"></GradientStop>
+                                    <GradientStop Color="#333333" Offset="1.0"></GradientStop>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <StackPanel Margin="20 10 0 0">
                                 <TextBlock Text="Выбранный сервер:"
-                                           FontFamily="MontserratBold"
-                                           Margin="0,0,0,6" />
+                                   FontFamily="MontserratBold"
+                                   FontSize="20"
+                                   Margin="0,0,0,6" />
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding SelectedModpack.Icon}"
-                                           Width="30" />
+                                    <Image Source="{Binding SelectedModpack.Icon}" Width="30" />
                                     <TextBlock Text="{Binding SelectedModpack.Name}"
-                                               FontFamily="MontserratRegular"
-                                               Margin="10" />
+                                       FontFamily="MontserratRegular"
+                                       FontSize="15"
+                                       Margin="10" />
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -176,24 +220,26 @@
                     <Grid ColumnDefinitions="*, 250">
                         <StackPanel Grid.Column="0">
                             <TextBlock x:Name="DownloadSpeed"
-                                    HorizontalAlignment="Right"
-                                    Text="zzz..."
-                                    FontFamily="MontserratLight" />
+                                HorizontalAlignment="Right"
+                                Text="zzz..."
+                                FontFamily="MontserratLight" />
                             <TextBlock x:Name="TaskName"
-                                    Text="Чего смотришь, иди игру играть..."
-                                    FontFamily="MontserratLight" />
+                                Text="Чего смотришь, иди игру играть..."
+                                FontFamily="MontserratLight" />
                             <ProgressBar x:Name="LaunchProgressBar"
-                                        Value="50"
-                                        Foreground="#EE4AEF" />
+                                Value="50"
+                                Foreground="#EE4AEF" />
                         </StackPanel>
                         <Button x:Name="LaunchButton"
-                                            Grid.Column="1"
-                                            Click="OnLaunchButtonClicked"
-                                            Content="Играть"
-                                            Background="#6D208F"
-                                            Foreground="White"
-                                            FontFamily="MontserratBold"
-                                            FontSize="22" />
+                                Margin="12 0 0 0"    
+                                CornerRadius="5"
+                                Grid.Column="1"
+                                Click="OnLaunchButtonClicked"
+                                Content="Играть"
+                                Background="#6D208F"
+                                Foreground="White"
+                                FontFamily="MontserratBold"
+                                FontSize="22" />
                     </Grid>
                 </StackPanel>
             </Grid>

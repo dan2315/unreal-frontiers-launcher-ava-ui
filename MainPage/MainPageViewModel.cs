@@ -94,7 +94,7 @@ public class MainPageViewModel : INotifyPropertyChanged
         Modpacks = new ObservableCollection<Modpack>
         {
             new Modpack { Name = "All The Mods 9", Value = "all_the_mods_nine", IsSelected=true },
-            new Modpack { Name = "(Beta) Create", Value = "create"  },
+            new Modpack { Name = "(Beta) Create", Value = "create" },
             new Modpack { Name = "Unreal Zaruba", Value = "unreal_zaruba", IsEnabled = false },
         };
 
