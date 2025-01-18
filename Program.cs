@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 using Avalonia;
 using Avalonia.Svg.Skia;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +20,6 @@ namespace UnrealFrontiersLauncher
             GC.KeepAlive(typeof(SvgImageExtension).Assembly);
             GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
             
-            // Pass serviceProvider to App's constructor
             return AppBuilder.Configure<App>()
                              .UsePlatformDetect()
                              .LogToTrace()

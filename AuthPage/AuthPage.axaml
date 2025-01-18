@@ -17,7 +17,7 @@
             </Border>
 
             <!-- Form Layout -->
-            <StackPanel Spacing="-5" Width="350">
+            <StackPanel Width="350">
                 <!-- Auth Error -->
                 <TextBlock Text="{Binding AuthError}" 
                            Background="Red" 
@@ -38,6 +38,7 @@
 
                 <!-- Email Entry -->
                 <TextBox Text="{Binding EmailEntry.Value}" 
+                         IsVisible="False"
                          Watermark="Enter email" 
                          Background="White" 
                          FontFamily="MontserratRegular" 
@@ -56,7 +57,8 @@
                            Foreground="Red" />
 
                 <!-- Repeat Password Entry -->
-                <TextBox Text="{Binding RepeatPasswordEntry.Value}" 
+                <TextBox Text="{Binding RepeatPasswordEntry.Value}"
+                         IsVisible="False"
                          Watermark="Repeat password" 
                          Background="White" 
                          FontFamily="MontserratRegular" 
