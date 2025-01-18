@@ -31,7 +31,7 @@ namespace UnrealFrontiersLauncher
 
             var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService);
             viewModel.PageReference = this;
-            DataContext = viewModel;
+            DataContext = viewModel; // Binding Context
 
         }
 

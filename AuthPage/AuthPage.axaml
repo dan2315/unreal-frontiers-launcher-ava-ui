@@ -1,8 +1,21 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:UnrealFrontiersLauncher"
+             xmlns:converters="using:UnrealFrontiersLauncher.Converters"
              x:Class="UnrealFrontiersLauncher.AuthPage"
              x:DataType="local:AuthPageViewModel">
+    <UserControl.Resources>
+        <converters:TextToVisibilityConverter x:Key="TextToVisibilityConverter"/>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style Selector="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="Red"/>
+        </Style>
+    </UserControl.Styles>
     <Grid>
         <Grid.Background>
             <ImageBrush Source="/Assets/Images/backgorund2.png" />
@@ -17,66 +30,57 @@
             </Border>
 
             <!-- Form Layout -->
-            <StackPanel Width="350">
+            <StackPanel Width="350" Spacing="10">
                 <!-- Auth Error -->
                 <TextBlock Text="{Binding AuthError}" 
+                           IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}"
                            Background="Red" 
                            Foreground="White" 
                            Padding="5" 
+                           
                            Margin="10"
-                           HorizontalAlignment="Center" 
+                           HorizontalAlignment="Center"
                            FontFamily="{StaticResource MontserratBold}"/>
 
                 <!-- Nickname Entry -->
                 <TextBox Text="{Binding NicknameEntry.Value}" 
-                         Watermark="Enter nickname" 
-                         Background="White" 
-                         FontFamily="MontserratRegular" 
-                         Foreground="Black" />
-                <TextBlock Text="{Binding NicknameEntry.ValidationMessage}" 
-                           Foreground="Red"  />
+                         Watermark="Enter nickname" />
+                <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
+                           IsVisible="{Binding NicknameEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}" />
 
                 <!-- Email Entry -->
                 <TextBox Text="{Binding EmailEntry.Value}" 
-                         IsVisible="False"
-                         Watermark="Enter email" 
-                         Background="White" 
-                         FontFamily="MontserratRegular" 
-                         Foreground="Black"  />
+                         IsVisible="{Binding IsRegisterMode}"
+                         Watermark="Enter email"/>
                 <TextBlock Text="{Binding EmailEntry.ValidationMessage}" 
-                           Foreground="Red" />
+                           IsVisible="{Binding EmailEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}" />
 
                 <!-- Password Entry -->
                 <TextBox Text="{Binding PasswordEntry.Value}" 
-                         Watermark="Enter password" 
-                         Background="White" 
-                         FontFamily="MontserratRegular" 
-                         Foreground="Black" 
+                         Watermark="Enter password"  
                          PasswordChar="•" />
-                <TextBlock Text="{Binding PasswordEntry.ValidationMessage}" 
+                <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
+                           IsVisible="{Binding PasswordEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}"
                            Foreground="Red" />
 
                 <!-- Repeat Password Entry -->
                 <TextBox Text="{Binding RepeatPasswordEntry.Value}"
-                         IsVisible="False"
-                         Watermark="Repeat password" 
-                         Background="White" 
-                         FontFamily="MontserratRegular" 
-                         Foreground="Black" 
+                         IsVisible="{Binding IsRegisterMode}"
+                         Watermark="Repeat password"
                          PasswordChar="•" />
-                <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}" 
-                           Foreground="Red" />
+                <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
+                           IsVisible="{Binding PasswordEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}" />
 
                 <Button x:Name="ActionButton" 
                         Content="{Binding ActionButtonText}" 
-                        FontFamily="MontserratBold" 
+                        FontFamily="{StaticResource MontserratRegular}" 
                         Height="48" 
                         FontSize="18" 
                         Click="AuthAction" />
 
                 <Button x:Name="StartDiscordAuthButton" 
                         Content="Discord Вход" 
-                        FontFamily="MontserratBold" 
+                        FontFamily="{StaticResource MontserratBold}" 
                         Height="48" 
                         FontSize="18" 
                         Background="Transparent"
