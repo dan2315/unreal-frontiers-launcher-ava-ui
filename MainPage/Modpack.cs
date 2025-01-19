@@ -58,7 +58,6 @@ public class Modpack : INotifyPropertyChanged
                 _isHovered = value;
                 OnPropertyChanged(nameof(IsHovered));
                 OnPropertyChanged(nameof(TextColor));
-
             }
         }
     }

@@ -35,6 +35,7 @@ public class App : Application
             Services.GetRequiredService<PopupService>();
 
             var navigation = Services.GetRequiredService<NavigationService>();
+
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Init(navigation);
             desktop.MainWindow = mainWindow;
@@ -47,7 +48,8 @@ public class App : Application
             navigation.RegisterPage(authPage);
             navigation.RegisterPage(mainPage);
             navigation.RegisterPage(entryModal);
-
+            _ = Services.GetRequiredService<DeepLinkHandler>().InitializeAsync(Environment.GetCommandLineArgs());
+            
             _internetConnection = await BackendConnectionDetector.ConnectionStatus();
 
             if (_internetConnection) 

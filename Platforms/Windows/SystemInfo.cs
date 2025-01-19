@@ -1,7 +1,8 @@
 using System.Runtime.InteropServices;
+using UnrealFrontiersLauncher.Platforms;
 
 namespace UnrealFrontiersLauncher.Windows;
-public class SystemInfo
+public class SystemInfo : ISystemInfo
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     private class MemoryStatusEx
@@ -25,8 +26,8 @@ public class SystemInfo
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatusEx lpBuffer);
 
-    private static MemoryStatusEx memoryStatusEx;
-    public static (ulong value, string richValue) GetRamInfo()
+    private MemoryStatusEx memoryStatusEx;
+    public (ulong value, string richValue) GetRamInfo()
     {
         if (memoryStatusEx == null) {
             memoryStatusEx = new MemoryStatusEx();

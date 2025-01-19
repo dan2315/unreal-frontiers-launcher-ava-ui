@@ -10,8 +10,10 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CmlLib.Core;
+using UnrealFrontiersLauncher.Platforms;
 using UnrealFrontiersLauncher.ViewModels;
 using UnrealFrontiersLauncher.Windows;
+using SystemInfo = UnrealFrontiersLauncher.Linux.SystemInfo;
 
 namespace UnrealFrontiersLauncher;
 
@@ -22,6 +24,11 @@ public partial class MainPage : UserControl
 	private GameLauncher _gameLauncher;
 	private PlayerProfileProvider _playerProfileProvider;
 	private MainPageViewModel _viewModel;
+#if WINDOWS
+	private ISystemInfo _systemInfo = new Windows.SystemInfo();
+#elif LINUX
+	private ISystemInfo _systemInfo = new Linux.SystemInfo();
+#endif
 	public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
 	public MainPage() {}
@@ -51,7 +58,7 @@ public partial class MainPage : UserControl
 	public void UpdateSettingsPanel() 
 	{
 		var configuration = _instanceManager.selectedInstance.GetLaunchConfiguration();
-		RamSlider.Maximum = SystemInfo.GetRamInfo().value / 1024 / 1024;
+		RamSlider.Maximum = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
 		RamSlider.Value = configuration.Ram;
 		RamEntry.Text = configuration.Ram.ToString();
 	}
@@ -141,7 +148,7 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
 		TaskName.Text = file;
 	}
 
-	private void OnShowFolderClicked(object sender, EventArgs e) 
+	private void OnShowFolderClicked(object sender, RoutedEventArgs e) 
 	{
 		var installFolder = Path.Combine(AppSettings.LauncherBasePath, "Install");
 		MinecraftPath minecraftPath = new MinecraftPath()

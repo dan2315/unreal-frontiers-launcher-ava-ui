@@ -29,7 +29,7 @@ namespace UnrealFrontiersLauncher
             _playerProfileProvider = serviceProvider.GetRequiredService<PlayerProfileProvider>();
             _navigationService = serviceProvider.GetRequiredService<NavigationService>();
 
-            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService);
+            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService, serviceProvider.GetRequiredService<PopupService>());
             viewModel.PageReference = this;
             DataContext = viewModel; // Binding Context
 

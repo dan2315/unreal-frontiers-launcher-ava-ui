@@ -47,6 +47,7 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<AuthPage>();
             services.AddTransient<MainPage>();
             services.AddSingleton<NavigationService>();
+            services.AddTransient<DeepLinkHandler>();
 
 
             // // Add logging

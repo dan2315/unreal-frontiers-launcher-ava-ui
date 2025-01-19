@@ -23,6 +23,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
     private AuthService _authService;
     private readonly PlayerProfileProvider _playerProfileProvider;
     private NavigationService _navigationService;
+    private PopupService _popupService;
 
     private string _authError;
 
@@ -82,11 +83,12 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
     public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
 
-    public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider, NavigationService navigationService)
+    public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider, NavigationService navigationService, PopupService popupService)
     {
         _authService = authService;
         _playerProfileProvider = playerProfileProvider;
         _navigationService = navigationService;
+        _popupService = popupService;
         NicknameEntry = new ValidatableEntry(ValidateNickname, this);
         EmailEntry = new ValidatableEntry(ValidateEmail, this);
         PasswordEntry = new ValidatableEntry(ValidatePassword, this);
@@ -112,9 +114,10 @@ public class AuthPageViewModel : INotifyPropertyChanged
                 {
                     AuthError = response.Message;
                 }
-                else 
+                else
                 {
-                    // TODO: await PageReference.DisplayAlert("Успех", "Вам на почту отправлено письмо для подтверждения аккаунта", "Оки-доки");
+                    _popupService.ShowOkDialogAsync("Успех",
+                        "Вам на почту отправлено письмо для подтверждения аккаунта");
                 }
             }
         }
