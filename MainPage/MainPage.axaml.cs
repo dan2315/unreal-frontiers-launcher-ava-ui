@@ -34,8 +34,6 @@ public partial class MainPage : UserControl
 		_viewModel = new MainPageViewModel(this);
 		DataContext = _viewModel;
 		
-		_playerProfileProvider.Subscribe(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
-		
 		InitializeComponent();
 
 

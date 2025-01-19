@@ -2,3 +2,13 @@ bin
 publish
 output
 obj
+/.idea/.idea.unreal-frontiers-launcher/.idea/.gitignore
+/.idea/.idea.unreal-frontiers-launcher/.idea/.name
+/.idea/.idea.unreal-frontiers-launcher/.idea/avalonia.xml
+/.idea/.idea.unreal-frontiers-launcher/.idea/discord.xml
+/.idea/.idea.unreal-frontiers-launcher/.idea/encodings.xml
+/.idea/.idea.unreal-frontiers-launcher/.idea/git_toolbox_blame.xml
+/.idea/.idea.unreal-frontiers-launcher/.idea/git_toolbox_prj.xml
+/.idea/.idea.unreal-frontiers-launcher/.idea/indexLayout.xml
+/unreal-frontiers-launcher.sln.DotSettings.user
+/.idea/.idea.unreal-frontiers-launcher/.idea/vcs.xml

@@ -45,7 +45,7 @@ public class Modpack : INotifyPropertyChanged
     }
     public IBrush BackgroundColor => !IsEnabled ?  new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22)) : IsSelected ? 
     new SolidColorBrush(Color.FromRgb(0x6D, 0x20, 0x8F)) : 
-    new SolidColorBrush(Color.FromRgb(0x20, 0x1E, 0x24));
+    new SolidColorBrush(Color.Parse("Transparent"));
 
     private bool _isHovered;
     public bool IsHovered
@@ -71,10 +71,9 @@ public class Modpack : INotifyPropertyChanged
             {
                 return new SolidColorBrush(Color.Parse("#ffffff"));
             }
-            return new SolidColorBrush(Color.Parse("#222222"));
+            return new SolidColorBrush(Color.Parse("#606060"));
         }
     }
-
 
     private bool _isLastItem;
 

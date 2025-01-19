@@ -24,8 +24,14 @@
         
         <!-- Left Side Panel -->
         <StackPanel Grid.Column="0"
-                    Background="#201E24"
                     Width="230">
+            <StackPanel.Background>
+                <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
+                    <GradientStop Color="#100F12" Offset="0.0"></GradientStop>
+                    <GradientStop Color="#2A272F" Offset="0.5"></GradientStop>
+                    <GradientStop Color="#100F12" Offset="1.0"></GradientStop>
+                </LinearGradientBrush>
+            </StackPanel.Background>
             <TextBlock Text="Modpacks"
                        TextAlignment="Center"
                        FontSize="34"
@@ -37,17 +43,19 @@
             <ListBox x:Name="ModpackCollectionView"
                               ItemsSource="{Binding Modpacks}"
                               SelectedItem="{Binding SelectedModpack}"
-                              SelectionChanged="OnInstanceSelected" Background="#201E24"
+                              SelectionChanged="OnInstanceSelected" Background="Transparent"
                               BorderBrush="Transparent">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Background="#201E24">
+                        <StackPanel Background="Transparent">
                             <Border Background="{Binding BackgroundColor}"
                                     Margin="0,10,0,10"
                                     Padding="5"
                                     CornerRadius="10"
                                     PointerEntered="Modpack_OnPointerEntered"
-                                    PointerExited="Modpack_OnPointerExited">
+                                    PointerExited="Modpack_OnPointerExited"
+                                    Height="50"
+                                    MaxWidth="180">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Image Source="{Binding Icon}"
                                            Width="30"
@@ -60,7 +68,7 @@
                                                MaxWidth="115">
                                     </TextBlock>
                                 </StackPanel>
-                            </Border>
+                            </Border>  
                             
                             <!-- Divider Line -->
                             <Rectangle Height="1"
@@ -149,7 +157,25 @@
                                     </Setter>
                                 </Style>
                             </TabItem.Styles>
-                            <TextBlock Margin="5">Здесь могла быть ваша реклама, но есть только: "Продам гараж недорого, звонить -> +8(800)-555-35-35"</TextBlock>
+
+                            <Border Background="#201E24"
+                                    Margin="10 10 10 420"
+                                    Width="600"
+                                    CornerRadius="5"
+                                    BorderBrush="Black"
+                                    BorderThickness="1">
+                                <Grid ColumnDefinitions="*, 475" RowDefinitions="*, Auto">
+                                    <StackPanel Margin="0 0 0 0" Grid.Column="0">
+                                        <Image Source="../Assets/Images/roflanbuldiga.png" Width="70" Height="70"></Image>
+                                        <TextBlock HorizontalAlignment="Center" Margin="0 0 0 5" 
+                                                   FontFamily="{StaticResource MontserratRegular}" FontSize="13">Roflan Buldiga</TextBlock>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Margin="00 25 0 0" FontFamily="{StaticResource MontserratRegular}" FontSize="16">Здесь могла быть ваша реклама, но есть только: <LineBreak/> "Продам гараж недорого, звонить -> +8(800)-555-35-35"</TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
                         </TabItem>
                         
                         <TabItem Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125">
@@ -200,7 +226,7 @@
                                     Background="#201E24"
                                     Margin="10"
                                     CornerRadius="5"
-                                    BorderBrush="White"
+                                    BorderBrush="Black"
                                     BorderThickness="1">
                                 <StackPanel>
 
@@ -212,7 +238,7 @@
                                                        Margin="10"
                                                        TextAlignment="Center"/>
                                         </Border>
-                                        <Rectangle Height="1" Fill="White"></Rectangle>
+                                        <Rectangle Height="1" Fill="Black"></Rectangle>
                                     </StackPanel>
                                     
                                     <StackPanel Orientation="Horizontal"
@@ -257,7 +283,7 @@
                                                   Margin="0 0 0 8"
                                                   CornerRadius="2"/>
                                     </StackPanel>
-                                    <Rectangle Height="1" Fill="White"></Rectangle>
+                                    <Rectangle Height="1" Fill="Black"></Rectangle>
                                 </StackPanel>
                             </Border>
                         </TabItem>
@@ -283,14 +309,14 @@
                                 </LinearGradientBrush>
                             </Border.Background>
                             
-                            <StackPanel Orientation="Horizontal" Margin="20 0 0 0">
+                            <StackPanel Orientation="Horizontal" Margin="10 0 0 0">
                                 <Image Source="/Assets/Images/stevehead.png"
                                        Width="30"
                                        Height="30" />
                                 <TextBlock Text="{Binding PlayerName}"
-                                           FontFamily="MontserratRegular"
-                                           Margin="10"
-                                           FontSize="20"/>
+                                           FontFamily="{StaticResource MontserratRegular}"
+                                           Margin="10 20 0 0"
+                                           FontSize="14"/>
                             </StackPanel>
                         </Border>
                         
@@ -305,19 +331,21 @@
                                     <GradientStop Color="#29282C" Offset="1.0"></GradientStop>
                                 </LinearGradientBrush>
                             </Border.Background>
+                            
                             <StackPanel Margin="10 10 0 0">
                                 <TextBlock Text="Выбранный сервер:"
-                                   FontFamily="MontserratBold"
-                                   FontSize="20"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="16"
                                    Margin="0,0,0,6" />
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="{Binding SelectedModpack.Icon}" Width="30" />
                                     <TextBlock Text="{Binding SelectedModpack.Name}"
-                                       FontFamily="MontserratRegular"
+                                       FontFamily="{StaticResource MontserratRegular}"
                                        FontSize="15"
                                        Margin="10" />
                                 </StackPanel>
                             </StackPanel>
+                            
                         </Border>
                     </StackPanel>
                 </Border>
