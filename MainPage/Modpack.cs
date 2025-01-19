@@ -66,7 +66,7 @@ public class Modpack : INotifyPropertyChanged
     {
         get
         {
-            if (IsSelected || IsHovered)
+            if ((IsSelected || IsHovered) && _isEnabled )
             {
                 return new SolidColorBrush(Color.Parse("#ffffff"));
             }

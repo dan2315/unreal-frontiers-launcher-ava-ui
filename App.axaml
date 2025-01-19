@@ -17,6 +17,11 @@
         <FontFamily x:Key="MontserratRegular">/Assets/Fonts/Montserrat-Regular.ttf#Montserrat</FontFamily>
         <FontFamily x:Key="MontserratBold">/Assets/Fonts/Montserrat-Bold.ttf#Montserrat</FontFamily>
         <FontFamily x:Key="MontserratLight">/Assets/Fonts/Montserrat-Light.ttf#Montserrat</FontFamily>
+        
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" x:Key="DefaultGradientBrush">
+            <GradientStop Color="#551E6E" Offset="0.2" />
+            <GradientStop Color="#EA4BED" Offset="1.0" />
+        </LinearGradientBrush>
     </Application.Resources>
   
 </Application>

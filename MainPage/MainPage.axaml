@@ -68,8 +68,8 @@
                                                MaxWidth="115">
                                     </TextBlock>
                                 </StackPanel>
-                            </Border>  
-                            
+                            </Border>
+            
                             <!-- Divider Line -->
                             <Rectangle Height="1"
                                        Fill="#404040"
@@ -78,16 +78,16 @@
                                        MaxWidth="175"/>
                         </StackPanel>
                     </DataTemplate>
-                    
+            
                 </ListBox.ItemTemplate>
-                
+            
                 <ListBox.Styles>
                     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
                         <Setter Property="Foreground" Value="White"></Setter>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Opacity" Value="75"></Setter>
                     </Style>
-                    
+            
                     <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
                         <Setter Property="Foreground" Value="White"></Setter>
                         <Setter Property="Background" Value="Transparent"/>
@@ -113,21 +113,14 @@
                                 <StackPanel>
                                     <Image Source="../Assets/Images/sword.png" Width="30" Height="30" Margin="18 0 0 0"></Image>
                                     <TextBlock Margin="18 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
-                                    <Rectangle Margin="18 0 0 0" Height="1" Fill="White" IsVisible="{Binding}" HorizontalAlignment="Stretch"></Rectangle>
+                                    <Rectangle Margin="18 0 0 0" Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
                                 </StackPanel>
                             </TabItem.Header>
                             
                             <TabItem.Styles>
                                 <Style Selector="TabItem:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
-                                                <GradientStop Color="#8a58bb" Offset="0.2" />
-                                                <GradientStop Color="#ee4aef" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter Property="Opacity" Value="30"></Setter>
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
                                 </Style>
                                 
                                 <Style Selector="TabItem:selected  /template/ ContentPresenter">
@@ -142,11 +135,8 @@
                                 </Style>
                                 
                                 <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            #8a58bb
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
                                 </Style>
                             </TabItem.Styles>
 
@@ -173,15 +163,8 @@
                             
                             <TabItem.Styles>
                                 <Style Selector="TabItem:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
-                                                <GradientStop Color="#8a58bb" Offset="0.2" />
-                                                <GradientStop Color="#ee4aef" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter Property="Opacity" Value="30"></Setter>
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
                                 </Style>
                                 
                                 <Style Selector="TabItem:selected  /template/ ContentPresenter">
@@ -196,11 +179,8 @@
                                 </Style>
                                 
                                 <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            #8a58bb
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
                                 </Style>
                             </TabItem.Styles>
                             
@@ -330,16 +310,52 @@
                                        FontFamily="{StaticResource MontserratRegular}"
                                        FontSize="15"/>
                                 </StackPanel>
-                                <Button Content="Показать папку"
-                                        Foreground="White"
-                                        Background="MediumPurple"
-                                        FontFamily="MontserratBold"
-                                        CornerRadius="5"
+                                <!-- <Button Content="Показать папку" -->
+                                <!--         Foreground="White" -->
+                                <!--         Background="MediumPurple" -->
+                                <!--         FontFamily="MontserratBold" -->
+                                <!--         CornerRadius="5" -->
+                                <!--         VerticalAlignment="Bottom" -->
+                                <!--         Click="OnShowFolderClicked"> -->
+                                <!-- </Button> -->
+                                    <Button Foreground="White"
+                                        Classes="idle_anim"
                                         VerticalAlignment="Bottom"
+                                        CornerRadius="5"
+                                        MaxWidth="210"
+                                        Height="35"
+                                        Background="{StaticResource DefaultGradientBrush}"
                                         Click="OnShowFolderClicked">
-                                </Button>
+                                    <Button.Content>
+                                        <Grid ColumnDefinitions="*, 150" RowDefinitions="*, Auto">
+                                            <Svg Path="/Assets/Images/svg/folder.svg" Height="20" Width="20"/>
+                                            <StackPanel Grid.Column="1" Grid.Row="0">
+                                                <TextBlock FontFamily="{StaticResource MontserratBold}"
+                                                           FontSize="15" Text="Показать папку" Margin="10 3 0 2"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button.Content>
+
+                                    <Button.Styles>
+                                        <Style Selector="Button.idle_anim">
+                                            <Style.Animations>
+                                                <Animation Duration="0:0:5" PlaybackDirection="AlternateReverse" IterationCount="INFINITE">
+                                                    <KeyFrame Cue="0%" >
+                                                        <Setter Property="Background">
+                                                            <Setter.Value>
+                                                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                                                    <GradientStop Color="#551E6E" Offset="0.2" />
+                                                                    <GradientStop Color="#EA4BED" Offset="1.0" />
+                                                                </LinearGradientBrush>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </KeyFrame>
+                                                </Animation>
+                                            </Style.Animations>
+                                        </Style>
+                                    </Button.Styles>
+                                    </Button>
                             </StackPanel>
-                            
                         </Border>
                     </StackPanel>
                 </Border>
@@ -375,7 +391,8 @@
                                 Content="Играть"
                                 Foreground="White"
                                 FontFamily="{StaticResource MontserratBold}"
-                                FontSize="22">
+                                FontSize="22"
+                                Classes="idle_anim">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
                                         <GradientStop Color="#8a58bb" Offset="0.2" />
@@ -393,13 +410,28 @@
                                             </Setter.Value>
                                         </Setter>
                                     </Style>
+                                    
+                                    <Style Selector="Button.idle_anim">
+                                        <Style.Animations>
+                                            <Animation Duration="0:0:5" PlaybackDirection="AlternateReverse" IterationCount="INFINITE">
+                                                <KeyFrame Cue="0%" >
+                                                    <Setter Property="Background">
+                                                        <Setter.Value>
+                                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                                                <GradientStop Color="#551E6E" Offset="0.2" />
+                                                                <GradientStop Color="#EA4BED" Offset="1.0" />
+                                                            </LinearGradientBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </KeyFrame>
+                                            </Animation>
+                                        </Style.Animations>
+                                    </Style>
                                 </Button.Styles>
                         </Button>
-                        
                     </Grid>
                 </StackPanel>
             </Grid>
         </DockPanel>
-
     </Grid>
 </UserControl>
