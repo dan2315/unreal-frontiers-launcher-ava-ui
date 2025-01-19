@@ -30,8 +30,8 @@
                        TextAlignment="Center"
                        FontSize="34"
                        Foreground="White"
-                       Margin="0,5,0,20"
-                       FontFamily="MontserratBold" />
+                       Margin="0,15,0,20"
+                       FontFamily="{StaticResource MontserratBold}" />
 
             <!-- Modpack Collection -->
             <ListBox x:Name="ModpackCollectionView"
@@ -258,10 +258,10 @@
 
                 <!-- Player Profile -->
                 <Border Grid.Column="1"
-                        Background="#201E24"
-                        Margin="10 10 20 50"
+                        Background="#BD201E24"
+                        Margin="10 60 20 60"
                         CornerRadius="5"
-                        BorderBrush="Black"
+                        BorderBrush="#BD000000"
                         BorderThickness="1">
                     <StackPanel>
                         <Border Height="60" Opacity="40" CornerRadius="5"
@@ -323,25 +323,49 @@
                             <TextBlock x:Name="DownloadSpeed"
                                 HorizontalAlignment="Right"
                                 Text="zzz..."
-                                FontFamily="MontserratLight" />
+                                FontFamily="{StaticResource MontserratLight}" />
                             <TextBlock x:Name="TaskName"
                                 Text="Чего смотришь, иди игру играть..."
-                                FontFamily="MontserratLight" />
-                            <ProgressBar x:Name="LaunchProgressBar"
-                                Value="50"
-                                Foreground="#EE4AEF" />
+                                FontFamily="{StaticResource MontserratLight}" />
+                            <ProgressBar x:Name="LaunchProgressBar" Value="50" CornerRadius="5" Margin="0 10 0 0">
+                                <ProgressBar.Foreground>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                        <GradientStop Color="#8a58bb" Offset="0.2" />
+                                        <GradientStop Color="#ee4aef" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </ProgressBar.Foreground>
+                            </ProgressBar>
                         </StackPanel>
+                        
                         <Button x:Name="LaunchButton"
                                 Margin="12 0 0 0"    
                                 CornerRadius="5"
                                 Grid.Column="1"
                                 Click="OnLaunchButtonClicked"
                                 Content="Играть"
-                                Background="#6D208F"
                                 Foreground="White"
-                                FontFamily="MontserratBold"
+                                FontFamily="{StaticResource MontserratBold}"
                                 FontSize="22">
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                        <GradientStop Color="#8a58bb" Offset="0.2" />
+                                        <GradientStop Color="#ee4aef" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                                    <GradientStop Color="#7252A4" Offset="0.2" />
+                                                    <GradientStop Color="#904991" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Styles>
                         </Button>
+                        
                     </Grid>
                 </StackPanel>
             </Grid>
