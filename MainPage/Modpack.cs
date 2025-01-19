@@ -39,7 +39,7 @@ public class Modpack : INotifyPropertyChanged
                 _isSelected = value;
                 OnPropertyChanged(nameof(IsSelected));
                 OnPropertyChanged(nameof(BackgroundColor));
-                OnPropertyChanged(nameof(SelectionAndHoverState));
+                OnPropertyChanged(nameof(TextColor));
             }
         }
     }
@@ -48,7 +48,7 @@ public class Modpack : INotifyPropertyChanged
     new SolidColorBrush(Color.FromRgb(0x20, 0x1E, 0x24));
 
     private bool _isHovered;
-    private bool IsHovered
+    public bool IsHovered
     {
         get => _isHovered;
         set
@@ -57,11 +57,24 @@ public class Modpack : INotifyPropertyChanged
             {
                 _isHovered = value;
                 OnPropertyChanged(nameof(IsHovered));
-                OnPropertyChanged(nameof(SelectionAndHoverState));
+                OnPropertyChanged(nameof(TextColor));
+
             }
         }
     }
-    public Tuple<bool, bool> SelectionAndHoverState => new (IsSelected, IsHovered);
+
+    public IBrush TextColor
+    {
+        get
+        {
+            if (IsSelected || IsHovered)
+            {
+                return new SolidColorBrush(Color.Parse("#ffffff"));
+            }
+            return new SolidColorBrush(Color.Parse("#222222"));
+        }
+    }
+
 
     private bool _isLastItem;
 

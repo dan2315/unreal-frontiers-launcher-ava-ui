@@ -45,7 +45,9 @@
                             <Border Background="{Binding BackgroundColor}"
                                     Margin="0,10,0,10"
                                     Padding="5"
-                                    CornerRadius="10">
+                                    CornerRadius="10"
+                                    PointerEntered="Modpack_OnPointerEntered"
+                                    PointerExited="Modpack_OnPointerExited">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Image Source="{Binding Icon}"
                                            Width="30"
@@ -53,8 +55,7 @@
                                            Margin="0,0,10,0"/>
                                     <TextBlock Text="{Binding Name}"
                                                FontSize="16" VerticalAlignment="Center"
-                                               Foreground="{Binding SelectionAndHoverState,
-                                                Converter={StaticResource MultiConditionColorConverter}}"
+                                               Foreground="{Binding TextColor}"
                                                FontFamily="{StaticResource MontserratLight}"
                                                MaxWidth="115">
                                     </TextBlock>

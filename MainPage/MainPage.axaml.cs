@@ -164,13 +164,17 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
         });
 	}
 
-	public void Modpack_OnHovered() 
+	private void Modpack_OnPointerEntered(object? sender, PointerEventArgs e)
 	{
-		
+		if (sender is not Border border) return;
+		if (border.DataContext is not Modpack modpack) return;
+		modpack.IsHovered = true;
 	}
 
-	public void Modpack_OnUnhovered() 
+	private void Modpack_OnPointerExited(object? sender, PointerEventArgs e)
 	{
-		
+		if (sender is not Border border) return;
+		if (border.DataContext is not Modpack modpack) return;
+		modpack.IsHovered = false;
 	}
 }

@@ -38,6 +38,10 @@ public class AuthPageViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ToggleMessage));
             OnPropertyChanged(nameof(ToggleButtonText));
             OnPropertyChanged(nameof(IsLoginMode));
+            NicknameEntry.OnPropertyChanged(nameof(NicknameEntry.IsVisible));            
+            EmailEntry.OnPropertyChanged(nameof(EmailEntry.IsVisible));
+            PasswordEntry.OnPropertyChanged(nameof(PasswordEntry.IsVisible));
+            RepeatPasswordEntry.OnPropertyChanged(nameof(RepeatPasswordEntry.IsVisible));
         }
     }
 
