@@ -21,7 +21,7 @@ class DiscordAuth
             }
             else
             {
-                AuthPage.GrantAccessAndProceed(profileProvider, navigation, queryParams);
+                authService.GrantAccessAndProceed(profileProvider, navigation, queryParams);
             }
         });
     }
@@ -35,7 +35,7 @@ class DiscordAuth
             var response = await authService.CompleteDiscordAuthSession(state, inputNickname);
             if (response.success)
             {
-                AuthPage.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken, refreshToken = response.refreshToken});
+                authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken, refreshToken = response.refreshToken});
                 navigation.NavigateTo<MainPage>();
             }
         });

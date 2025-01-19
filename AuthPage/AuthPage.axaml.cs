@@ -40,26 +40,8 @@ namespace UnrealFrontiersLauncher
             (bool success, string? nickname) = await _authService.TryAuthWithTokens();
             if (!success) return;
 
-            GrantAccess(_playerProfileProvider, new() { nickname = nickname });
+            _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
             _navigationService.NavigateTo<MainPage>();
-        }
-
-        public static void GrantAccessAndProceed(PlayerProfileProvider profileProvider, NavigationService navigationService, NameValueCollection queryParams)
-        {
-            var parameters = ReadAuthParams(queryParams);
-            GrantAccess(profileProvider, parameters);
-            navigationService.NavigateTo<MainPage>();
-        }
-
-        public static void GrantAccess(PlayerProfileProvider profileProvider, AccessData parameters)
-        {
-            if (parameters.accessToken != null && parameters.refreshToken != null)
-            {
-                TokenStorage.SaveTokens(parameters.accessToken, parameters.refreshToken);
-            }
-
-            var profile = new PlayerProfile(parameters.nickname);
-            profileProvider.SetProfile(profile);
         }
 
         public void AuthAction(object? sender, RoutedEventArgs  e) 
@@ -80,16 +62,6 @@ namespace UnrealFrontiersLauncher
         public void InitiatePasswordRecovery(object? sender, PointerPressedEventArgs e)
         {
             ((AuthPageViewModel) DataContext).InitiatePasswordRecovery();
-        }
-
-        public static AccessData ReadAuthParams(NameValueCollection queryParams)
-        {
-            return new()
-            {
-                nickname = queryParams["nickname"],
-                accessToken = queryParams["accessToken"],
-                refreshToken = queryParams["refreshToken"]
-            };
         }
 
         public struct AccessData

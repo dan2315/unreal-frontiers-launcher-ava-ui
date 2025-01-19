@@ -26,7 +26,7 @@ namespace UnrealFrontiersLauncher
                              .With(new Win32PlatformOptions())
                              .AfterSetup(_ =>
                              {
-                                 var app = (App)App.Current;
+                                 var app = App.Current;
                                  app.IncludeServices(serviceProvider);
                              });
         }

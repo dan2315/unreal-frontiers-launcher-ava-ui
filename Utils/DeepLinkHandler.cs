@@ -112,7 +112,7 @@ public class DeepLinkHandler
             }
             if (uri.Host == "email-verified-response")
             {
-                EmailVerificationCallback.OnEmailVerified(uri, _profileProvider, _navigation);
+                EmailVerificationCallback.OnEmailVerified(uri, _authService ,_profileProvider, _navigation);
             }
         }
     }

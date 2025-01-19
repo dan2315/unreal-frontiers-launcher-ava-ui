@@ -1,7 +1,10 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Mail;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using ReactiveUI;
@@ -35,16 +38,29 @@ public class AuthPageViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ToggleMessage));
             OnPropertyChanged(nameof(ToggleButtonText));
             OnPropertyChanged(nameof(IsLoginMode));
-            NicknameEntry.OnPropertyChanged(nameof(NicknameEntry.IsVisible));
-            EmailEntry.OnPropertyChanged(nameof(EmailEntry.IsVisible));
-            PasswordEntry.OnPropertyChanged(nameof(PasswordEntry.IsVisible));
-            RepeatPasswordEntry.OnPropertyChanged(nameof(RepeatPasswordEntry.IsVisible));
         }
     }
 
     public string AuthError 
     {
-        get => _authError;
+        get { 
+            if (string.IsNullOrEmpty(_authError))
+                return null;
+
+            try
+            {
+                using var jsonDoc = JsonDocument.Parse(_authError);
+                if (jsonDoc.RootElement.TryGetProperty("error", out var errorElement))
+                {
+                    return errorElement.GetString();
+                }
+                return "Unknown error format.";
+            }
+            catch (JsonException)
+            {
+                return "Invalid error format.";
+            }
+        }
         set {
             if (_authError != value) {
                 _authError = value;
@@ -73,8 +89,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
         RepeatPasswordEntry = new ValidatableEntry(ValidateRepeatPassword, this);
         IsRegisterMode = false;
     }
-
-    // RelayCommand for Login or Register action
+    
     public async void AuthAction()
     {
         if (IsRegisterMode)
@@ -111,7 +126,8 @@ public class AuthPageViewModel : INotifyPropertyChanged
             }
             else
             {
-                AuthPage.GrantAccess(_playerProfileProvider, new() { nickname = response.Nickname, accessToken = response.AccessToken, refreshToken = response.RefreshToken });
+                _authService.GrantAccess(_playerProfileProvider,
+                    new() { nickname = response.Nickname, accessToken = response.AccessToken, refreshToken = response.RefreshToken });
                 _navigationService.NavigateTo<MainPage>();
             }
         }
@@ -151,55 +167,53 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public (bool IsValid, string Message) ValidateEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
-            return (false, "Email cannot be empty.");
+            return (false, "Почта не может быть пустой.");
 
-        try
+        string emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        if (!Regex.IsMatch(email, emailRegex, RegexOptions.IgnoreCase))
         {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return (addr.Address == email, addr.Address == email ? "Email is valid." : "Invalid email format.");
+            return (false, "Неверный формат почты.");
         }
-        catch
-        {
-            return (false, "Invalid email format.");
-        }
+
+        return (true, "");
     }
 
     public (bool IsValid, string Message) ValidatePassword(string password)
     {
         if (string.IsNullOrWhiteSpace(password))
-            return (false, "Password cannot be empty.");
+            return (false, "Ну придумай пароль.");
 
         if (password.Length < 8)
-            return (false, "Password must be at least 8 characters long.");
+            return (false, "Пароль должен быть минимум 8 символов.");
 
         if (!password.Any(char.IsUpper))
-            return (false, "Password must contain at least one uppercase letter.");
+            return (false, "Добавь большую букву.");
 
         if (!password.Any(char.IsLower))
-            return (false, "Password must contain at least one lowercase letter.");
+            return (false, "Добавь маленькую букву.");
 
         if (!password.Any(char.IsDigit))
-            return (false, "Password must contain at least one digit.");
+            return (false, "Добавь цифру.");
 
-        return (true, "Password is valid.");
+        return (true, "");
     }
 
     public (bool IsValid, string Message) ValidateNickname(string nickname)
     {
         if (string.IsNullOrWhiteSpace(nickname))
-            return (false, "Nickname cannot be empty.");
+            return (false, "А как ты будешь играть без имени?");
 
         if (nickname.Length < 3)
-            return (false, "Nickname must be at least 3 characters long.");
+            return (false, "Минимум 3 символа.");
 
         if (nickname.Length > 16)
-            return (false, "Nickname must be no more than 16 characters long.");
+            return (false, "Максимум 16 символов.");
 
         var regex = new System.Text.RegularExpressions.Regex("^[a-zA-Z0-9_]+$");
         if (!regex.IsMatch(nickname))
-            return (false, "Nickname can only contain letters, numbers, and underscores.");
+            return (false, "Напрудил каких-то не тех буковок.");
 
-        return (true, "Nickname is valid.");
+        return (true, "");
     }
 
     private (bool, string) ValidateRepeatPassword(string repeatedPassword)
@@ -210,6 +224,6 @@ public class AuthPageViewModel : INotifyPropertyChanged
         if (repeatedPassword != PasswordEntry.Value) 
             return (false, "Пароли не совпадают.");
 
-        return (true, "Ахуэнчик");
+        return (true, "");
     }
 }

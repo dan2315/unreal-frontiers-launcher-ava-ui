@@ -3,18 +3,31 @@ using System.Text;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
+using UnrealFrontiersLauncher.TokenStorage;
+#if WINDOWS
+using UnrealFrontiersLauncher.TokenStorage.Windows;
+#elif LINUX
+using UnrealFrontiersLauncher.TokenStorage.Linux;
+#endif
 
 namespace UnrealFrontiersLauncher
 {
     public class AuthService
     {
         private readonly HttpClient _httpClient;
+        private readonly ITokenStorage _tokenStorage;
 
         public AuthService()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(AppSettings.ServerURL);
+#if WINDOWS
+            _tokenStorage = new TokenStorageWindows();
+#elif LINUX
+            _tokenStorage = new TokenStorageLinux();
+#endif
         }
 
         public async Task<(bool Success, string Message)> CreateAccount(string nickname, string email, string password)
@@ -51,7 +64,7 @@ namespace UnrealFrontiersLauncher
                 string accessToken = data.GetProperty("accessToken").GetString();
                 string refreshToken = data.GetProperty("refreshToken").GetString();
 
-                TokenStorage.SaveTokens(accessToken, refreshToken);
+                _tokenStorage.SaveTokens(accessToken, refreshToken);
                 return (true, "Login successful.", accessToken, refreshToken, nickname);
             }
             else
@@ -99,7 +112,7 @@ namespace UnrealFrontiersLauncher
 
         public async Task<(bool, string?)> TryAuthWithTokens() 
         {
-            (string accessToken, string refreshToken)  = TokenStorage.LoadTokens();
+            (string accessToken, string refreshToken) = _tokenStorage.LoadTokens();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             var accessResponse = await _httpClient.GetAsync("request_access");
 
@@ -122,7 +135,7 @@ namespace UnrealFrontiersLauncher
                 var data = JsonSerializer.Deserialize<JsonElement>(await refreshResponse.Content.ReadAsStringAsync());
                 var newAccessToken = data.GetProperty("accessToken").GetString();
                 var nickname = data.GetProperty("nickname").GetString();
-                TokenStorage.SaveTokens(newAccessToken, refreshToken);
+                _tokenStorage.SaveTokens(newAccessToken, refreshToken);
 
                 return(true, nickname);
             }
@@ -162,7 +175,7 @@ namespace UnrealFrontiersLauncher
                 var accessToken = responseObject.GetProperty("accessToken").GetString();
                 var refreshToken = responseObject.GetProperty("refreshToken").GetString();
 
-                TokenStorage.SaveTokens(accessToken, refreshToken);
+                _tokenStorage.SaveTokens(accessToken, refreshToken);
                 return (true, accessToken, refreshToken, recievedNickname);
             }
             else
@@ -172,6 +185,34 @@ namespace UnrealFrontiersLauncher
                 Console.WriteLine($"Error details: {errorContent}");
                 return (false, null, null, null);
             }
+        }
+        
+        public void GrantAccessAndProceed(PlayerProfileProvider profileProvider, NavigationService navigationService, NameValueCollection queryParams)
+        {
+            var parameters = ReadAuthParams(queryParams);
+            GrantAccess(profileProvider, parameters);
+            navigationService.NavigateTo<MainPage>();
+        }
+
+        public void GrantAccess(PlayerProfileProvider profileProvider, AuthPage.AccessData parameters)
+        {
+            if (parameters.accessToken != null && parameters.refreshToken != null)
+            {
+                _tokenStorage.SaveTokens(parameters.accessToken, parameters.refreshToken);
+            }
+
+            var profile = new PlayerProfile(parameters.nickname);
+            profileProvider.SetProfile(profile);
+        }
+        
+        public AuthPage.AccessData ReadAuthParams(NameValueCollection queryParams)
+        {
+            return new()
+            {
+                nickname = queryParams["nickname"],
+                accessToken = queryParams["accessToken"],
+                refreshToken = queryParams["refreshToken"]
+            };
         }
     }
 }

@@ -9,20 +9,31 @@
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="TextBox">
-            <Setter Property="FontSize" Value="16"/>
+            <!-- <Setter Property="FontSize" Value="16"/> -->
+            <Setter Property="FontFamily" Value="{StaticResource MontserratBold}"  />
         </Style>
-        <Style Selector="TextBlock">
+        <Style Selector="TextBlock.Error">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Background" Value="Red"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontFamily" Value="{StaticResource MontserratRegular}"/> 
+            <Setter Property="Height" Value="32"/> 
+            <Setter Property="FontSize" Value="16"/> 
         </Style>
     </UserControl.Styles>
     <Grid>
         <Grid.Background>
-            <ImageBrush Source="/Assets/Images/backgorund2.png" />
+            <ImageBrush Stretch="UniformToFill" Source="/Assets/Images/backgorund2.png" />
         </Grid.Background>
 
         <!-- Main Layout -->
-        <StackPanel Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Spacing="20" VerticalAlignment="Center" HorizontalAlignment="Center">
             
             <!-- Logo -->
             <Border CornerRadius="25" Width="200" Height="200" ClipToBounds="True">
@@ -30,71 +41,76 @@
             </Border>
 
             <!-- Form Layout -->
-            <StackPanel Width="350" Spacing="10">
+            <StackPanel Width="350" Spacing="8">
                 <!-- Auth Error -->
-                <TextBlock Text="{Binding AuthError}" 
-                           IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}"
-                           Background="Red" 
-                           Foreground="White" 
-                           Padding="5" 
-                           
-                           Margin="10"
-                           HorizontalAlignment="Center"
-                           FontFamily="{StaticResource MontserratBold}"/>
-
+                <Border Background="Red" CornerRadius="5">
+                    <TextBlock Text="{Binding AuthError}" 
+                               IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}"
+                               Foreground="White" 
+                               FontSize="14"
+                               TextAlignment="Center"
+                               FontFamily="{StaticResource MontserratBold}"
+                               Padding="5" 
+                               TextWrapping="Wrap"
+                               Margin="0,5,0,5"
+                               HorizontalAlignment="Center" />
+                </Border>
                 <!-- Nickname Entry -->
-                <TextBox Text="{Binding NicknameEntry.Value}" 
-                         Watermark="Enter nickname" />
-                <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
-                           IsVisible="{Binding NicknameEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}" />
-
+                <StackPanel Background="Red">
+                    <TextBox Text="{Binding NicknameEntry.Value}" 
+                             Watermark="Enter nickname" />
+                    <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
+                               Classes="Error"
+                               IsVisible="{Binding NicknameEntry.IsVisible}" />
+                </StackPanel>
+                
                 <!-- Email Entry -->
-                <TextBox Text="{Binding EmailEntry.Value}" 
-                         IsVisible="{Binding IsRegisterMode}"
-                         Watermark="Enter email"/>
-                <TextBlock Text="{Binding EmailEntry.ValidationMessage}" 
-                           IsVisible="{Binding EmailEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}" />
-
+                <StackPanel>
+                    <TextBox Text="{Binding EmailEntry.Value}" 
+                             IsVisible="{Binding IsRegisterMode}"
+                             Watermark="Enter email"/>
+                    <TextBlock Text="{Binding EmailEntry.ValidationMessage}"
+                               Classes="Error"
+                               IsVisible="{Binding EmailEntry.IsVisible}" />
+                </StackPanel>
+                
                 <!-- Password Entry -->
-                <TextBox Text="{Binding PasswordEntry.Value}" 
-                         Watermark="Enter password"  
-                         PasswordChar="•" />
-                <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
-                           IsVisible="{Binding PasswordEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}"
-                           Foreground="Red" />
-
+                <StackPanel>
+                    <TextBox Text="{Binding PasswordEntry.Value}" 
+                             Watermark="Enter password"  
+                             PasswordChar="•" />
+                    <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
+                               Classes="Error"
+                               IsVisible="{Binding PasswordEntry.IsVisible}" />
+                </StackPanel>
+                
                 <!-- Repeat Password Entry -->
-                <TextBox Text="{Binding RepeatPasswordEntry.Value}"
-                         IsVisible="{Binding IsRegisterMode}"
-                         Watermark="Repeat password"
-                         PasswordChar="•" />
-                <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
-                           IsVisible="{Binding PasswordEntry.ValidationMessage, Converter={StaticResource TextToVisibilityConverter}}" />
-
+                <StackPanel>
+                    <TextBox Text="{Binding RepeatPasswordEntry.Value}"
+                             IsVisible="{Binding IsRegisterMode}"
+                             Watermark="Repeat password"
+                             PasswordChar="•" />
+                    <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
+                               Classes="Error"
+                               IsVisible="{Binding RepeatPasswordEntry.IsVisible}" />
+                </StackPanel>
+                
+                
                 <Button x:Name="ActionButton" 
                         Content="{Binding ActionButtonText}" 
-                        FontFamily="{StaticResource MontserratRegular}" 
-                        Height="48" 
-                        FontSize="18" 
                         Click="AuthAction" />
 
                 <Button x:Name="StartDiscordAuthButton" 
                         Content="Discord Вход" 
-                        FontFamily="{StaticResource MontserratBold}" 
-                        Height="48" 
-                        FontSize="18" 
-                        Background="Transparent"
                         Click="InitiateDiscordAuth" />
 
                 <Button Content="Google (WIP)" 
-                        FontFamily="MontserratBold" 
-                        Height="48" 
-                        FontSize="18" 
                         IsEnabled="False" />
 
                 <!-- Toggle Message -->
                 <TextBlock Text="{Binding ToggleMessage}" 
-                           Foreground="#FFA4A4FF" 
+                           Foreground="Blue" 
+                           Background="#88827594"
                            TextDecorations="Underline" 
                            HorizontalAlignment="Center" 
                            FontFamily="MontserratBold" 
@@ -104,7 +120,8 @@
 
                 <!-- Forgot Password -->
                 <TextBlock Text="Forgot Password?" 
-                           Foreground="Blue" 
+                           Foreground="Blue"
+                           Background="#88827594"
                            TextDecorations="Underline" 
                            HorizontalAlignment="Center" 
                            FontFamily="MontserratBold" 

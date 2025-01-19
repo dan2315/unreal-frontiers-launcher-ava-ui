@@ -1,17 +1,18 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using UnrealFrontiersLauncher.TokenStorage;
 
-namespace UnrealFrontiersLauncher
+namespace UnrealFrontiersLauncher.TokenStorage.Windows
 {
-    public class TokenStorage
+    public class TokenStorageWindows : ITokenStorage
     {
         private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UnrealFrontiers");
         private static readonly string TokenFilePath = Path.Combine(AppDataPath, "tokens.dat");
         private static readonly string KeyFilePath = Path.Combine(AppDataPath, "encryption_key.dat");
         private static readonly int KeySize = 16;
 
-        static TokenStorage()
+        public TokenStorageWindows()
         {
             if (!Directory.Exists(AppDataPath))
             {
@@ -19,7 +20,7 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        private static byte[] LoadOrGenerateEncryptionKey()
+        private byte[] LoadOrGenerateEncryptionKey()
         {
             if (File.Exists(KeyFilePath))
             {
@@ -37,7 +38,7 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        public static void SaveTokens(string accessToken, string refreshToken)
+        public void SaveTokens(string accessToken, string refreshToken)
         {
             var tokens = $"{accessToken}|{refreshToken}";
             var encryptedTokens = Encrypt(tokens);
@@ -45,10 +46,9 @@ namespace UnrealFrontiersLauncher
             File.WriteAllBytes(TokenFilePath, encryptedTokens);
         }
 
-        public static (string accessToken, string refreshToken) LoadTokens()
+        public (string accessToken, string refreshToken) LoadTokens()
         {
-            if (!File.Exists(TokenFilePath))
-                throw new FileNotFoundException("Token file not found.");
+            if (!File.Exists(TokenFilePath)) return ("", "");
 
             var encryptedTokens = File.ReadAllBytes(TokenFilePath);
             var decryptedTokens = Decrypt(encryptedTokens);
@@ -57,7 +57,7 @@ namespace UnrealFrontiersLauncher
             return (tokens[0], tokens[1]);
         }
 
-        public static void DeleteTokens()
+        public void DeleteTokens()
         {
             if (File.Exists(TokenFilePath))
             {
@@ -65,7 +65,7 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        private static byte[] Encrypt(string plainText)
+        private byte[] Encrypt(string plainText)
         {
             byte[] key = LoadOrGenerateEncryptionKey(); // Load or generate user-specific key
             using (Aes aes = Aes.Create())
@@ -87,7 +87,7 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        private static string Decrypt(byte[] cipherText)
+        private string Decrypt(byte[] cipherText)
         {
             byte[] key = LoadOrGenerateEncryptionKey(); // Load or generate user-specific key
             using (Aes aes = Aes.Create())
