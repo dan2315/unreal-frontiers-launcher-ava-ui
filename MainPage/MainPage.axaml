@@ -30,14 +30,15 @@
                        TextAlignment="Center"
                        FontSize="34"
                        Foreground="White"
-                       Margin="0,5,0,20"
-                       FontFamily="MontserratBold" />
+                       Margin="0,15,0,20"
+                       FontFamily="{StaticResource MontserratBold}" />
 
             <!-- Modpack Collection -->
             <ListBox x:Name="ModpackCollectionView"
                               ItemsSource="{Binding Modpacks}"
                               SelectedItem="{Binding SelectedModpack}"
-                              SelectionChanged="OnInstanceSelected">
+                              SelectionChanged="OnInstanceSelected" Background="#201E24"
+                              BorderBrush="Transparent">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Background="#201E24">
@@ -45,37 +46,43 @@
                                     Margin="0,10,0,10"
                                     Padding="5"
                                     CornerRadius="10">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Image Source="{Binding Icon}"
                                            Width="30"
                                            Height="30"
                                            Margin="0,0,10,0"/>
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="16"
-                                               VerticalAlignment="Center"
-                                               Foreground="{Binding SelectionAndHoverState, Converter={StaticResource MultiConditionColorConverter}}"
-                                               FontFamily="MontserratLight"/>
+                                               FontSize="16" VerticalAlignment="Center"
+                                               Foreground="{Binding SelectionAndHoverState,
+                                                Converter={StaticResource MultiConditionColorConverter}}"
+                                               FontFamily="{StaticResource MontserratLight}"
+                                               MaxWidth="115">
+                                    </TextBlock>
                                 </StackPanel>
                             </Border>
+                            
                             <!-- Divider Line -->
                             <Rectangle Height="1"
                                        Fill="#404040"
                                        HorizontalAlignment="Stretch"
-                                       IsVisible="{Binding IsLastItem}" />
+                                       IsVisible="{Binding IsLastItem}"
+                                       MaxWidth="175"/>
                         </StackPanel>
                     </DataTemplate>
+                    
                 </ListBox.ItemTemplate>
+                
                 <ListBox.Styles>
                     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                        <Setter Property="Foreground" Value="White"></Setter>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Opacity" Value="75"></Setter>
-                        <!-- <Setter Property="CornerRadius" Value="16"></Setter> -->
                     </Style>
+                    
                     <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                        <Setter Property="Foreground" Value="White"></Setter>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="VerticalAlignment" Value="Bottom"></Setter>
-                        <!-- <Setter Property="Opacity" Value="75"></Setter> -->
-                        <!-- <Setter Property="CornerRadius" Value="16"></Setter> -->
                     </Style>
                 </ListBox.Styles>
             </ListBox>
@@ -99,79 +106,179 @@
                             VerticalAlignment="Stretch"
                             Orientation="Horizontal">
                     <TabControl Margin="10 0 10 0">
-                        <TabItem Background="MediumPurple" Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                            
                             <TabItem.Header>
-                                <StackPanel HorizontalAlignment="Stretch">
-                                    <Image Source="../Assets/Images/sword.png" Width="30" Height="30"></Image>
-                                    <TextBlock Margin="10 0 0 0" Foreground="Black" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
+                                <StackPanel>
+                                    <Image Source="../Assets/Images/sword.png" Width="30" Height="30" Margin="18 0 0 0"></Image>
+                                    <TextBlock Margin="18 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
+                                    <Rectangle Margin="18 0 0 0" Height="1" Fill="White" IsVisible="{Binding}" HorizontalAlignment="Stretch"></Rectangle>
                                 </StackPanel>
                             </TabItem.Header>
-                            <TextBlock Margin="5">This is tab 1 content</TextBlock>
+                            
+                            <TabItem.Styles>
+                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
+                                                <GradientStop Color="#8a58bb" Offset="0.2" />
+                                                <GradientStop Color="#ee4aef" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Opacity" Value="30"></Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
+                                                <GradientStop Color="#8a58bb" Offset="0.2" />
+                                                <GradientStop Color="#ee4aef" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            #8a58bb
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TabItem.Styles>
+                            <TextBlock Margin="5">Здесь могла быть ваша реклама, но есть только: "Продам гараж недорого, звонить -> +8(800)-555-35-35"</TextBlock>
                         </TabItem>
                         
-                        <TabItem Background="MediumPurple" Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                        <TabItem Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                            
+                            <TabItem.Styles>
+                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
+                                                <GradientStop Color="#8a58bb" Offset="0.2" />
+                                                <GradientStop Color="#ee4aef" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Opacity" Value="30"></Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
+                                                <GradientStop Color="#8a58bb" Offset="0.2" />
+                                                <GradientStop Color="#ee4aef" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            #8a58bb
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TabItem.Styles>
+                            
                             <TabItem.Header>
-                                <StackPanel HorizontalAlignment="Stretch" Background="Red">
-                                    <Image Source="../Assets/Images/settings.png" Width="30" Height="30"></Image>
-                                    <TextBlock Margin="10 0 0 0" Foreground="Black" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Настройки"></TextBlock>
+                                <StackPanel>
+                                    <Image Margin="3 0 0 0" Source="../Assets/Images/settings.png" Width="30" Height="30"></Image>
+                                    <TextBlock Margin="0 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Настройки"></TextBlock>
+                                    <Rectangle Margin="0 0 0 0" Height="1" Fill="White" IsVisible="{Binding}" HorizontalAlignment="Stretch"></Rectangle>
                                 </StackPanel>
                             </TabItem.Header>
+                            
+                            <!-- Ебанина с настройками -->
                             <Border Grid.Column="0"
                                     Background="#201E24"
-                                    Margin="10">
-                            <StackPanel>
-                                <TextBlock Text="Настройки"
-                                        FontSize="18"
-                                        FontFamily="MontserratBold"
-                                        Margin="10" />
-                                <StackPanel Orientation="Horizontal"
-                                            Background="#444444"
-                                            Spacing="15">
-                                    <TextBlock Text="RAM:"
-                                            VerticalAlignment="Center"
-                                            FontFamily="MontserratRegular" />
-                                    <Slider x:Name="RamSlider"
-                                            Width="400"
-                                            VerticalAlignment="Center" />
-                                    <TextBox x:Name="RamEntry"
-                                            Width="140"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Center" />
+                                    Margin="10"
+                                    CornerRadius="5"
+                                    BorderBrush="White"
+                                    BorderThickness="1">
+                                <StackPanel>
+
+                                    <StackPanel>
+                                        <Border Background="#1b191f" CornerRadius="5 5 0 0">
+                                            <TextBlock Text="Настройки"
+                                                       FontSize="18"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       Margin="10"
+                                                       TextAlignment="Center"/>
+                                        </Border>
+                                        <Rectangle Height="1" Fill="White"></Rectangle>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal"
+                                                Background="#2f2d36"
+                                                Spacing="15"
+                                                Margin="0 10 0 10">
+                                        <TextBlock Text="RAM:"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{StaticResource MontserratBold}"
+                                                Margin="5 0 0 0"/>
+                                        <Slider x:Name="RamSlider"
+                                                Width="400"
+                                                VerticalAlignment="Center" />
+                                        <TextBox x:Name="RamEntry"
+                                                Width="140"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Margin="0 0 5 0"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal"
+                                                Background="#2f2d36"
+                                                Spacing="15">
+                                        <TextBlock Text="Открыть консоль:"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{StaticResource MontserratBold}"
+                                                Margin="5 5 0 0"/>
+                                        <CheckBox IsEnabled="False"
+                                                  Margin="0 5 0 0"
+                                                  CornerRadius="2"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal"
+                                                Background="#2f2d36"
+                                                Spacing="15">
+                                        <TextBlock Text="Закрыть лаунчер при запуске:"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{StaticResource MontserratBold}" 
+                                                Margin="5 0 0 10"/>
+                                        
+                                        <CheckBox IsEnabled="False" 
+                                                  Margin="0 0 0 8"
+                                                  CornerRadius="2"/>
+                                    </StackPanel>
+                                    <Rectangle Height="1" Fill="White"></Rectangle>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal"
-                                            Background="#444444"
-                                            Spacing="15">
-                                    <TextBlock Text="Открыть консоль:"
-                                            VerticalAlignment="Center"
-                                            FontFamily="MontserratRegular" />
-                                    <CheckBox IsEnabled="False" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal"
-                                            Background="#444444"
-                                            Spacing="15">
-                                    <TextBlock Text="Закрыть лаунчер при запуске:"
-                                            VerticalAlignment="Center"
-                                            FontFamily="MontserratRegular" />
-                                    <CheckBox IsEnabled="False" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
+                            </Border>
                         </TabItem>
                     </TabControl>
                 </StackPanel>
 
                 <!-- Player Profile -->
                 <Border Grid.Column="1"
-                        Background="#201E24"
-                        Margin="10 10 20 10"
-                        CornerRadius="20">
+                        Background="#BD201E24"
+                        Margin="10 60 20 60"
+                        CornerRadius="5"
+                        BorderBrush="#BD000000"
+                        BorderThickness="1">
                     <StackPanel>
-                        <Border Height="60" Opacity="40" CornerRadius="20 20 0 0">
+                        <Border Height="60" Opacity="40" CornerRadius="5"
+                                Margin="5 5 5 0" BorderBrush="Black" BorderThickness="1">
+                            
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
                                     <GradientStop Color="#201e24" Offset="0.0"></GradientStop>
-                                    <GradientStop Color="#444444" Offset="0.5"></GradientStop>
-                                    <GradientStop Color="#333333" Offset="1.0"></GradientStop>
+                                    <!-- <GradientStop Color="#444444" Offset="0.5"></GradientStop> -->
+                                    <GradientStop Color="#29282C" Offset="1.0"></GradientStop>
                                 </LinearGradientBrush>
                             </Border.Background>
                             
@@ -188,15 +295,16 @@
                         
                         <TextBlock/>
                         
-                        <Border Height="100" Opacity="40" >
+                        <Border Height="100" Opacity="40" CornerRadius="5"
+                                Margin="5 0 5 0" BorderBrush="Black" BorderThickness="1">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
                                     <GradientStop Color="#201e24" Offset="0.0"></GradientStop>
-                                    <GradientStop Color="#444444" Offset="0.5"></GradientStop>
-                                    <GradientStop Color="#333333" Offset="1.0"></GradientStop>
+                                    <!-- <GradientStop Color="#444444" Offset="0.5"></GradientStop> -->
+                                    <GradientStop Color="#29282C" Offset="1.0"></GradientStop>
                                 </LinearGradientBrush>
                             </Border.Background>
-                            <StackPanel Margin="20 10 0 0">
+                            <StackPanel Margin="10 10 0 0">
                                 <TextBlock Text="Выбранный сервер:"
                                    FontFamily="MontserratBold"
                                    FontSize="20"
@@ -222,24 +330,49 @@
                             <TextBlock x:Name="DownloadSpeed"
                                 HorizontalAlignment="Right"
                                 Text="zzz..."
-                                FontFamily="MontserratLight" />
+                                FontFamily="{StaticResource MontserratLight}" />
                             <TextBlock x:Name="TaskName"
                                 Text="Чего смотришь, иди игру играть..."
-                                FontFamily="MontserratLight" />
-                            <ProgressBar x:Name="LaunchProgressBar"
-                                Value="50"
-                                Foreground="#EE4AEF" />
+                                FontFamily="{StaticResource MontserratLight}" />
+                            <ProgressBar x:Name="LaunchProgressBar" Value="50" CornerRadius="5" Margin="0 10 0 0">
+                                <ProgressBar.Foreground>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                        <GradientStop Color="#8a58bb" Offset="0.2" />
+                                        <GradientStop Color="#ee4aef" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </ProgressBar.Foreground>
+                            </ProgressBar>
                         </StackPanel>
+                        
                         <Button x:Name="LaunchButton"
                                 Margin="12 0 0 0"    
                                 CornerRadius="5"
                                 Grid.Column="1"
                                 Click="OnLaunchButtonClicked"
                                 Content="Играть"
-                                Background="#6D208F"
                                 Foreground="White"
-                                FontFamily="MontserratBold"
-                                FontSize="22" />
+                                FontFamily="{StaticResource MontserratBold}"
+                                FontSize="22">
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                        <GradientStop Color="#8a58bb" Offset="0.2" />
+                                        <GradientStop Color="#ee4aef" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                                                    <GradientStop Color="#7252A4" Offset="0.2" />
+                                                    <GradientStop Color="#904991" Offset="1.0" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Styles>
+                        </Button>
+                        
                     </Grid>
                 </StackPanel>
             </Grid>

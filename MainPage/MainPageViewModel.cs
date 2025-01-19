@@ -106,6 +106,7 @@ public class MainPageViewModel : INotifyPropertyChanged
         SelectedTab = "game";
         SelectedModpack = Modpacks[0];
     }
+    
 
     public event PropertyChangedEventHandler PropertyChanged;
     public void OnPropertyChanged([CallerMemberName] string propertyName = null)
