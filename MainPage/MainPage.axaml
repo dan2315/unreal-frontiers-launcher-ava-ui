@@ -37,7 +37,8 @@
             <ListBox x:Name="ModpackCollectionView"
                               ItemsSource="{Binding Modpacks}"
                               SelectedItem="{Binding SelectedModpack}"
-                              SelectionChanged="OnInstanceSelected">
+                              SelectionChanged="OnInstanceSelected" Background="#201E24"
+                              BorderBrush="Transparent">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Background="#201E24">
@@ -45,37 +46,43 @@
                                     Margin="0,10,0,10"
                                     Padding="5"
                                     CornerRadius="10">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Image Source="{Binding Icon}"
                                            Width="30"
                                            Height="30"
                                            Margin="0,0,10,0"/>
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="16"
-                                               VerticalAlignment="Center"
-                                               Foreground="{Binding SelectionAndHoverState, Converter={StaticResource MultiConditionColorConverter}}"
-                                               FontFamily="MontserratLight"/>
+                                               FontSize="16" VerticalAlignment="Center"
+                                               Foreground="{Binding SelectionAndHoverState,
+                                                Converter={StaticResource MultiConditionColorConverter}}"
+                                               FontFamily="{StaticResource MontserratLight}"
+                                               MaxWidth="115">
+                                    </TextBlock>
                                 </StackPanel>
                             </Border>
+                            
                             <!-- Divider Line -->
                             <Rectangle Height="1"
                                        Fill="#404040"
                                        HorizontalAlignment="Stretch"
-                                       IsVisible="{Binding IsLastItem}" />
+                                       IsVisible="{Binding IsLastItem}"
+                                       MaxWidth="175"/>
                         </StackPanel>
                     </DataTemplate>
+                    
                 </ListBox.ItemTemplate>
+                
                 <ListBox.Styles>
                     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                        <Setter Property="Foreground" Value="White"></Setter>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Opacity" Value="75"></Setter>
-                        <!-- <Setter Property="CornerRadius" Value="16"></Setter> -->
                     </Style>
+                    
                     <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                        <Setter Property="Foreground" Value="White"></Setter>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="VerticalAlignment" Value="Bottom"></Setter>
-                        <!-- <Setter Property="Opacity" Value="75"></Setter> -->
-                        <!-- <Setter Property="CornerRadius" Value="16"></Setter> -->
                     </Style>
                 </ListBox.Styles>
             </ListBox>

@@ -67,7 +67,7 @@ public class Modpack : INotifyPropertyChanged
 
     public bool IsLastItem
     {
-        get => _isLastItem;
+        get => !_isLastItem;
         set
         {
             if (_isLastItem != value)
