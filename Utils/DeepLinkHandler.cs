@@ -23,6 +23,7 @@ public class DeepLinkHandler
         _authService = authService;
         _profileProvider = profileProvider;
         _navigation = navigation;
+        _entryModal = entryModal;
     }
 
     public async Task InitializeAsync(string[] args)

@@ -43,7 +43,6 @@ public partial class MainPage : UserControl
 		
 		InitializeComponent();
 
-
 		Loaded += (sender, eventArgs) => {
 			InitSettingsPanel();
 			UpdateSettingsPanel();
@@ -106,7 +105,7 @@ public partial class MainPage : UserControl
 
     private void OnDownloadSpeedChanged(string speedText)
     {
-        // DownloadSpeed.Text = speedText;
+        DownloadSpeed.Text = speedText;
     }
 	
 private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
@@ -114,10 +113,13 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
     // Use index access to get the first item
     if (e.AddedItems.Count > 0 && e.AddedItems[0] is Modpack currentModpack)
     {
-        if (!currentModpack.IsEnabled) return;
-
         if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is Modpack previousModpack)
         {
+	        if (!currentModpack.IsEnabled)
+	        {
+		        ModpackCollectionView.SelectedItem = previousModpack;
+		        return;
+	        }
             previousModpack.IsSelected = false;
         }
 
@@ -136,11 +138,11 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
 	private void OnDownloadProgress(float progress)
 	{
 		LaunchProgressBar.Value = progress * 100; 
-		// DownloadProgress.Text = $"{progress * 100:F2} %";
-		// if (progress == 1f)
-		// {
-		// 	DownloadProgress.Text = $"Downloaded!";
-		// }
+		DownloadProgress.Text = $"{progress * 100:F2} %";
+		if (Math.Abs(progress - 1f) < 0.001f)
+		{
+			DownloadProgress.Text = $"Downloaded!";
+		}
 	}
 
 	private void OnDownloadFileChanged(string file) 

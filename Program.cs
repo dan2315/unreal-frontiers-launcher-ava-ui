@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Svg.Skia;
 using Microsoft.Extensions.DependencyInjection;
+using UnrealFrontiersLauncher.Sentry;
 
 namespace UnrealFrontiersLauncher
 {
@@ -10,6 +11,7 @@ namespace UnrealFrontiersLauncher
         [STAThread]
         public static void Main(string[] args)
         {
+            SentryIntegration.Initialize();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
