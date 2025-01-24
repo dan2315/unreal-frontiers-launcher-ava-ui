@@ -14,16 +14,18 @@ public class DeepLinkHandler
 
     AuthService _authService;
     PlayerProfileProvider _profileProvider;
+    PopupService _popupService;
     NavigationService _navigation;
 
     EntryModal _entryModal;
 
-    public DeepLinkHandler(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal) 
+    public DeepLinkHandler(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService) 
     {
         _authService = authService;
         _profileProvider = profileProvider;
         _navigation = navigation;
         _entryModal = entryModal;
+        _popupService = popupService;
     }
 
     public async Task InitializeAsync(string[] args)
@@ -109,7 +111,7 @@ public class DeepLinkHandler
 
             if (uri.Host == "auth-response")
             {
-                DiscordAuth.OnDiscordAuthResponseRecieved(uri, _authService, _profileProvider, _navigation, _entryModal);
+                DiscordAuth.OnDiscordAuthResponseRecieved(uri, _authService, _profileProvider, _navigation, _entryModal, _popupService);
             }
             if (uri.Host == "email-verified-response")
             {

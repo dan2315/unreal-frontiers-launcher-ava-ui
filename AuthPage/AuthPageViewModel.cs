@@ -106,20 +106,18 @@ public class AuthPageViewModel : INotifyPropertyChanged
             RepeatPasswordEntry.Validate();
             bool valid = NicknameEntry.IsValid && EmailEntry.IsValid && PasswordEntry.IsValid && RepeatPasswordEntry.IsValid;
 
-            if (valid) {
-                var response = await _authService.CreateAccount(NicknameEntry.Value, EmailEntry.Value, PasswordEntry.Value);
-                PageReference.ActionButtonRef.IsEnabled = true;
+            if (!valid) return;
+            var response = await _authService.CreateAccount(NicknameEntry.Value, EmailEntry.Value, PasswordEntry.Value);
+            PageReference.ActionButtonRef.IsEnabled = true;
                 
-                if(! response.Success) 
-                {
-                    AuthError = response.Message;
-                }
-                else
-                {
-                    _popupService.ShowOkDialogAsync("Успех",
-                        "Вам на почту отправлено письмо для подтверждения аккаунта");
-                }
+            if(!response.Success) 
+            {
+                AuthError = response.Message;
+                return;
             }
+
+            _popupService.ShowOkDialogAsync("Успех",
+                "Вам на почту отправлено письмо для подтверждения аккаунта");
         }
         else if (IsLoginMode)
         {
@@ -130,27 +128,19 @@ public class AuthPageViewModel : INotifyPropertyChanged
             {
                 AuthError = response.Message;
                 Console.WriteLine(AuthError);
+                return;
             }
-            else
-            {
-                _authService.GrantAccess(_playerProfileProvider,
-                    new() { nickname = response.Nickname, accessToken = response.AccessToken, refreshToken = response.RefreshToken });
-                _navigationService.NavigateTo<MainPage>();
-            }
+
+            _authService.GrantAccess(_playerProfileProvider,
+                new() { nickname = response.Nickname, accessToken = response.AccessToken });
+            _navigationService.NavigateTo<MainPage>();
         }
     }
 
     public async void InitiateDiscordAuth(string? nickname)
     {
-        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
-        if (nickname is string nicknameString)
-        {
-            await _authService.DiscordAuth(nicknameString);
-        }
-        else
-        {
-            await _authService.DiscordAuth(null);
-        }
+
+        await _authService.DiscordAuth();
         PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
     }
 

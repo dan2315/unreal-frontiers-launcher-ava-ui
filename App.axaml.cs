@@ -43,6 +43,7 @@ public class App : Application
 
             var authPage = Services.GetRequiredService<AuthPage>();
             var mainPage = Services.GetRequiredService<MainPage>();
+            var autoupdatePage = Services.GetRequiredService<AutoupdatePage>();
             var entryModal = Services.GetRequiredService<EntryModal>();
 
             navigation.RegisterPage(authPage);
@@ -54,7 +55,7 @@ public class App : Application
 
             if (_internetConnection) 
             {
-                navigation.NavigateTo(authPage);
+                navigation.NavigateTo(autoupdatePage);
                 await authPage.TryAutoAuth();
             }
             else

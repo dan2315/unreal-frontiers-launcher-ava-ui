@@ -1,0 +1,10 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UnrealFrontiersLauncher.AutoupdatePage">
+    <Grid>
+        <ProgressBar Value="33"/>
+        <Label Content="sosal" x:Name="AnimatedText">
+        </Label>
+            
+    </Grid>
+</UserControl>

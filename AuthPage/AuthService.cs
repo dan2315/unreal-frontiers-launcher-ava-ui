@@ -3,6 +3,8 @@ using System.Text;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using UnrealFrontiersLauncher.TokenStorage;
@@ -22,7 +24,7 @@ namespace UnrealFrontiersLauncher
         public AuthService()
         {
             _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(AppSettings.ServerURL);
+            _httpClient.BaseAddress = new Uri(AppSettings.ApiServerURL);
 #if WINDOWS
             _tokenStorage = new TokenStorageWindows();
 #elif LINUX
@@ -48,10 +50,14 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        public async Task<(bool Success, string Message, string AccessToken, string RefreshToken, string Nickname)> Login(string nicknameOrEmail, string password)
+        public async Task<(bool Success, string Message, string AccessToken, string Nickname)> Login(string loginOrEmail, string password)
         {
-            var payload = new { nickname = nicknameOrEmail, password };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var payload = new Dictionary<String, String>()
+            {
+                {"login", loginOrEmail},
+                {"password", password}
+            };
+            var content = new FormUrlEncodedContent(payload);
             var response = await _httpClient.PostAsync("/login", content);
 
             var responseMessage = await response.Content.ReadAsStringAsync();
@@ -60,16 +66,15 @@ namespace UnrealFrontiersLauncher
             {
                 var data = JsonSerializer.Deserialize<JsonElement>(responseMessage);
 
-                string nickname = data.GetProperty("nickname").GetString();
+                // string nickname = data.GetProperty("login").GetString();
                 string accessToken = data.GetProperty("accessToken").GetString();
-                string refreshToken = data.GetProperty("refreshToken").GetString();
 
-                _tokenStorage.SaveTokens(accessToken, refreshToken);
-                return (true, "Login successful.", accessToken, refreshToken, nickname);
+                _tokenStorage.SaveTokens(accessToken, "aboba");
+                return (true, "Login successful.", accessToken, loginOrEmail);
             }
             else
             {
-                return (false, responseMessage, null, null, null);
+                return (false, responseMessage, null, null);
             }
         }
 
@@ -114,7 +119,7 @@ namespace UnrealFrontiersLauncher
         {
             (string accessToken, string refreshToken) = _tokenStorage.LoadTokens();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var accessResponse = await _httpClient.GetAsync("request_access");
+            var accessResponse = await _httpClient.GetAsync("/api/user");
 
             if (accessResponse.IsSuccessStatusCode)
             {
@@ -126,31 +131,12 @@ namespace UnrealFrontiersLauncher
                 return (access, nickname);
             } 
 
-            var payload = new { refreshToken };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var refreshResponse = await _httpClient.PostAsync("/refresh_tokens", content);
-
-            if (refreshResponse.IsSuccessStatusCode) 
-            {
-                var data = JsonSerializer.Deserialize<JsonElement>(await refreshResponse.Content.ReadAsStringAsync());
-                var newAccessToken = data.GetProperty("accessToken").GetString();
-                var nickname = data.GetProperty("nickname").GetString();
-                _tokenStorage.SaveTokens(newAccessToken, refreshToken);
-
-                return(true, nickname);
-            }
-
             return (false, null);
         }
-        public async Task<(bool Success, string Message)> DiscordAuth(string? nickname)
+        public async Task<(bool Success, string Message)> DiscordAuth()
         {
-            var url = "auth_discord";
-            if (!string.IsNullOrEmpty(nickname))
-            {
-                url += $"?nickname={Uri.EscapeDataString(nickname)}";
-            }
+            var url = "auth/discord/redirect";
 
-            // Direct the client to open this URL in the default browser for Discord OAuth
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
                 FileName = $"{_httpClient.BaseAddress}{url}",

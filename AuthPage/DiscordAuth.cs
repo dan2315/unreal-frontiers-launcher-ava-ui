@@ -8,12 +8,17 @@ namespace UnrealFrontiersLauncher;
 
 class DiscordAuth
 {
-    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal)
+    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService)
     {
         Dispatcher.UIThread.Post(async () =>
         {
             var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
             var requestNickname = queryParams["requestNickname"];
+            var nickname = queryParams["nickname"];
+
+
+            popupService.ShowOkDialogAsync("",$"Текущий никнейм : {nickname}    Req nickname: {requestNickname}");
+
 
             if (string.Equals(requestNickname, "true"))
             {
