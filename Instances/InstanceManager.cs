@@ -62,14 +62,14 @@ namespace UnrealFrontiersLauncher
                 if (minecraftInstances.ContainsKey(instanceId))
                 {
                     selectedInstance = minecraftInstances[instanceId];
-                    Console.WriteLine($"selected instance set from existing: {selectedInstance.Name}");
+                    Console.WriteLine($"Selected instance set from existing: {selectedInstance.Name}");
                 }
                 else
                 {
                     VersionInfo versionInfo = await GetVersionInfo(instanceId);
                     selectedInstance = CreateMinecraftInstance(instanceId, versionInfo);
                     minecraftInstances[instanceId] = selectedInstance;
-                    Console.WriteLine($"selected instance fetched from server: {selectedInstance.Name}");
+                    Console.WriteLine($"Selected instance fetched from server: {selectedInstance.Name}");
                 }
             }
             catch (Exception e)
@@ -97,7 +97,7 @@ namespace UnrealFrontiersLauncher
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error fetching version info: {ex.Message}");
-                    return null;
+                    return VersionInfo.Default(instanceId);
                 }
             }
         }
@@ -117,6 +117,7 @@ namespace UnrealFrontiersLauncher
                 versionInfo.serverAddress,
                 versionInfo.minRam
             );
+            // TODO: Create instance.json
             instance.LoadLaunchConfiguration();
             return instance;
         }

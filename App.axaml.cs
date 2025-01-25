@@ -51,12 +51,12 @@ public class App : Application
             navigation.RegisterPage(entryModal);
             _ = Services.GetRequiredService<DeepLinkHandler>().InitializeAsync(Environment.GetCommandLineArgs());
             
+            _internetConnection = false;
             _internetConnection = await BackendConnectionDetector.ConnectionStatus();
 
             if (_internetConnection) 
             {
                 navigation.NavigateTo(autoupdatePage);
-                await authPage.TryAutoAuth();
             }
             else
             {

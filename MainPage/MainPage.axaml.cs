@@ -39,6 +39,7 @@ public partial class MainPage : UserControl
 		_gameLauncher = gameLauncher;
 		_instanceManager = instanceManager;
 		_viewModel = new MainPageViewModel(this);
+		_playerProfileProvider.Subscribe(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
 		DataContext = _viewModel;
 		
 		InitializeComponent();
