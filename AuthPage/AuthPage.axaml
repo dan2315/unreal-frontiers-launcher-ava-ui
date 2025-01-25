@@ -34,101 +34,269 @@
 
         <!-- Main Layout -->
         <StackPanel Spacing="20" VerticalAlignment="Center" HorizontalAlignment="Center">
-            
-            <!-- Logo -->
-            <Border CornerRadius="25" Width="200" Height="200" ClipToBounds="True">
-                <Image Source="/Assets/Images/logo.png" Stretch="Uniform" />
+            <Border Background="White"
+                    CornerRadius="25"
+                    Width="400"
+                    MinHeight="500"
+                    MaxHeight="650">
+                
+                <StackPanel>
+                <!-- Logo -->
+                    <Border CornerRadius="25" Width="150" Height="150" ClipToBounds="True" Margin=" 0 20 0 0">
+                        <Image Source="/Assets/Images/logo_unrealfrontiers.png" Stretch="Uniform" />
+                    </Border>
+                
+                    <StackPanel>
+                        <TextBlock Text="{Binding PageTitle}"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="25"
+                                   Foreground="Black"
+                                   HorizontalAlignment="Center"
+                                   Margin="0 0 0 15"></TextBlock>
+                    </StackPanel>
+
+                    <!-- Form Layout -->
+                    <StackPanel Width="350" Spacing="8">
+                        <!-- Auth Error -->
+                        <Border Background="Red" CornerRadius="5">
+                            <TextBlock Text="{Binding AuthError}" 
+                                       IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}"
+                                       Foreground="White" 
+                                       FontSize="14"
+                                       TextAlignment="Center"
+                                       FontFamily="{StaticResource MontserratBold}"
+                                       Padding="5" 
+                                       TextWrapping="Wrap"
+                                       Margin="0,5,0,5"
+                                       HorizontalAlignment="Center"
+                                       Height="35"/>
+                        </Border>
+                        <!-- Nickname Entry -->
+                        <StackPanel>
+                            <TextBox Text="{Binding NicknameEntry.Value}" 
+                                     Watermark="Enter nickname"
+                                     VerticalContentAlignment="Center"
+                                     CornerRadius="8"
+                                     Opacity="50"
+                                     Background="#DCDCDC"
+                                     Foreground="#B2B2B2"
+                                     BorderThickness="1"
+                                     Height="35">
+                                    <TextBox.Styles>
+                                        <Style Selector="TextBox">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                    </TextBox.Styles>
+                            </TextBox>
+                            <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
+                                       FontFamily="{StaticResource MontserratRegular}"
+                                       Classes="Error"
+                                       IsVisible="{Binding NicknameEntry.IsVisible}" />
+                        </StackPanel>
+                        
+                        <!-- Email Entry -->
+                        <StackPanel>
+                            <TextBox Text="{Binding EmailEntry.Value}" 
+                                     IsVisible="{Binding IsRegisterMode}"
+                                     Watermark="Enter email"
+                                     VerticalContentAlignment="Center"
+                                     CornerRadius="8"
+                                     Opacity="50"
+                                     Background="#DCDCDC"
+                                     Foreground="#B2B2B2"
+                                     Height="35">
+                                    <TextBox.Styles>
+                                        <Style Selector="TextBox">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                    </TextBox.Styles>
+                            </TextBox>
+                            <TextBlock Text="{Binding EmailEntry.ValidationMessage}"
+                                       FontFamily="{StaticResource MontserratRegular}"
+                                       Classes="Error"
+                                       IsVisible="{Binding EmailEntry.IsVisible}" />
+                        </StackPanel>
+                        
+                        <!-- Password Entry -->
+                        <StackPanel>
+                            <TextBox Text="{Binding PasswordEntry.Value}" 
+                                     Watermark="Enter password"  
+                                     VerticalContentAlignment="Center"
+                                     PasswordChar="•" 
+                                     CornerRadius="8"
+                                     Opacity="50"
+                                     Background="#DCDCDC"
+                                     Foreground="#B2B2B2"
+                                     Height="35">
+                                    <TextBox.Styles>
+                                        <Style Selector="TextBox">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                    </TextBox.Styles>
+                            </TextBox>
+                            <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
+                                       FontFamily="{StaticResource MontserratRegular}"
+                                       Classes="Error"
+                                       IsVisible="{Binding PasswordEntry.IsVisible}" />
+                        </StackPanel>
+                        
+                        <!-- Repeat Password Entry -->
+                        <StackPanel>
+                            <TextBox Text="{Binding RepeatPasswordEntry.Value}"
+                                     IsVisible="{Binding IsRegisterMode}"
+                                     Watermark="Repeat password"
+                                     VerticalContentAlignment="Center"
+                                     PasswordChar="•" 
+                                     CornerRadius="8"
+                                     Opacity="50"
+                                     Background="#DCDCDC"
+                                     Foreground="#B2B2B2"
+                                     Height="35">
+                                    <TextBox.Styles>
+                                        <Style Selector="TextBox">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#ccc" />
+                                        </Style>
+                                    </TextBox.Styles>
+                            </TextBox>
+                            <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
+                                       FontFamily="{StaticResource MontserratRegular}"
+                                       Classes="Error"
+                                       IsVisible="{Binding RepeatPasswordEntry.IsVisible}" />
+                        </StackPanel>
+                        
+                        
+                        <Button x:Name="ActionButton" 
+                                Content="{Binding ActionButtonText}" 
+                                Click="AuthAction"
+                                CornerRadius="5"
+                                Background="#bf6edc"
+                                BorderThickness="0"
+                                FontFamily="{StaticResource MontserratRegular}"
+                                BorderBrush="White"
+                                Height="35">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Foreground" Value="#B2B2B2"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Style>
+                                </Button.Styles>
+                                <Button.Transitions>
+                                    <Transitions>
+                                        <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+                                    </Transitions>
+                                </Button.Transitions>
+                        </Button>
+
+                        <Grid Grid.ColumnDefinitions="175, *">
+                            <Button x:Name="StartDiscordAuthButton" 
+                                    Click="InitiateDiscordAuth"
+                                    CornerRadius="5"
+                                    Background="#5464f7"
+                                    BorderThickness="0"
+                                    Height="35"
+                                    Margin="0 0 8 0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Svg Path="/Assets/Images/svg/discord_icon.svg" Height="23" Width="23"></Svg>
+                                        <TextBlock FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="15"
+                                                   VerticalAlignment="Center"
+                                                   Margin="4 0 0 0">Войти с Discord</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Foreground" Value="#B2B2B2"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Style>
+                                </Button.Styles>
+                                <Button.Transitions>
+                                    <Transitions>
+                                        <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+                                    </Transitions>
+                                </Button.Transitions>
+                            </Button>
+                            
+
+                            <Button Content="Войти с Google (WIP)" 
+                                    Grid.Column="1"
+                                    IsEnabled="False"
+                                    CornerRadius="5"
+                                    Background="Black"
+                                    Foreground="White"
+                                    FontFamily="{StaticResource MontserratRegular}"
+                                    BorderThickness="0"
+                                    Height="35"/>
+                        </Grid>
+                        
+                        
+                        <Grid Grid.ColumnDefinitions="Auto, *" Margin="0 10 0 20">
+                            <TextBlock Text="{Binding ToggleMessage}" 
+                                       Grid.Column="0"
+                                       Foreground="#B2B2B2"
+                                       TextDecorations="Underline" 
+                                       HorizontalAlignment="Center"
+                                       Margin="15 0 20 0"
+                                       FontFamily="{StaticResource MontserratBold}"
+                                       FontSize="18"
+                                       PointerPressed="ToggleView">
+                            </TextBlock>
+
+                            <!-- Forgot Password -->
+                            <TextBlock Text="Забыл пароль"
+                                       Grid.Column="1"
+                                       Foreground="#B2B2B2"
+                                       TextDecorations="Underline"
+                                       HorizontalAlignment="Center" 
+                                       FontFamily="{StaticResource MontserratBold}"
+                                       FontSize="18" 
+                                       PointerPressed="InitiatePasswordRecovery">
+                            </TextBlock>
+                        </Grid>
+                        <!-- Toggle Message -->
+                    </StackPanel>
+                </StackPanel>
             </Border>
-
-            <!-- Form Layout -->
-            <StackPanel Width="350" Spacing="8">
-                <!-- Auth Error -->
-                <Border Background="Red" CornerRadius="5">
-                    <TextBlock Text="{Binding AuthError}" 
-                               IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}"
-                               Foreground="White" 
-                               FontSize="14"
-                               TextAlignment="Center"
-                               FontFamily="{StaticResource MontserratBold}"
-                               Padding="5" 
-                               TextWrapping="Wrap"
-                               Margin="0,5,0,5"
-                               HorizontalAlignment="Center" />
-                </Border>
-                <!-- Nickname Entry -->
-                <StackPanel Background="Red">
-                    <TextBox Text="{Binding NicknameEntry.Value}" 
-                             Watermark="Enter nickname" />
-                    <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
-                               Classes="Error"
-                               IsVisible="{Binding NicknameEntry.IsVisible}" />
-                </StackPanel>
-                
-                <!-- Email Entry -->
-                <StackPanel>
-                    <TextBox Text="{Binding EmailEntry.Value}" 
-                             IsVisible="{Binding IsRegisterMode}"
-                             Watermark="Enter email"/>
-                    <TextBlock Text="{Binding EmailEntry.ValidationMessage}"
-                               Classes="Error"
-                               IsVisible="{Binding EmailEntry.IsVisible}" />
-                </StackPanel>
-                
-                <!-- Password Entry -->
-                <StackPanel>
-                    <TextBox Text="{Binding PasswordEntry.Value}" 
-                             Watermark="Enter password"  
-                             PasswordChar="•" />
-                    <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
-                               Classes="Error"
-                               IsVisible="{Binding PasswordEntry.IsVisible}" />
-                </StackPanel>
-                
-                <!-- Repeat Password Entry -->
-                <StackPanel>
-                    <TextBox Text="{Binding RepeatPasswordEntry.Value}"
-                             IsVisible="{Binding IsRegisterMode}"
-                             Watermark="Repeat password"
-                             PasswordChar="•" />
-                    <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
-                               Classes="Error"
-                               IsVisible="{Binding RepeatPasswordEntry.IsVisible}" />
-                </StackPanel>
-                
-                
-                <Button x:Name="ActionButton" 
-                        Content="{Binding ActionButtonText}" 
-                        Click="AuthAction" />
-
-                <Button x:Name="StartDiscordAuthButton" 
-                        Content="Discord Вход" 
-                        Click="InitiateDiscordAuth" />
-
-                <Button Content="Google (WIP)" 
-                        IsEnabled="False" />
-
-                <!-- Toggle Message -->
-                <TextBlock Text="{Binding ToggleMessage}" 
-                           Foreground="Blue" 
-                           Background="#88827594"
-                           TextDecorations="Underline" 
-                           HorizontalAlignment="Center" 
-                           FontFamily="MontserratBold" 
-                           FontSize="18"
-                           PointerPressed="ToggleView">
-                </TextBlock>
-
-                <!-- Forgot Password -->
-                <TextBlock Text="Forgot Password?" 
-                           Foreground="Blue"
-                           Background="#88827594"
-                           TextDecorations="Underline" 
-                           HorizontalAlignment="Center" 
-                           FontFamily="MontserratBold" 
-                           FontSize="18" 
-                           PointerPressed="InitiatePasswordRecovery">
-                </TextBlock>
-            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

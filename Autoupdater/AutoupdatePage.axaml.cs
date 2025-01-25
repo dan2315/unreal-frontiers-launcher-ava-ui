@@ -22,8 +22,8 @@ public partial class AutoupdatePage : UserControl
         gradient.GradientStops.Add(new GradientStop() { Offset = 1, Color = Colors.Red });
         
         
-        AnimatedText.Foreground = gradient;
-        AnimateOpacity(AnimatedText);
+        // AnimatedText.Foreground = gradient;
+        // AnimateOpacity(AnimatedText);
     }
 
     public async void AnimateOpacity(StyledElement target)

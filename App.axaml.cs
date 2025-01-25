@@ -56,7 +56,7 @@ public class App : Application
 
             if (_internetConnection) 
             {
-                navigation.NavigateTo(autoupdatePage);
+                navigation.NavigateTo(authPage);
             }
             else
             {
