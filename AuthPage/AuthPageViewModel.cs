@@ -78,9 +78,9 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
 
     public bool IsLoginMode => !IsRegisterMode;
-    public string PageTitle => IsRegisterMode ? "Register" : "Login";
+    public string PageTitle => IsRegisterMode ? "Регистрация аккаунта" : "Войти";
     public string ActionButtonText => IsRegisterMode ? "Создать аккаунт" : "Войти";
-    public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
+    public string ToggleMessage => IsLoginMode ? "Нет аккаунта" : "Есть аккаунт";
     public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
 
     public AuthPageViewModel(AuthService authService, UserProvider userProvider, NavigationService navigationService, PopupService popupService)
