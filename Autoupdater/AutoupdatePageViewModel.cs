@@ -4,5 +4,7 @@ namespace UnrealFrontiersLauncher;
 
 public  class AutoupdatePageViewModel 
 {
-    
+    public AutoupdatePageViewModel( )
+    {
+    }
 }

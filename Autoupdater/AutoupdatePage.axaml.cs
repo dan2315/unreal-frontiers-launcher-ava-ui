@@ -11,21 +11,19 @@ namespace UnrealFrontiersLauncher;
 
 public partial class AutoupdatePage : UserControl
 {
-    public AutoupdatePage()
+    NavigationService _navigationService;
+    public AutoupdatePage(NavigationService navigationService)
     {
+        _navigationService = navigationService;
+        DataContext = new AutoupdatePageViewModel();        
         InitializeComponent();
-
-        var gradient =  new LinearGradientBrush();
-        gradient.GradientStops.Add(new GradientStop() { Offset = 0, Color = Colors.Red });
-        gradient.GradientStops.Add(new GradientStop() { Offset = 0.33, Color = Colors.Red });
-        gradient.GradientStops.Add(new GradientStop() { Offset = 0.66, Color = Colors.Red });
-        gradient.GradientStops.Add(new GradientStop() { Offset = 1, Color = Colors.Red });
-        
-        
-        AnimatedText.Foreground = gradient;
-        AnimateOpacity(AnimatedText);
     }
 
+    public void TryAutoupdate()
+    {
+        Autoupdater.AutopdateOrOtherwise(_navigationService.NavigateTo<AuthPage>);
+    }
+    
     public async void AnimateOpacity(StyledElement target)
     {
         var animation = new Animation

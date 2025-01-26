@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -11,36 +10,35 @@ namespace UnrealFrontiersLauncher
     public partial class AuthPage : UserControl
     {
         private readonly AuthService _authService;
-        private readonly PlayerProfileProvider _playerProfileProvider;
+        private readonly UserProvider _userProvider;
         private readonly NavigationService _navigationService;
 
         public Button ActionButtonRef => ActionButton;
         public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
 
-        public AuthPage()
-        {
-            InitializeComponent();
-        }
-
         public AuthPage(IServiceProvider serviceProvider)
         {
-            InitializeComponent();
             _authService = serviceProvider.GetRequiredService<AuthService>();
-            _playerProfileProvider = serviceProvider.GetRequiredService<PlayerProfileProvider>();
+            _userProvider = serviceProvider.GetRequiredService<UserProvider>();
             _navigationService = serviceProvider.GetRequiredService<NavigationService>();
+            _ = VerifyToken();
+            
+            InitializeComponent();
 
-            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService, serviceProvider.GetRequiredService<PopupService>());
+            var viewModel = new AuthPageViewModel(_authService, _userProvider, _navigationService, serviceProvider.GetRequiredService<PopupService>());
             viewModel.PageReference = this;
-            DataContext = viewModel; // Binding Context
-
+            DataContext = viewModel;
         }
 
-        public async Task TryAutoAuth()
+        public async Task VerifyToken()
         {
-            (bool success, string? nickname) = await _authService.TryAuthWithTokens();
-            if (!success) return;
+            User? user = await _authService.TryGetUser();
+            
+            if (user == null) return;
 
-            _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
+            //TODO: Check if login present, otherwise ask user to enter it
+            
+            _userProvider.SetProfile(user);
             _navigationService.NavigateTo<MainPage>();
         }
 
@@ -66,9 +64,8 @@ namespace UnrealFrontiersLauncher
 
         public struct AccessData
         {
-            public string nickname;
+            public string login;
             public string? accessToken;
-            public string? refreshToken;
         }
 
         public static implicit operator Window(AuthPage v)

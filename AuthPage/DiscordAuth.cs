@@ -8,7 +8,7 @@ namespace UnrealFrontiersLauncher;
 
 class DiscordAuth
 {
-    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService)
+    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, UserProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService)
     {
         Dispatcher.UIThread.Post(async () =>
         {
@@ -26,12 +26,12 @@ class DiscordAuth
             }
             else
             {
-                authService.GrantAccessAndProceed(profileProvider, navigation, queryParams);
+                //TODO: authService.GrantAccessAndProceed(profileProvider, navigation, queryParams);
             }
         });
     }
 
-    private static async Task CreateNewDiscordBindingAndProceed(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal nicknameRequestModal, NameValueCollection queryParams)
+    private static async Task CreateNewDiscordBindingAndProceed(AuthService authService, UserProvider profileProvider, NavigationService navigation, EntryModal nicknameRequestModal, NameValueCollection queryParams)
     {
         string state = queryParams["state"];
         navigation.NavigateTo<EntryModal>();
@@ -40,7 +40,7 @@ class DiscordAuth
             var response = await authService.CompleteDiscordAuthSession(state, inputNickname);
             if (response.success)
             {
-                authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken, refreshToken = response.refreshToken});
+                // TODO: authService.GrantAccess(profileProvider, new() {login = response.nickname, accessToken = response.accessToken});
                 navigation.NavigateTo<MainPage>();
             }
         });

@@ -37,10 +37,11 @@ namespace UnrealFrontiersLauncher
         {
             var services = new ServiceCollection();
 
+            services.AddSingleton<HttpClientService>();
             services.AddSingleton<AuthService>();
             services.AddSingleton<GameLauncher>();
             services.AddSingleton<InstanceManager>();
-            services.AddSingleton<PlayerProfileProvider>();
+            services.AddSingleton<UserProvider>();
             
             services.AddSingleton<MainWindow>();
             services.AddSingleton<PopupService>(); 

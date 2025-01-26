@@ -81,7 +81,7 @@ namespace UnrealFrontiersLauncher
 
         public static async Task<VersionInfo> GetVersionInfo(string instanceId)
         {
-            string url = AppSettings.GetVersionInfoURL(instanceId);
+            string url = AppSettings.GetVersionInfoURLOld(instanceId);
             Console.WriteLine(url);
 
             using (var httpClient = new HttpClient())

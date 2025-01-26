@@ -16,7 +16,7 @@ namespace UnrealFrontiersLauncher
     {
         public async void LaunchMinecraft(
             MinecraftInstance minecraftInstance,
-            PlayerProfile playerProfile,
+            string login,
             Action<float> onProgressChanged,
             Action<string> onFileChanged,
             Action<string> onDownloadSpeedUpdated,
@@ -97,7 +97,7 @@ namespace UnrealFrontiersLauncher
 
                 var process = await launcher.InstallAndBuildProcessAsync(version_name, new MLaunchOption
                 {
-                    Session = MSession.CreateOfflineSession(playerProfile.Nickname),
+                    Session = MSession.CreateOfflineSession(login),
                     MaximumRamMb = minecraftInstance.GetLaunchConfiguration().Ram,
                 });
                 process.StartInfo.Arguments += "";

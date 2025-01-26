@@ -1,18 +1,21 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using UnrealFrontiersLauncher.TokenStorage;
 
-namespace UnrealFrontiersLauncher.TokenStorage.Windows
+namespace UnrealFrontiersLauncher
 {
-    public class TokenStorageWindows : ITokenStorage
+    public class TokenStorage 
     {
+#if  WINDOWS
         private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UnrealFrontiers");
+#elif LINUX
+        private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
+#endif
         private static readonly string TokenFilePath = Path.Combine(AppDataPath, "tokens.dat");
         private static readonly string KeyFilePath = Path.Combine(AppDataPath, "encryption_key.dat");
         private static readonly int KeySize = 16;
 
-        public TokenStorageWindows()
+        public TokenStorage()
         {
             if (!Directory.Exists(AppDataPath))
             {
@@ -38,23 +41,16 @@ namespace UnrealFrontiersLauncher.TokenStorage.Windows
             }
         }
 
-        public void SaveTokens(string accessToken, string refreshToken)
+        public void SaveTokens(string accessToken)
         {
-            var tokens = $"{accessToken}|{refreshToken}";
-            var encryptedTokens = Encrypt(tokens);
-
-            File.WriteAllBytes(TokenFilePath, encryptedTokens);
+            File.WriteAllBytes(TokenFilePath, Encrypt(accessToken));
         }
 
-        public (string accessToken, string refreshToken) LoadTokens()
+        public string  LoadToken()
         {
-            if (!File.Exists(TokenFilePath)) return ("", "");
+            if (!File.Exists(TokenFilePath)) return "";
 
-            var encryptedTokens = File.ReadAllBytes(TokenFilePath);
-            var decryptedTokens = Decrypt(encryptedTokens);
-            var tokens = decryptedTokens.Split('|');
-
-            return (tokens[0], tokens[1]);
+            return Decrypt(File.ReadAllBytes(TokenFilePath));
         }
 
         public void DeleteTokens()

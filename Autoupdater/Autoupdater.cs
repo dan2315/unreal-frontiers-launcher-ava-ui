@@ -12,27 +12,28 @@ public class Autoupdater
     private const string InstallerFileName = "UFLauncher_installer.exe";
     private const string CurrentVersion = "0.2.9";
 
-    public static async void DoTheThingOrOtherwise(Action? finalize = null)
+    public static async void AutopdateOrOtherwise(Action? updateCompleted = null)
     {
         try
         {
             Console.WriteLine("Checking for updates...");
 
+            // TODO: Delete
+            updateCompleted?.Invoke();
+            return;
+            
             string latestVersion = await FetchLatestVersion();
 
-            // Compare versions
             if (IsNewVersionAvailable(CurrentVersion, latestVersion))
             {
-                Console.WriteLine($"↓ SMOTRI SUDA ↓");
                 Console.WriteLine($"New launcher version available: {latestVersion}. Download in progress...");
-                Console.WriteLine($"↑ SMOTRI SUDA ↑");
                 await DownloadInstaller();
                 RunInstaller();
             }
             else
             {
                 Console.WriteLine("Your application is up to date.");
-                finalize?.Invoke();
+                updateCompleted?.Invoke();
             }
         }
         catch (Exception ex)
@@ -83,7 +84,7 @@ public class Autoupdater
             StartInfo = new ProcessStartInfo
             {
                 FileName = tempFilePath,
-                Arguments = "/VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS",
+                Arguments = "/CLOSEAPPLICATIONS",
                 UseShellExecute = true
             }
         };

@@ -13,13 +13,13 @@ public class DeepLinkHandler
     const string appMutexName = "Global\\UnrealFrontiersLauncher";
 
     AuthService _authService;
-    PlayerProfileProvider _profileProvider;
+    UserProvider _profileProvider;
     PopupService _popupService;
     NavigationService _navigation;
 
     EntryModal _entryModal;
 
-    public DeepLinkHandler(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService) 
+    public DeepLinkHandler(AuthService authService, UserProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService) 
     {
         _authService = authService;
         _profileProvider = profileProvider;

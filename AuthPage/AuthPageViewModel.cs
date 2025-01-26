@@ -21,7 +21,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
     private bool _isRegisterMode;
 
     private AuthService _authService;
-    private readonly PlayerProfileProvider _playerProfileProvider;
+    private readonly UserProvider _userProvider;
     private NavigationService _navigationService;
     private PopupService _popupService;
 
@@ -83,10 +83,10 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
     public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
 
-    public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider, NavigationService navigationService, PopupService popupService)
+    public AuthPageViewModel(AuthService authService, UserProvider userProvider, NavigationService navigationService, PopupService popupService)
     {
         _authService = authService;
-        _playerProfileProvider = playerProfileProvider;
+        _userProvider = userProvider;
         _navigationService = navigationService;
         _popupService = popupService;
         NicknameEntry = new ValidatableEntry(ValidateNickname, this);
@@ -104,6 +104,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
             EmailEntry.Validate();
             PasswordEntry.Validate();
             RepeatPasswordEntry.Validate();
+            
             bool valid = NicknameEntry.IsValid && EmailEntry.IsValid && PasswordEntry.IsValid && RepeatPasswordEntry.IsValid;
 
             if (!valid) return;
@@ -121,18 +122,19 @@ public class AuthPageViewModel : INotifyPropertyChanged
         }
         else if (IsLoginMode)
         {
+            _navigationService.NavigateTo<MainPage>();
+            return;
+
             var response = await _authService.Login(NicknameEntry.Value, PasswordEntry.Value);
             PageReference.ActionButtonRef.IsEnabled = true;
 
             if (!response.Success)
             {
-                AuthError = response.Message;
+                AuthError = response.Error;
                 Console.WriteLine(AuthError);
                 return;
             }
 
-            _authService.GrantAccess(_playerProfileProvider,
-                new() { nickname = response.Nickname, accessToken = response.AccessToken });
             _navigationService.NavigateTo<MainPage>();
         }
     }

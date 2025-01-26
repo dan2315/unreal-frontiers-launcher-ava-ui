@@ -6,14 +6,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using CmlLib.Core;
 using UnrealFrontiersLauncher.Platforms;
 using UnrealFrontiersLauncher.ViewModels;
-using UnrealFrontiersLauncher.Windows;
-using SystemInfo = UnrealFrontiersLauncher.Linux.SystemInfo;
 
 namespace UnrealFrontiersLauncher;
 
@@ -22,24 +17,24 @@ public partial class MainPage : UserControl
 	private PopupService _popUpService;
 	private InstanceManager _instanceManager;
 	private GameLauncher _gameLauncher;
-	private PlayerProfileProvider _playerProfileProvider;
+	private UserProvider _userProvider;
 	private MainPageViewModel _viewModel;
 #if WINDOWS
 	private ISystemInfo _systemInfo = new Windows.SystemInfo();
 #elif LINUX
 	private ISystemInfo _systemInfo = new Linux.SystemInfo();
 #endif
-	public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
+	public User User => _userProvider.GetProfile();
 
 	public MainPage() {}
-	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider)
+	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, UserProvider userProvider)
 	{
-		_playerProfileProvider = playerProfileProvider;
+		_userProvider = userProvider;
 		_popUpService = popUpService;
 		_gameLauncher = gameLauncher;
 		_instanceManager = instanceManager;
 		_viewModel = new MainPageViewModel(this);
-		_playerProfileProvider.Subscribe(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
+		_userProvider.Subscribe(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
 		DataContext = _viewModel;
 		
 		InitializeComponent();
@@ -101,7 +96,7 @@ public partial class MainPage : UserControl
 			LaunchButton.IsEnabled = true;
 			return;
 		}
-		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, PlayerProfile, OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, () => LaunchButton.IsEnabled = true);
+		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, User.Login ?? "GandonkaBezLogina", OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, () => LaunchButton.IsEnabled = true);
 	}
 
     private void OnDownloadSpeedChanged(string speedText)

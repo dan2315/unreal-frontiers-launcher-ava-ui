@@ -65,12 +65,12 @@ public class MainPageViewModel : INotifyPropertyChanged
 
     public string PlayText
     {
-        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.PlayerProfile.Nickname}"; }
+        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.User.Login}"; }
     }
 
     public string? PlayerName
     {
-        get { return _pageReference.PlayerProfile?.Nickname; }
+        get { return _pageReference.User?.Login; }
     }
 
     public void OnTabSelectedCommand(string selectedTab)
