@@ -46,6 +46,8 @@ namespace UnrealFrontiersLauncher
             };
             var content = new FormUrlEncodedContent(payload);
             var response = await _httpClient.PostAsync("/login", content);
+            
+            // var response = await new HttpClient().PostAsync("/login", content);
 
             var responseMessage = await response.Content.ReadAsStringAsync();
 
@@ -104,7 +106,7 @@ namespace UnrealFrontiersLauncher
             if (string.IsNullOrEmpty(accessToken)) return null;
             
             _httpClient.SetAuthHeader(accessToken);
-            var accessResponse = await _httpClient.GetAsync("/api/user");
+            var accessResponse = await _httpClient.PostAsync("/api/user", null);
 
             if (!accessResponse.IsSuccessStatusCode) return null;
             

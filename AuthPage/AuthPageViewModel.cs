@@ -122,9 +122,6 @@ public class AuthPageViewModel : INotifyPropertyChanged
         }
         else if (IsLoginMode)
         {
-            _navigationService.NavigateTo<MainPage>();
-            return;
-
             var response = await _authService.Login(NicknameEntry.Value, PasswordEntry.Value);
             PageReference.ActionButtonRef.IsEnabled = true;
 

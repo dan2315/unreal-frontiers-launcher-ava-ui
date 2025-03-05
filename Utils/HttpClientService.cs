@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -10,8 +11,29 @@ public class HttpClientService
     private HttpClient _httpClient;
     public HttpClient Get => _httpClient;
     
-    private string? _csrfToken;
-    public string GetCsrfToken => _csrfToken ??= _httpClient.GetStringAsync($"{AppSettings.ApiServerURL}/sanctum/csrf-cookie").Result;
+    private string? _csrfToken = null;
+    public string GetCsrfToken
+    {
+        get
+        {
+            if (_csrfToken == null)
+            {
+                var response = _httpClient.GetAsync($"{AppSettings.ApiServerURL}/sanctum/csrf-cookie").Result;
+                response.EnsureSuccessStatusCode();
+                
+                var cookies = response.Headers.GetValues("Set-Cookie");
+                foreach (var cookie in cookies)
+                {
+                    if (!cookie.Contains("XSRF-TOKEN")) continue;
+                    
+                    _csrfToken = WebUtility.UrlDecode(cookie.Split(';')[0].Split('=')[1]);
+                    break;
+                }
+            }
+            
+            return _csrfToken;
+        }
+    }
 
     public HttpClientService()
     {
@@ -27,9 +49,7 @@ public class HttpClientService
     
     public async Task<HttpResponseMessage> GetAsync(string url)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-
-        var response = await _httpClient.SendAsync(request);
+        var response = await _httpClient.GetAsync(url);
 
         await AfterResponseMiddlewareAsync(response);
 
@@ -55,10 +75,11 @@ public class HttpClientService
 
     private async Task PrePostRequestMiddlewareAsync(HttpRequestMessage request)
     {
-        if (!request.Headers.Contains("X-CSRF-TOKEN"))
+        if (!_httpClient.DefaultRequestHeaders.Contains("X-CSRF-TOKEN"))
         {
             FlushCsrf();
-            request.Headers.Add("X-CSRF-TOKEN", GetCsrfToken);
+            var csrf = GetCsrfToken;
+            _httpClient.DefaultRequestHeaders.Add("X-CSRF-TOKEN", csrf);
         }
     }
 
