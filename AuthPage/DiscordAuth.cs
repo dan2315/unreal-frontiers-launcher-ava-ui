@@ -8,7 +8,7 @@ namespace UnrealFrontiersLauncher;
 
 class DiscordAuth
 {
-    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal)
+    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService)
     {
         Dispatcher.UIThread.Post(async () =>
         {
@@ -35,7 +35,7 @@ class DiscordAuth
             var response = await authService.CompleteDiscordAuthSession(state, inputNickname);
             if (response.success)
             {
-                authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken, refreshToken = response.refreshToken});
+                TODO: authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken});
                 navigation.NavigateTo<MainPage>();
             }
         });

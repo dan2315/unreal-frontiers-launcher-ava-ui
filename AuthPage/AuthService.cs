@@ -5,29 +5,20 @@ using System.Net.Http;
 using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
-using UnrealFrontiersLauncher.TokenStorage;
-#if WINDOWS
-using UnrealFrontiersLauncher.TokenStorage.Windows;
-#elif LINUX
-using UnrealFrontiersLauncher.TokenStorage.Linux;
-#endif
+using UnrealFrontiersLauncher.ApiResponses.Auth;
 
 namespace UnrealFrontiersLauncher
 {
     public class AuthService
     {
         private readonly HttpClient _httpClient;
-        private readonly ITokenStorage _tokenStorage;
+        private readonly TokenStorage _tokenStorage;
 
         public AuthService()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(AppSettings.ServerURL);
-#if WINDOWS
-            _tokenStorage = new TokenStorageWindows();
-#elif LINUX
-            _tokenStorage = new TokenStorageLinux();
-#endif
+            _tokenStorage = new TokenStorage();
         }
 
         public async Task<(bool Success, string Message)> CreateAccount(string nickname, string email, string password)
@@ -150,7 +141,6 @@ namespace UnrealFrontiersLauncher
                 url += $"?nickname={Uri.EscapeDataString(nickname)}";
             }
 
-            // Direct the client to open this URL in the default browser for Discord OAuth
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
                 FileName = $"{_httpClient.BaseAddress}{url}",

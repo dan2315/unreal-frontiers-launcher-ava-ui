@@ -1,18 +1,21 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using UnrealFrontiersLauncher.TokenStorage;
 
-namespace UnrealFrontiersLauncher.TokenStorage.Windows
+namespace UnrealFrontiersLauncher
 {
-    public class TokenStorageWindows : ITokenStorage
+    public class TokenStorage 
     {
+#if  WINDOWS
         private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UnrealFrontiers");
+#elif LINUX
+        private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
+#endif
         private static readonly string TokenFilePath = Path.Combine(AppDataPath, "tokens.dat");
         private static readonly string KeyFilePath = Path.Combine(AppDataPath, "encryption_key.dat");
         private static readonly int KeySize = 16;
 
-        public TokenStorageWindows()
+        public TokenStorage()
         {
             if (!Directory.Exists(AppDataPath))
             {

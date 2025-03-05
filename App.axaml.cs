@@ -40,28 +40,28 @@ public class App : Application
             mainWindow.Init(navigation);
             desktop.MainWindow = mainWindow;
             
-
             var authPage = Services.GetRequiredService<AuthPage>();
-            var mainPage = Services.GetRequiredService<MainPage>();
-            var entryModal = Services.GetRequiredService<EntryModal>();
-
             navigation.RegisterPage(authPage);
+            var mainPage = Services.GetRequiredService<MainPage>();
             navigation.RegisterPage(mainPage);
+            var entryModal = Services.GetRequiredService<EntryModal>(); 
             navigation.RegisterPage(entryModal);
+            var autoupdatePage = Services.GetRequiredService<AutoupdatePage>();
+            navigation.RegisterPage(autoupdatePage);
+            
             _ = Services.GetRequiredService<DeepLinkHandler>().InitializeAsync(Environment.GetCommandLineArgs());
             
             _internetConnection = await BackendConnectionDetector.ConnectionStatus();
 
-            if (_internetConnection) 
+            if (!_internetConnection)
             {
-                navigation.NavigateTo(authPage);
-                await authPage.TryAutoAuth();
-            }
-            else
-            {
-                Services.GetRequiredService<PlayerProfileProvider>().SetProfile(new PlayerProfile("OfflinePlayer"));
+                Services.GetRequiredService<PlayerProfileProvider>().SetProfile(PlayerProfile.Default);
                 navigation.NavigateTo(mainPage);
+                return;
             }
+
+            navigation.NavigateTo(autoupdatePage);
+            autoupdatePage.TryAutoupdate();
         }
 
         base.OnFrameworkInitializationCompleted();

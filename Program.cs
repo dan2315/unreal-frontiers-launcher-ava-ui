@@ -1,5 +1,6 @@
 ﻿using System;
 using Avalonia;
+using Avalonia.ReactiveUI;
 using Avalonia.Svg.Skia;
 using Microsoft.Extensions.DependencyInjection;
 using UnrealFrontiersLauncher.Sentry;
@@ -25,6 +26,7 @@ namespace UnrealFrontiersLauncher
             return AppBuilder.Configure<App>()
                              .UsePlatformDetect()
                              .LogToTrace()
+                             .UseReactiveUI()
                              .With(new Win32PlatformOptions())
                              .AfterSetup(_ =>
                              {
@@ -37,6 +39,7 @@ namespace UnrealFrontiersLauncher
         {
             var services = new ServiceCollection();
 
+            services.AddSingleton<HttpClientService>();
             services.AddSingleton<AuthService>();
             services.AddSingleton<GameLauncher>();
             services.AddSingleton<InstanceManager>();
@@ -46,8 +49,9 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<PopupService>(); 
 
             services.AddTransient<EntryModal>();
+            services.AddSingleton<AutoupdatePage>();
             services.AddSingleton<AuthPage>();
-            services.AddTransient<MainPage>();
+            services.AddSingleton<MainPage>();
             services.AddSingleton<NavigationService>();
             services.AddTransient<DeepLinkHandler>();
 

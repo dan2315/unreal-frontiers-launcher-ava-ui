@@ -7,4 +7,6 @@ public class PlayerProfile
     public PlayerProfile(string nickname) {
         _nickname = nickname;
     }
+    
+    public static PlayerProfile Default => new PlayerProfile("DefaultPlayer"); 
 }

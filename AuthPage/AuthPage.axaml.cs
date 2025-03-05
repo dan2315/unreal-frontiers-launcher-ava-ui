@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -14,25 +13,20 @@ namespace UnrealFrontiersLauncher
         private readonly PlayerProfileProvider _playerProfileProvider;
         private readonly NavigationService _navigationService;
 
-        public Button ActionButtonRef => ActionButton;
-        public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
-
-        public AuthPage()
-        {
-            InitializeComponent();
-        }
+        // public Button ActionButtonRef => ActionButton;
+        // public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
 
         public AuthPage(IServiceProvider serviceProvider)
         {
-            InitializeComponent();
             _authService = serviceProvider.GetRequiredService<AuthService>();
             _playerProfileProvider = serviceProvider.GetRequiredService<PlayerProfileProvider>();
             _navigationService = serviceProvider.GetRequiredService<NavigationService>();
 
             var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService, serviceProvider.GetRequiredService<PopupService>());
             viewModel.PageReference = this;
-            DataContext = viewModel; // Binding Context
-
+            DataContext = viewModel;
+            
+            InitializeComponent();
         }
 
         public async Task TryAutoAuth()

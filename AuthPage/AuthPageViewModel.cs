@@ -78,7 +78,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
 
     public bool IsLoginMode => !IsRegisterMode;
-    public string PageTitle => IsRegisterMode ? "Register" : "Login";
+    public string PageTitle => IsRegisterMode ? "Регистрация" : "Войти";
     public string ActionButtonText => IsRegisterMode ? "Создать аккаунт" : "Войти";
     public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
     public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
@@ -104,45 +104,41 @@ public class AuthPageViewModel : INotifyPropertyChanged
             EmailEntry.Validate();
             PasswordEntry.Validate();
             RepeatPasswordEntry.Validate();
+            
             bool valid = NicknameEntry.IsValid && EmailEntry.IsValid && PasswordEntry.IsValid && RepeatPasswordEntry.IsValid;
 
-            if (valid) {
-                var response = await _authService.CreateAccount(NicknameEntry.Value, EmailEntry.Value, PasswordEntry.Value);
-                PageReference.ActionButtonRef.IsEnabled = true;
+            if (!valid) return;
+            var response = await _authService.CreateAccount(NicknameEntry.Value, EmailEntry.Value, PasswordEntry.Value);
+            // PageReference.ActionButtonRef.IsEnabled = true;
                 
-                if(! response.Success) 
-                {
-                    AuthError = response.Message;
-                }
-                else
-                {
-                    _popupService.ShowOkDialogAsync("Успех",
-                        "Вам на почту отправлено письмо для подтверждения аккаунта");
-                }
+            if(!response.Success) 
+            {
+                AuthError = response.Message;
+                return;
             }
+
+            _popupService.ShowOkDialogAsync("Успех",
+                "Вам на почту отправлено письмо для подтверждения аккаунта");
         }
         else if (IsLoginMode)
         {
             var response = await _authService.Login(NicknameEntry.Value, PasswordEntry.Value);
-            PageReference.ActionButtonRef.IsEnabled = true;
+            // PageReference.ActionButtonRef.IsEnabled = true;
 
             if (!response.Success)
             {
                 AuthError = response.Message;
                 Console.WriteLine(AuthError);
+                return;
             }
-            else
-            {
-                _authService.GrantAccess(_playerProfileProvider,
-                    new() { nickname = response.Nickname, accessToken = response.AccessToken, refreshToken = response.RefreshToken });
-                _navigationService.NavigateTo<MainPage>();
-            }
+
+            _navigationService.NavigateTo<MainPage>();
         }
     }
 
     public async void InitiateDiscordAuth(string? nickname)
     {
-        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
+        // PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
         if (nickname is string nicknameString)
         {
             await _authService.DiscordAuth(nicknameString);
@@ -151,7 +147,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
         {
             await _authService.DiscordAuth(null);
         }
-        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
+        // PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
     }
 
     public void ToggleView()

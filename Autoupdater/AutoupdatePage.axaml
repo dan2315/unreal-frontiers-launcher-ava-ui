@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UnrealFrontiersLauncher.AutoupdatePage">
+    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, *">
+        <Image Source="/Assets/Images/backgorund2.png"
+               Stretch="UniformToFill"
+               Grid.ColumnSpan="2" />
+        
+        <StackPanel Grid.Column="1">
+            <StackPanel Margin="0 150 0 0" Classes="buldiga">
+                <Image Source="../Assets/Images/roflanbuldiga.png" Width="250" Height="250"/>
+                <StackPanel.Styles>
+                    <Style Selector="StackPanel.buldiga">
+                        <Style.Animations>
+                            <Animation Duration="0:0:10" IterationCount="INFINITE">
+                                <KeyFrame Cue="0%">
+                                    <Setter Property="Opacity" Value="0.0"/>
+                                    <Setter Property="RotateTransform.Angle" Value="0.0"/>
+                                </KeyFrame>
+                                <KeyFrame Cue="50%">
+                                    <Setter Property="Opacity" Value="1.0"/>
+                                    <Setter Property="RotateTransform.Angle" Value="180.0"/>
+                                </KeyFrame>
+                                <KeyFrame Cue="100%">
+                                    <Setter Property="Opacity" Value="0.0"/>
+                                    <Setter Property="RotateTransform.Angle" Value="360.0"/>
+                                </KeyFrame>
+                            </Animation>
+                        </Style.Animations>
+                    </Style>
+                </StackPanel.Styles>
+            </StackPanel>
+        
+            <StackPanel>
+                <Border Background="#201E24" Height="90" BorderThickness="1" BorderBrush="Black" Opacity="50">
+                    <Grid Grid.ColumnDefinitions="Auto, *" >
+                        <TextBlock FontSize="22"
+                               FontFamily="{StaticResource MontserratBold}"
+                               Margin="25 0 600 0"
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center">Некий текст, который будет тут висеть, <LineBreak/> но пока висит только его кодер)</TextBlock>
+                                                                                <!-- ^ Тут сплеш-текст ^ -->
+                        <TextBlock FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="50"
+                                   Grid.Column="2"
+                                   Margin="0 15 0 0">100%</TextBlock>
+                                                <!-- ^ Тут процентик тот что справа ^ -->
+                    </Grid>
+                </Border>
+            </StackPanel>
+            
+            <!-- Прогресс бар -->
+            <StackPanel>
+                <ProgressBar Value="50">
+                    <ProgressBar.Foreground>
+                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
+                            <GradientStop Color="#8a58bb" Offset="0.2" />
+                            <GradientStop Color="#ee4aef" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </ProgressBar.Foreground>
+                </ProgressBar>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
