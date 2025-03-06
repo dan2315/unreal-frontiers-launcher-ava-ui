@@ -12,16 +12,12 @@ public class Autoupdater
     private const string InstallerFileName = "UFLauncher_installer.exe";
     private const string CurrentVersion = "0.2.9";
 
-    public static async void AutopdateOrOtherwise(Action? updateCompleted = null)
+    public static async Task AutopdateOrOtherwise(Action? updateIsNotRequiredFallback = null)
     {
         try
         {
             Console.WriteLine("Checking for updates...");
 
-            // TODO: Delete
-            updateCompleted?.Invoke();
-            return;
-            
             string latestVersion = await FetchLatestVersion();
 
             if (IsNewVersionAvailable(CurrentVersion, latestVersion))
@@ -33,7 +29,7 @@ public class Autoupdater
             else
             {
                 Console.WriteLine("Your application is up to date.");
-                updateCompleted?.Invoke();
+                updateIsNotRequiredFallback?.Invoke();
             }
         }
         catch (Exception ex)

@@ -12,30 +12,34 @@ namespace UnrealFrontiersLauncher
         private readonly AuthService _authService;
         private readonly PlayerProfileProvider _playerProfileProvider;
         private readonly NavigationService _navigationService;
-
-        // public Button ActionButtonRef => ActionButton;
-        // public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
+        private readonly PopupService _popupService;
+        
+        public Button ActionButtonRef => ActionButton;
+        public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
 
         public AuthPage(IServiceProvider serviceProvider)
         {
             _authService = serviceProvider.GetRequiredService<AuthService>();
             _playerProfileProvider = serviceProvider.GetRequiredService<PlayerProfileProvider>();
             _navigationService = serviceProvider.GetRequiredService<NavigationService>();
-
-            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService, serviceProvider.GetRequiredService<PopupService>());
+            _popupService = serviceProvider.GetRequiredService<PopupService>();
+            
+            var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService, _popupService);
             viewModel.PageReference = this;
             DataContext = viewModel;
             
             InitializeComponent();
         }
 
-        public async Task TryAutoAuth()
+
+        public async Task<Boolean> TryAutoAuth()
         {
             (bool success, string? nickname) = await _authService.TryAuthWithTokens();
-            if (!success) return;
+            if (!success) return success;
 
             _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
             _navigationService.NavigateTo<MainPage>();
+            return success;
         }
 
         public void AuthAction(object? sender, RoutedEventArgs  e) 

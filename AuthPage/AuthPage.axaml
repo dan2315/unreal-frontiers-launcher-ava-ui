@@ -102,10 +102,12 @@
 
                 <Button x:Name="StartDiscordAuthButton" 
                         Content="Discord Вход" 
-                        Click="InitiateDiscordAuth" />
+                        Click="InitiateDiscordAuth"
+                        IsVisible="{Binding IsLoginMode}"/>
 
                 <Button Content="Google (WIP)" 
-                        IsEnabled="False" />
+                        IsEnabled="False"
+                        IsVisible="{Binding IsLoginMode}"/>
 
                 <!-- Toggle Message -->
                 <TextBlock Text="{Binding ToggleMessage}" 

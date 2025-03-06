@@ -59,9 +59,14 @@ public class App : Application
                 navigation.NavigateTo(mainPage);
                 return;
             }
-
+            
             navigation.NavigateTo(autoupdatePage);
-            autoupdatePage.TryAutoupdate();
+            autoupdatePage.TryAutoupdateOrOtherwise(
+                () =>
+                {
+                    _ = authPage.TryAutoAuth();
+                }
+                );
         }
 
         base.OnFrameworkInitializationCompleted();

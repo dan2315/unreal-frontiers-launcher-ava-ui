@@ -27,8 +27,8 @@ public class NavigationService
         {
             Duration = TimeSpan.FromMilliseconds(500),
             Orientation = PageSlide.SlideAxis.Vertical,
-            SlideInEasing = new BounceEaseIn(),
-            SlideOutEasing = new BounceEaseIn(),
+            SlideInEasing = new CubicEaseOut(),
+            SlideOutEasing = new CubicEaseIn(),
         };
     }
 
@@ -40,10 +40,10 @@ public class NavigationService
     public void NavigateTo(object nextPage)
     {
         // Animate
-        // if (pagesStack.Count > 0)
-        // {
-        //     _transition.Start(pagesStack.Peek() as Visual, nextPage as Visual, true, CancellationToken.None);
-        // }
+        if (pagesStack.Count > 0)
+        {
+            _transition.Start(pagesStack.Peek() as Visual, nextPage as Visual, true, CancellationToken.None);
+        }
         pagesStack.Push(nextPage);
         SetWindowContent(nextPage);
     }
@@ -60,7 +60,7 @@ public class NavigationService
         {
             var previousPage = pagesStack.Peek();
             
-            // _transition.Start(currentPage as Visual, previousPage as Visual, true, CancellationToken.None);
+            _transition.Start(currentPage as Visual, previousPage as Visual, true, CancellationToken.None);
             
             SetWindowContent(previousPage);
         }

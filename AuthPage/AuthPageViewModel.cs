@@ -109,7 +109,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
             if (!valid) return;
             var response = await _authService.CreateAccount(NicknameEntry.Value, EmailEntry.Value, PasswordEntry.Value);
-            // PageReference.ActionButtonRef.IsEnabled = true;
+            PageReference.ActionButtonRef.IsEnabled = true;
                 
             if(!response.Success) 
             {
@@ -123,7 +123,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
         else if (IsLoginMode)
         {
             var response = await _authService.Login(NicknameEntry.Value, PasswordEntry.Value);
-            // PageReference.ActionButtonRef.IsEnabled = true;
+            PageReference.ActionButtonRef.IsEnabled = true;
 
             if (!response.Success)
             {
@@ -138,7 +138,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public async void InitiateDiscordAuth(string? nickname)
     {
-        // PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
+        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
         if (nickname is string nicknameString)
         {
             await _authService.DiscordAuth(nicknameString);
@@ -147,7 +147,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
         {
             await _authService.DiscordAuth(null);
         }
-        // PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
+        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
     }
 
     public void ToggleView()

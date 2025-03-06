@@ -19,9 +19,9 @@ public partial class AutoupdatePage : UserControl
         InitializeComponent();
     }
 
-    public void TryAutoupdate()
+    public void TryAutoupdateOrOtherwise(Action? updateIsNotRequiredFallback = null)
     {
-        Autoupdater.AutopdateOrOtherwise(_navigationService.NavigateTo<AuthPage>);
+        Autoupdater.AutopdateOrOtherwise(updateIsNotRequiredFallback);
     }
     
     public async void AnimateOpacity(StyledElement target)
