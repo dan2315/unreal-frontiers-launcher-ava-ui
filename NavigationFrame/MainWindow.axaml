@@ -20,7 +20,7 @@
             <DockPanel>
                 <Grid Grid.ColumnDefinitions="*, *, *">
                     <Button CornerRadius="4" Grid.Column="0" BorderThickness="0" Background="Black" Width="50" PointerEntered="InputElement_OnPointerEntered" PointerExited="InputElement_OnPointerExited"
-                            Click="GetToPreviousPage" Margin="5,0,0,0" HorizontalAlignment="Left">
+                            Click="GetToAuthPage" Margin="5,0,0,0" HorizontalAlignment="Left">
                         <Svg Path="/Assets/Images/svg/arrow_left.svg" Width="20"/>
                     </Button>
 

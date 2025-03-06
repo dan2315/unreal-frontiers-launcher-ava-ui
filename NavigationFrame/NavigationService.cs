@@ -15,6 +15,7 @@ public class NavigationService
     public static Dictionary<Type, UserControl> Pages => _pages;
     private static Dictionary<Type, UserControl> _pages = new();
     private IPageTransition _transition;
+    public object? CurrentContent => _mainWindow.ContentControl.Content;
     
     private void SetWindowContent(object value)
     {
