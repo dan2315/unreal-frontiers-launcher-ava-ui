@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Unreal Frontiers
-Exec=flatpak run dod.unrealfrontiers.launcher %u
+Exec=UnrealFrontiersLauncher %u
 Icon=dod.unrealfrontiers.launcher
 Type=Application
 Categories=Game;
@@ -9,4 +9,4 @@ Actions=OpenURL;
 
 [Desktop Action OpenURL]
 Name=Open URL
-Exec=flatpak run dod.unrealfrontiers.launcher %u
+Exec=UnrealFrontiersLauncher %u
