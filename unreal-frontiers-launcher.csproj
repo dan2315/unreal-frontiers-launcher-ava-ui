@@ -31,7 +31,7 @@
     <AvaloniaResource Include="Assets/Fonts/Montserrat-Bold.ttf" />
     <AvaloniaResource Include="Assets/Fonts/Montserrat-Regular.ttf" />
     <AvaloniaResource Include="Assets/Fonts/Montserrat-Light.ttf" />
-    
+
     <PackageReference Include="Avalonia" Version="11.2.3" />
     <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3" />
@@ -56,4 +56,9 @@
     <Folder Include="flatpak-builder\nuget-sources\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageFile Include="flatpak-builder/dod.unrealfrontiers.launcher.desktop">
+        <PackagePath>/usr/share/applications/unreal-frontiers-launcher.desktop</PackagePath>
+    </PackageFile>
+  </ItemGroup>
 </Project>
