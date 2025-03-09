@@ -17,7 +17,7 @@ public class PlayerProfileProvider
         _onProfileChanged?.Invoke();
     }
 
-    public void Subscribe(Action onProfileChanged)
+    public void OnProfileUpdate(Action onProfileChanged)
     {
         _onProfileChanged = onProfileChanged;
     }

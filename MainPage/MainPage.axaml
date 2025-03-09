@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="using:UnrealFrontiersLauncher.ViewModels"
         xmlns:converters="using:UnrealFrontiersLauncher.Converters"
-        xmlns:elements="using:UnrealFrontiersLauncher"
         x:Class="UnrealFrontiersLauncher.MainPage"
         x:DataType="local:MainPageViewModel">
 

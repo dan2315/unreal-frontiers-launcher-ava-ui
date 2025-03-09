@@ -37,6 +37,8 @@ public partial class MainPage : UserControl
 		DataContext = _viewModel;
 		
 		InitializeComponent();
+		
+		_playerProfileProvider.OnProfileUpdate(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
 
 		Loaded += (sender, eventArgs) => {
 			InitSettingsPanel();

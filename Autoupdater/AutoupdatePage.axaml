@@ -1,6 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="UnrealFrontiersLauncher.AutoupdatePage">
+             xmlns:local="using:UnrealFrontiersLauncher"
+             x:Class="UnrealFrontiersLauncher.AutoupdatePage"
+             x:DataType="local:AutoupdatePageViewModel">
     <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, *">
         <Image Source="/Assets/Images/backgorund2.png"
                Stretch="UniformToFill"
@@ -33,26 +35,31 @@
         
             <StackPanel>
                 <Border Background="#201E24" Height="90" BorderThickness="1" BorderBrush="Black" Opacity="50">
-                    <Grid Grid.ColumnDefinitions="Auto, *" >
+                    <Grid Grid.ColumnDefinitions="3*, 1*">
                         <TextBlock FontSize="22"
                                FontFamily="{StaticResource MontserratBold}"
-                               Margin="25 0 600 0"
                                Grid.Column="0"
+                               Margin="5 0 0 0"
                                VerticalAlignment="Center"
-                               HorizontalAlignment="Center">Некий текст, который будет тут висеть, <LineBreak/> но пока висит только его кодер)</TextBlock>
-                                                                                <!-- ^ Тут сплеш-текст ^ -->
+                               HorizontalAlignment="Left"
+                               Text="{Binding StatusText}"/>
+                        <!-- ^ Тут сплеш-текст ^ -->
                         <TextBlock FontFamily="{StaticResource MontserratBold}"
                                    FontSize="50"
+                                   IsVisible="{Binding ShouldDisplayDownloadProgress}"
                                    Grid.Column="2"
-                                   Margin="0 15 0 0">100%</TextBlock>
-                                                <!-- ^ Тут процентик тот что справа ^ -->
+                                   Margin="0 0 5 0"
+                                   Text="{Binding ProgressValue, StringFormat={}{0:F2}%}"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Right"/>
+                        <!-- ^ Тут процентик тот что справа ^ -->
                     </Grid>
                 </Border>
             </StackPanel>
             
             <!-- Прогресс бар -->
             <StackPanel>
-                <ProgressBar Value="50">
+                <ProgressBar Value="{Binding ProgressValue}">
                     <ProgressBar.Foreground>
                         <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
                             <GradientStop Color="#8a58bb" Offset="0.2" />

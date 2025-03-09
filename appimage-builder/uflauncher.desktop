@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=UnrealFrontiersLauncher
+Exec=/usr/bin/uflauncher %u
+Type=Application
+MimeType=x-scheme-handler/uflauncher;
+NoDisplay=true

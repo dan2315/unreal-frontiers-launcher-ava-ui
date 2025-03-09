@@ -32,14 +32,18 @@ namespace UnrealFrontiersLauncher
         }
 
 
-        public async Task<Boolean> TryAutoAuth()
+        public async Task TryAutoAuth()
         {
             (bool success, string? nickname) = await _authService.TryAuthWithTokens();
-            if (!success) return success;
-
-            _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
-            _navigationService.NavigateTo<MainPage>();
-            return success;
+            if (!success)
+            {
+                _navigationService.NavigateTo<AuthPage>();
+            }
+            else
+            {
+                _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
+                _navigationService.NavigateTo<MainPage>();
+            }
         }
 
         public void AuthAction(object? sender, RoutedEventArgs  e) 
