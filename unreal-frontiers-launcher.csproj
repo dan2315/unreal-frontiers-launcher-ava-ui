@@ -41,7 +41,11 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.1" />
     <PackageReference Include="Citrus.Avalonia" Version="2.1.1" />
     <PackageReference Include="CmlLib.Core" Version="4.0.2" />
-    <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.0.0" />
+<!--    <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.0.0" />-->
+    <Reference Include="CmlLib.Core.Installer.Forge">
+      <HintPath>.\ChastKorablya\CmlLib.Core.Installer.Forge.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
     <PackageReference Include="Sentry" Version="5.0.1" />
