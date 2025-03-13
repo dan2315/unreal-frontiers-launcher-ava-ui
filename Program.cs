@@ -52,7 +52,8 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<AutoupdatePage>();
             services.AddSingleton<AuthPage>();
             services.AddSingleton<MainPage>();
-            services.AddSingleton<NavigationService>();
+            services.AddSingleton<NavigationService>();  
+            services.AddSingleton<HttpClientService>();
             services.AddTransient<DeepLinkHandler>();
 
 

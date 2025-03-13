@@ -11,13 +11,12 @@ namespace UnrealFrontiersLauncher
 {
     public class AuthService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClientService _httpClient;
         private readonly TokenStorage _tokenStorage;
 
-        public AuthService()
+        public AuthService(HttpClientService httpClient)
         {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(AppSettings.ServerURL);
+            _httpClient = httpClient;
             _tokenStorage = new TokenStorage();
         }
 
@@ -104,7 +103,6 @@ namespace UnrealFrontiersLauncher
         public async Task<(bool, string?)> TryAuthWithTokens() 
         {
             (string accessToken, string refreshToken) = _tokenStorage.LoadTokens();
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             var accessResponse = await _httpClient.GetAsync("/auth/request_access");
 
             if (accessResponse.IsSuccessStatusCode)
@@ -135,7 +133,7 @@ namespace UnrealFrontiersLauncher
         }
         public async Task<(bool Success, string Message)> DiscordAuth(string? nickname)
         {
-            var url = "auth/auth_discord";
+            var url = "/auth/auth_discord";
             if (!string.IsNullOrEmpty(nickname))
             {
                 url += $"?nickname={Uri.EscapeDataString(nickname)}";
@@ -143,7 +141,7 @@ namespace UnrealFrontiersLauncher
 
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                FileName = $"{_httpClient.BaseAddress}{url}",
+                FileName = $"{AppSettings.ServerURL}{url}",
                 UseShellExecute = true
             });
 
@@ -199,6 +197,7 @@ namespace UnrealFrontiersLauncher
             }
         }
         
+        
         public void GrantAccessAndProceed(PlayerProfileProvider profileProvider, NavigationService navigationService, NameValueCollection queryParams)
         {
             var parameters = ReadAuthParams(queryParams);
@@ -206,12 +205,15 @@ namespace UnrealFrontiersLauncher
             navigationService.NavigateTo<MainPage>();
         }
 
-        public void GrantAccess(PlayerProfileProvider profileProvider, AuthPage.AccessData parameters)
+        public async Task GrantAccess(PlayerProfileProvider profileProvider, AuthPage.AccessData parameters)
         {
             if (parameters.accessToken != null && parameters.refreshToken != null)
             {
                 _tokenStorage.SaveTokens(parameters.accessToken, parameters.refreshToken);
             }
+            
+            var response = _httpClient.GetAsync("auth/user");
+            _httpClient.SetAuthHeader(parameters.accessToken);
 
             var profile = new PlayerProfile(parameters.nickname);
             profileProvider.SetProfile(profile);
@@ -227,4 +229,5 @@ namespace UnrealFrontiersLauncher
             };
         }
     }
+
 }
