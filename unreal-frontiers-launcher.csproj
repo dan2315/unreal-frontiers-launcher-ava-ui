@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -54,12 +54,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="flatpak-builder\nuget-sources\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageFile Include="flatpak-builder/dod.unrealfrontiers.launcher.desktop">
-        <PackagePath>/usr/share/applications/unreal-frontiers-launcher.desktop</PackagePath>
-    </PackageFile>
+    <Content Include="flatpak-builder/dod.unrealfrontiers.launcher.desktop" CopyToPublishDirectory="PreserveNewest">
+      <LinuxPath>/usr/share/applications/unreal-frontiers-launcher.desktop</LinuxPath>
+    </Content>
   </ItemGroup>
 </Project>
