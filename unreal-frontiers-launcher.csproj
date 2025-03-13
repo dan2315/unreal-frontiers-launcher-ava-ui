@@ -8,6 +8,7 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <AssemblyName>UnrealFrontiersLauncher</AssemblyName>
     <ApplicationTitle>Unreal Frontiers Launcher</ApplicationTitle>
+    <ApplicationIcon>Assets/Images/logo.ico</ApplicationIcon>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
