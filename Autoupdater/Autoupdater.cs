@@ -15,7 +15,7 @@ public class Autoupdater
     private static string InstallerDownloadUrl = AppSettings.GetFileDownloadPath("install.sh", "launcher");
     private const string InstallerFileName = "install.sh";
 #endif
-    private const string CurrentVersion = "0.3.0";
+    private const string CurrentVersion = "0.3.1";
 
     public static Action<float> OnProgress;
     public static Action<string> OnSetStatus;
@@ -119,23 +119,40 @@ public class Autoupdater
         };
 
         installerProcess.Start();
-        installerProcess.WaitForExit();
-        RestartApplication();
+        
+        Task.Delay(1000).Wait();
+        
+        Environment.Exit(0);
     }
 #elif LINUX
     private static void InstallAndRunFlatpak()
     {
         string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
 
-        Console.WriteLine("Installing Flatpak package...");
-        OnSetStatus?.Invoke("Installing Flatpak package...");
+        Console.WriteLine("Running installation script...");
+        OnSetStatus?.Invoke("Running installation script...");
 
+        // Make the script executable
+        var chmodProcess = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "chmod",
+                Arguments = $"+x {tempFilePath}",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        chmodProcess.Start();
+        chmodProcess.WaitForExit();
+
+        // Run the installation script
         var installProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "flatpak",
-                Arguments = $"install --noninteractive {tempFilePath}",
+                FileName = tempFilePath,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -148,38 +165,44 @@ public class Autoupdater
 
         if (installProcess.ExitCode == 0)
         {
-            Console.WriteLine("Flatpak package installed successfully.");
-            OnSetStatus?.Invoke("Flatpak package installed successfully.");
+            Console.WriteLine("Installation completed successfully.");
+            OnSetStatus?.Invoke("Installation completed successfully.");
 
             Console.WriteLine("Running application...");
             OnSetStatus?.Invoke("Running application...");
-            RunFlatpakApp();
+            RunUpdatedApplication();
         }
         else
         {
-            Console.WriteLine("Flatpak installation failed.");
-            OnSetStatus?.Invoke("Flatpak installation failed.");
+            Console.WriteLine("Installation failed.");
+            OnSetStatus?.Invoke("Installation failed.");
         }
     }
 
-    private static void RunFlatpakApp()
+    private static void RunUpdatedApplication()
     {
+        // Run the newly installed application
         var runProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "flatpak",
-                Arguments = "run dod.unrealfrontiers.launcher",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                FileName = "UnrealFrontiersLauncher",
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = false
             }
         };
 
-        runProcess.Start();
-        Console.WriteLine("Flatpak application started.");
-        OnSetStatus?.Invoke("Flatpak application started.");
+        try
+        {
+            runProcess.Start();
+            Console.WriteLine("Application started.");
+            OnSetStatus?.Invoke("Application started.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to start application: {ex.Message}");
+            OnSetStatus?.Invoke($"Failed to start application: {ex.Message}");
+        }
     }
 #endif
 
@@ -193,7 +216,7 @@ public class Autoupdater
             UseShellExecute = true
         });
 #elif LINUX
-        RunFlatpakApp();
+        RunUpdatedApplication();
 #endif
 
         Environment.Exit(0);

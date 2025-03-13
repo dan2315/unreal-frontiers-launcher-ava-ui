@@ -236,7 +236,7 @@
                                                 VerticalAlignment="Center"
                                                 FontFamily="{StaticResource MontserratBold}"
                                                 Margin="5 5 0 0"/>
-                                        <CheckBox IsEnabled="False"
+                                        <CheckBox x:Name="OpenConsoleBox"
                                                   Margin="0 5 0 0"
                                                   CornerRadius="2"/>
                                     </StackPanel>
@@ -249,11 +249,113 @@
                                                 FontFamily="{StaticResource MontserratBold}" 
                                                 Margin="5 0 0 10"/>
                                         
-                                        <CheckBox IsEnabled="False" 
-                                                  Margin="0 0 0 8"
-                                                  CornerRadius="2"/>
+                                        <CheckBox x:Name="CloseLauncherBox" 
+                                                Margin="0 0 0 8"
+                                                CornerRadius="2"/>
                                     </StackPanel>
                                     <Rectangle Height="1" Fill="Black"></Rectangle>
+                                </StackPanel>
+                            </Border>
+                        </TabItem>
+                        
+                        <!-- New Profile Tab -->
+                        <TabItem Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                            
+                            <TabItem.Styles>
+                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
+                                                <GradientStop Color="#8a58bb" Offset="0.2" />
+                                                <GradientStop Color="#ee4aef" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
+                                </Style>
+                            </TabItem.Styles>
+                            
+                            <TabItem.Header>
+                                <StackPanel>
+                                    <Svg Margin="3 0 0 0" Path="/Assets/Images/svg/profile.svg" Width="30" Height="30"/>
+                                    <TextBlock Margin="0 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Профиль"></TextBlock>
+                                    <Rectangle Margin="0 0 0 0" Height="1" Fill="White" IsVisible="{Binding}" HorizontalAlignment="Stretch"></Rectangle>
+                                </StackPanel>
+                            </TabItem.Header>
+                            
+                            <!-- Profile Content -->
+                            <Border Grid.Column="0"
+                                    Background="#201E24"
+                                    Margin="10"
+                                    CornerRadius="5"
+                                    BorderBrush="Black"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <StackPanel>
+                                        <Border Background="#1b191f" CornerRadius="5 5 0 0">
+                                            <TextBlock Text="Профиль"
+                                                       FontSize="18"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       Margin="10"
+                                                       TextAlignment="Center"/>
+                                        </Border>
+                                        <Rectangle Height="1" Fill="Black"></Rectangle>
+                                    </StackPanel>
+                                    
+                                    <!-- Profile Options -->
+                                    <StackPanel Margin="20">
+                                        <!-- Add Password Button -->
+                                        <Button Foreground="White"
+                                                Classes="idle_anim"
+                                                VerticalAlignment="Bottom"
+                                                CornerRadius="5"
+                                                MaxWidth="250"
+                                                Height="40"
+                                                Margin="0 10 0 20"
+                                                Background="#6E53A1"
+                                                x:Name="AddPasswordButton">
+                                            <Button.Content>
+                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
+                                                    <Svg Path="../Assets/Images/svg/lock.svg" Height="20" Width="20"/>
+                                                    <TextBlock Grid.Column="1" 
+                                                               FontFamily="{StaticResource MontserratBold}"
+                                                               FontSize="15" 
+                                                               Text="Добавить пароль" 
+                                                               Margin="10 3 0 2"/>
+                                                </Grid>
+                                            </Button.Content>
+                                        </Button>
+                                        
+                                        <!-- Connect Discord Button -->
+                                        <Button Foreground="White"
+                                                Classes="idle_anim"
+                                                VerticalAlignment="Bottom"
+                                                CornerRadius="5"
+                                                MaxWidth="250"
+                                                Height="40"
+                                                Background="#5865F2"
+                                                x:Name="ConnectDiscordButton">
+                                            <Button.Content>
+                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
+                                                    <Svg Path="../Assets/Images/svg/discord.svg" Height="20" Width="20"/>
+                                                    <TextBlock Grid.Column="1" 
+                                                               FontFamily="{StaticResource MontserratBold}"
+                                                               FontSize="15" 
+                                                               Text="Подключить Discord" 
+                                                               Margin="10 3 0 2"/>
+                                                </Grid>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
                         </TabItem>

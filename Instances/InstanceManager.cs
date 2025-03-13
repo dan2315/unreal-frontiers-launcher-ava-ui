@@ -11,7 +11,7 @@ namespace UnrealFrontiersLauncher
     {
         public static string instancesPath = Path.Combine(AppSettings.LauncherBasePath, "Instances");
         Dictionary<string, MinecraftInstance> minecraftInstances = new();
-        public MinecraftInstance selectedInstance = new MinecraftInstance("sosal_question_mark", "DefaultProfile", "1.0.0", "localhost:25565", 0);
+        public MinecraftInstance? selectedInstance;
 
         public InstanceManager()
         {

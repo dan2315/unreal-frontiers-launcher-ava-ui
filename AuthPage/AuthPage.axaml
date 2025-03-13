@@ -294,7 +294,7 @@
                             </TextBlock>
 
                             <!-- Forgot Password -->
-                            <TextBlock Text="Забыл пароль"
+                            <TextBlock Text="Забыли пароль?"
                                        Grid.Column="1"
                                        Foreground="#222222"
                                        TextDecorations="Underline"

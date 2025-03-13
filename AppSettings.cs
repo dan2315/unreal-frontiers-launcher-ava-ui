@@ -12,8 +12,8 @@ public static class AppSettings
     public static string LauncherBasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
 #endif
     public static string RemoteIndexesURI (string instanceId)  => GetFileDownloadPath("indexes.json", instanceId);
-    public static string GetFileDownloadPath(string filename, string instanceId) => $"{ServerURL}/updateclient/download_file/{instanceId}?file={Uri.EscapeDataString(filename)}";
-    public static string GetVersionInfoURL(string instanceId) => $"{ServerURL}/updateclient/get_version_data/{instanceId}";
-    public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}/updateclient/indexes/{instanceId}";
-    public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}/updateclient/obsolete/{instanceId}";
+    public static string GetFileDownloadPath(string filename, string instanceId) => $"{ServerURL}/update/download_file/{instanceId}?file={Uri.EscapeDataString(filename)}";
+    public static string GetVersionInfoURL(string instanceId) => $"{ServerURL}/update/get_version_data/{instanceId}";
+    public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}/update/indexes/{instanceId}";
+    public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}/update/obsolete/{instanceId}";
 }

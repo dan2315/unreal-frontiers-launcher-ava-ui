@@ -40,7 +40,6 @@ public class NavigationService
     
     public void NavigateTo(object nextPage)
     {
-        // Animate
         if (pagesStack.Count > 0)
         {
             _transition.Start(pagesStack.Peek() as Visual, nextPage as Visual, true, CancellationToken.None);

@@ -17,14 +17,11 @@ public class DeepLinkHandler
     PopupService _popupService;
     NavigationService _navigation;
 
-    EntryModal _entryModal;
-
-    public DeepLinkHandler(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService) 
+    public DeepLinkHandler(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, PopupService popupService) 
     {
         _authService = authService;
         _profileProvider = profileProvider;
         _navigation = navigation;
-        _entryModal = entryModal;
         _popupService = popupService;
     }
 
@@ -111,7 +108,7 @@ public class DeepLinkHandler
 
             if (uri.Host == "auth-response")
             {
-                DiscordAuth.OnDiscordAuthResponseRecieved(uri, _authService, _profileProvider, _navigation, _entryModal, _popupService);
+                DiscordAuth.OnDiscordAuthResponseRecieved(uri, _authService, _profileProvider, _navigation , _popupService);
             }
             if (uri.Host == "email-verified-response")
             {

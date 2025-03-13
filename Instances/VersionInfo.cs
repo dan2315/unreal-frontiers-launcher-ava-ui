@@ -17,7 +17,7 @@ namespace UnrealFrontiersLauncher
             forgeVersion = string.Empty,
             minecraftVersion = "1.0.0",
             minRam = 2000,
-            serverAddress = string.Empty,
+            serverAddress = "no:address",
             version = "1.0.0"
         };
     }

@@ -44,8 +44,6 @@ public class App : Application
             navigation.RegisterPage(authPage);
             var mainPage = Services.GetRequiredService<MainPage>();
             navigation.RegisterPage(mainPage);
-            var entryModal = Services.GetRequiredService<EntryModal>(); 
-            navigation.RegisterPage(entryModal);
             var autoupdatePage = Services.GetRequiredService<AutoupdatePage>();
             navigation.RegisterPage(autoupdatePage);
             

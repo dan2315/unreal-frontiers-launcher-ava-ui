@@ -8,7 +8,7 @@ namespace UnrealFrontiersLauncher;
 
 class DiscordAuth
 {
-    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService)
+    public static void OnDiscordAuthResponseRecieved(Uri uri, AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, PopupService popupService)
     {
         Dispatcher.UIThread.Post(async () =>
         {
@@ -17,7 +17,7 @@ class DiscordAuth
 
             if (string.Equals(requestNickname, "true"))
             {
-                await CreateNewDiscordBindingAndProceed(authService,  profileProvider, navigation, entryModal, queryParams);
+                await CreateNewDiscordBindingAndProceed(authService,  profileProvider, navigation, queryParams);
             }
             else
             {
@@ -26,18 +26,17 @@ class DiscordAuth
         });
     }
 
-    private static async Task CreateNewDiscordBindingAndProceed(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, EntryModal nicknameRequestModal, NameValueCollection queryParams)
+    private static async Task CreateNewDiscordBindingAndProceed(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, NameValueCollection queryParams)
     {
         string state = queryParams["state"];
-        navigation.NavigateTo<EntryModal>();
-        nicknameRequestModal.InitializeComponentOverride("Введите никнейм для вашего аккаунта", async (inputNickname) =>
+        var entryModal = new EntryModal(navigation, "Введите никнейм для вашего аккаунта", async (inputNickname) =>
         {
             var response = await authService.CompleteDiscordAuthSession(state, inputNickname);
             if (response.success)
             {
-                TODO: authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken});
-                navigation.NavigateTo<MainPage>();
+                authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken});
             }
         });
+        navigation.NavigateTo(entryModal);
     }
 }

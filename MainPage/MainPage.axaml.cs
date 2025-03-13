@@ -50,13 +50,18 @@ public partial class MainPage : UserControl
 	{
 		RamSlider.ValueChanged += UpdateRamThroughSlider;
 		RamEntry.TextChanged += UpdateRamThroughEntry;
+		CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
+		OpenConsoleBox.IsCheckedChanged += UpdateOpenConsole;
 	}
 	public void UpdateSettingsPanel() 
 	{
+		if (_instanceManager.selectedInstance == null) return;
 		var configuration = _instanceManager.selectedInstance.GetLaunchConfiguration();
 		RamSlider.Maximum = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
 		RamSlider.Value = configuration.Ram;
 		RamEntry.Text = configuration.Ram.ToString();
+		CloseLauncherBox.IsChecked = configuration.NeedToClose;
+		OpenConsoleBox.IsChecked = configuration.NeedToOpenConsole;
 	}
 
 	private void UpdateRamThroughSlider(object? sender, RangeBaseValueChangedEventArgs  args) 
@@ -86,6 +91,22 @@ public partial class MainPage : UserControl
 		}
 		RamSlider.Value = value;
 		_instanceManager.selectedInstance.ApplyNewRamValue(value);
+	}
+
+	private void UpdateCloseLauncher(object? sender, RoutedEventArgs  args)
+	{
+		if (sender is CheckBox checkBox)
+		{
+			_instanceManager.selectedInstance.ApplyNewShouldCloseValue(checkBox.IsChecked.Value);
+		}
+	}
+	
+	private void UpdateOpenConsole(object? sender, RoutedEventArgs  args)
+	{
+		if (sender is CheckBox checkBox)
+		{
+			_instanceManager.selectedInstance.ApplyNewShouldOpenConsoleValue(checkBox.IsChecked.Value);
+		}
 	}
 
     private async void OnLaunchButtonClicked(object sender, RoutedEventArgs  e)
@@ -125,6 +146,7 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
         Console.WriteLine($"Selected Server: {currentModpack.Name}");
 
         await _instanceManager.SelectInstance(selectedValue);
+        UpdateSettingsPanel();
     }
     else
     {

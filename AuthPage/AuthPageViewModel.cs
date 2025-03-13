@@ -52,6 +52,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
             if (string.IsNullOrEmpty(_authError))
                 return null;
 
+            return _authError;
             try
             {
                 using var jsonDoc = JsonDocument.Parse(_authError);
@@ -158,7 +159,12 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public void InitiatePasswordRecovery()
     {
-        //TODO: PageReference.DisplayAlert("Ой-ёй","Больше не забывай =- )", "Ну ладно :("); 
+        var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
+        {
+            var message = await _authService.SendResetPasswordEmail(email);
+            await _popupService.ShowOkDialogAsync("Восстановление пароля", message);
+        });
+        _navigationService.NavigateTo(entryModal);
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
