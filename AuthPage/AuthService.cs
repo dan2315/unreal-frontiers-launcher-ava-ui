@@ -115,19 +115,19 @@ namespace UnrealFrontiersLauncher
                 return (access, nickname);
             } 
 
-            // var payload = new { refreshToken };
-            // var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            // var refreshResponse = await _httpClient.PostAsync("/auth/refresh_tokens", content);
-            //
-            // if (refreshResponse.IsSuccessStatusCode) 
-            // {
-            //     var data = JsonSerializer.Deserialize<JsonElement>(await refreshResponse.Content.ReadAsStringAsync());
-            //     var newAccessToken = data.GetProperty("accessToken").GetString();
-            //     var nickname = data.GetProperty("nickname").GetString();
-            //     _tokenStorage.SaveTokens(newAccessToken, refreshToken);
-            //
-            //     return(true, nickname);
-            // }
+            var payload = new { refreshToken };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var refreshResponse = await _httpClient.PostAsync("/auth/refresh_tokens", content);
+            
+            if (refreshResponse.IsSuccessStatusCode) 
+            {
+                var data = JsonSerializer.Deserialize<JsonElement>(await refreshResponse.Content.ReadAsStringAsync());
+                var newAccessToken = data.GetProperty("accessToken").GetString();
+                var nickname = data.GetProperty("nickname").GetString();
+                _tokenStorage.SaveTokens(newAccessToken, refreshToken);
+            
+                return(true, nickname);
+            }
 
             return (false, null);
         }

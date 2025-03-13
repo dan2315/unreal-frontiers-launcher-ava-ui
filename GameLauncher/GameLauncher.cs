@@ -20,7 +20,7 @@ namespace UnrealFrontiersLauncher
             Action<float> onProgressChanged,
             Action<string> onFileChanged,
             Action<string> onDownloadSpeedUpdated,
-            Action onGameLaunched)
+            Action onGameQuit)
         {
             try
             {
@@ -112,11 +112,26 @@ namespace UnrealFrontiersLauncher
                 Console.WriteLine("Executing command:");
                 Console.WriteLine(process.StartInfo.FileName + " " + process.StartInfo.Arguments);
 
+                LoggingWindow? loggingWindow = null;
+                
+                if (minecraftInstance.GetLaunchConfiguration().NeedToOpenConsole)
+                {
+                    loggingWindow = new LoggingWindow(minecraftInstance.Name);
+                    loggingWindow.Show();
+                }
+
                 var processUtil = new ProcessWrapper(process);
-                processUtil.OutputReceived += (s, e) => Console.WriteLine(e);
+                processUtil.OutputReceived += (s, e) => 
+                {
+                    Console.WriteLine(e);
+                    if (minecraftInstance.GetLaunchConfiguration().NeedToOpenConsole)
+                    {
+                        loggingWindow?.AppendLog(e);
+                    }
+                };
                 processUtil.StartWithEvents();
                 await processUtil.WaitForExitTaskAsync();
-                onGameLaunched.Invoke();
+                onGameQuit.Invoke();
             }
             catch (Exception e)
             {
@@ -134,5 +149,4 @@ namespace UnrealFrontiersLauncher
             return path;
         }
     }
-
 }
