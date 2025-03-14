@@ -9,13 +9,13 @@
         Title="Game Console"
         Width="800" Height="500">
     <Grid RowDefinitions="Auto, *">
-        <StackPanel Orientation="Horizontal" Margin="5" Spacing="25">
-            <TextBox x:Name="SearchBox" Watermark="Search logs..." 
-                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
-            <CheckBox x:Name="ScrollToBottomCheckBox" Content="Scroll to Bottom" 
-                      IsChecked="{Binding ScrollToBottom}" Margin="10,0,0,0"/>
-        </StackPanel>
-        <ListBox Grid.Row="1" ItemsSource="{Binding Logs}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <!-- <StackPanel Orientation="Horizontal" Margin="5" Spacing="25"> -->
+        <!--     <TextBox x:Name="SearchBox" Watermark="Search logs..."  -->
+        <!--              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" /> -->
+        <!--     <CheckBox x:Name="ScrollToBottomCheckBox" Content="Scroll to Bottom"  -->
+        <!--               IsChecked="{Binding ScrollToBottom}" Margin="10,0,0,0"/> -->
+        <!-- </StackPanel> -->
+        <ListBox x:Name="LogsListBox" Grid.Row="1" ItemsSource="{Binding FilteredLogs}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                         <TextBlock Text="{Binding}" 

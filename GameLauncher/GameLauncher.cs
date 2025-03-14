@@ -46,16 +46,13 @@ namespace UnrealFrontiersLauncher
                 {
                     DateTime now = DateTime.UtcNow;
 
-                    // Add the current sample to the queue
                     speedSamples.Enqueue((now, progressedBytes));
 
-                    // Remove samples outside the rolling window
                     while (speedSamples.Count > 0 && speedSamples.Peek().Timestamp < now - rollingWindow)
                     {
                         speedSamples.Dequeue();
                     }
 
-                    // Calculate the speed over the rolling window
                     if (speedSamples.Count > 1)
                     {
                         var oldest = speedSamples.Peek();

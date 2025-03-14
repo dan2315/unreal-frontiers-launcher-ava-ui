@@ -17,8 +17,12 @@ namespace UnrealFrontiersLauncher
         private StringBuilder _logBuffer = new();
         private bool _isRunning = true;
 
-        public ObservableCollection<string> Logs { get; } = new();
-        public ObservableCollection<string> FilteredLogs { get; } = new();
+        private ObservableCollection<string> _logs = new();
+        private ObservableCollection<string> _filteredLogs = new();
+        public ObservableCollection<string> FilteredLogs
+        {
+            get => _logs;
+        }
 
         private string _searchQuery = "";
         public string SearchQuery
@@ -100,22 +104,23 @@ namespace UnrealFrontiersLauncher
 
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            Logs.Add(formattedLog);
-                            if (Logs.Count > 1000)
-                            {
-                                Logs.RemoveAt(0);
-                            }
+                            _logs.Add(formattedLog);
                             
+                            if (_logs.Count > 1000)
+                            {
+                                _logs.RemoveAt(0);
+                            }
+
                             if (ScrollToBottom)
                             {
-                                ScrollToEnd();
+                                // ScrollToEnd();
                             }
                         });
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine("[ERROR] Log parsing failed: " + ex.Message);
-                        Dispatcher.UIThread.Post(() => Logs.Add(message));
+                        Dispatcher.UIThread.Post(() => _logs.Add(message));
                     }
                 }
                 else
@@ -127,28 +132,26 @@ namespace UnrealFrontiersLauncher
 
         private void ApplyFilter()
         {
-            FilteredLogs.Clear();
-            foreach (var log in Logs.Where(log => log.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)))
-            {
-                FilteredLogs.Add(log);
-            }
+            var filtered = string.IsNullOrEmpty(_searchQuery) 
+                ? _logs 
+                : _logs.Where(log => log.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
+            
         }
 
         private void ScrollToEnd()
         {
             if (FilteredLogs.Count > 0)
             {
-                var listBox = this.FindControl<ListBox>("LogListBox");
-                listBox.ScrollIntoView(FilteredLogs.Last());
+                LogsListBox.ScrollIntoView(FilteredLogs.Last());
             }
         }
-        
+
         protected override void OnClosed(EventArgs e)
         {
             _isRunning = false;
             base.OnClosed(e);
         }
-        
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

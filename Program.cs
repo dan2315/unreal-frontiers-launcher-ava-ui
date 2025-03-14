@@ -12,7 +12,7 @@ namespace UnrealFrontiersLauncher
         [STAThread]
         public static void Main(string[] args)
         {
-            // SentryIntegration.Initialize();
+            SentryIntegration.Initialize();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 

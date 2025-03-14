@@ -15,7 +15,7 @@ public class Autoupdater
     private static string InstallerDownloadUrl = AppSettings.GetFileDownloadPath("install.sh", "launcher");
     private const string InstallerFileName = "install.sh";
 #endif
-    private const string CurrentVersion = "0.3.1";
+    private const string CurrentVersion = "0.3.2";
 
     public static Action<float> OnProgress;
     public static Action<string> OnSetStatus;
