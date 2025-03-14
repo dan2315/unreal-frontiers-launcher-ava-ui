@@ -18,6 +18,8 @@ namespace UnrealFrontiersLauncher
         {
             _httpClient = httpClient;
             _tokenStorage = new TokenStorage();
+            var tokens = _tokenStorage.LoadTokens();
+            _httpClient.SetAuthHeader(tokens.accessToken);
         }
 
         public async Task<(bool Success, string Message)> CreateAccount(string nickname, string email, string password)

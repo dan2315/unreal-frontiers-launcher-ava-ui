@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Installer.Forge;
@@ -20,7 +22,8 @@ namespace UnrealFrontiersLauncher
             Action<float> onProgressChanged,
             Action<string> onFileChanged,
             Action<string> onDownloadSpeedUpdated,
-            Action onGameQuit)
+            Action onGameQuit,
+            MainWindow mainWindow)
         {
             try
             {
@@ -119,7 +122,7 @@ namespace UnrealFrontiersLauncher
                     loggingWindow = new LoggingWindow(minecraftInstance.Name);
                     loggingWindow.Show();
                 }
-
+                
                 var processUtil = new ProcessWrapper(process);
                 processUtil.OutputReceived += (s, e) => 
                 {
@@ -130,8 +133,14 @@ namespace UnrealFrontiersLauncher
                     }
                 };
                 processUtil.StartWithEvents();
+                
+                if (minecraftInstance.GetLaunchConfiguration().NeedToClose)
+                {
+                    mainWindow.Close();
+                }
                 await processUtil.WaitForExitTaskAsync();
                 onGameQuit.Invoke();
+                loggingWindow?.Close();
             }
             catch (Exception e)
             {

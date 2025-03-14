@@ -19,6 +19,7 @@ public partial class MainPage : UserControl
 	private GameLauncher _gameLauncher;
 	private PlayerProfileProvider _playerProfileProvider;
 	private MainPageViewModel _viewModel;
+	private MainWindow _mainWindow;
 #if WINDOWS
 	private ISystemInfo _systemInfo = new Windows.SystemInfo();
 #elif LINUX
@@ -27,12 +28,13 @@ public partial class MainPage : UserControl
 	public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
 	public MainPage() {}
-	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider)
+	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, MainWindow mainWindow)
 	{
 		_playerProfileProvider = playerProfileProvider;
 		_popUpService = popUpService;
 		_gameLauncher = gameLauncher;
 		_instanceManager = instanceManager;
+		_mainWindow = mainWindow;
 		_viewModel = new MainPageViewModel(this);
 		DataContext = _viewModel;
 		
@@ -117,8 +119,8 @@ public partial class MainPage : UserControl
 		{
 			LaunchButton.IsEnabled = true;
 			return;
-		}
-		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, PlayerProfile, OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, () => LaunchButton.IsEnabled = true);
+		} 
+		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, PlayerProfile, OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, () => LaunchButton.IsEnabled = true, _mainWindow);
 	}
 
     private void OnDownloadSpeedChanged(string speedText)
