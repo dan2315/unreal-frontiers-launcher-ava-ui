@@ -35,6 +35,7 @@ class DiscordAuth
             if (response.success)
             {
                 authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken});
+                navigation.NavigateTo<MainPage>();
             }
         });
         navigation.NavigateTo(entryModal);

@@ -24,7 +24,6 @@ namespace UnrealFrontiersLauncher
         private void OnSubmitClicked(object? sender, RoutedEventArgs e)
         {
             _clickAction?.Invoke(UserInput.Text);
-            _navigationService.GetBack();
         }
 
         private void OnCancelClicked(object? sender, RoutedEventArgs e)

@@ -163,6 +163,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
         {
             var message = await _authService.SendResetPasswordEmail(email);
             await _popupService.ShowOkDialogAsync("Восстановление пароля", message);
+            _navigationService.GetBack();
         });
         _navigationService.NavigateTo(entryModal);
     }
