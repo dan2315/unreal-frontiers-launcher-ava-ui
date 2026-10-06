@@ -23,7 +23,7 @@
         
         <!-- Left Side Panel -->
         <StackPanel Grid.Column="0"
-                    Width="230">
+                    Width="280">
             <StackPanel.Background>
                 <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
                     <GradientStop Color="#100F12" Offset="0.0"></GradientStop>
@@ -31,7 +31,7 @@
                     <GradientStop Color="#100F12" Offset="1.0"></GradientStop>
                 </LinearGradientBrush>
             </StackPanel.Background>
-            <TextBlock Text="Modpacks"
+            <TextBlock Text="Servers"
                        TextAlignment="Center"
                        FontSize="34"
                        Foreground="White"
@@ -44,6 +44,13 @@
                               SelectedItem="{Binding SelectedModpack}"
                               SelectionChanged="OnInstanceSelected" Background="Transparent"
                               BorderBrush="Transparent">
+                
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Background="Transparent">
@@ -53,19 +60,46 @@
                                     CornerRadius="10"
                                     PointerEntered="Modpack_OnPointerEntered"
                                     PointerExited="Modpack_OnPointerExited"
-                                    Height="50"
-                                    MaxWidth="180">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Image Source="{Binding Icon}"
-                                           Width="30"
-                                           Height="30"
-                                           Margin="0,0,10,0"/>
-                                    <TextBlock Text="{Binding Name}"
-                                               FontSize="16" VerticalAlignment="Center"
-                                               Foreground="{Binding TextColor}"
-                                               FontFamily="{StaticResource MontserratLight}"
-                                               MaxWidth="115">
-                                    </TextBlock>
+                                    Height="75"
+                                    MaxWidth="250">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Image Source="{Binding Icon}"
+                                               Width="30"
+                                               Height="30"
+                                               Margin="0,0,10,0"/>
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="16" VerticalAlignment="Center"
+                                                   Foreground="{Binding TextColor}"
+                                                   FontFamily="{StaticResource MontserratLight}"
+                                                   MaxWidth="250">
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <!-- Player Count -->
+                                    <StackPanel Margin="0,8,0,0" MaxWidth="200">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding PlayerCount}"
+                                                       FontSize="12"
+                                                       Foreground="#D0D0D0"
+                                                       FontFamily="{StaticResource MontserratLight}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding MaxPlayers}"
+                                                       FontSize="12"
+                                                       Foreground="#D0D0D0"
+                                                       FontFamily="{StaticResource MontserratLight}"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding PlayerCountProgress}"
+                                                     MinHeight="4"
+                                                     MinWidth="130"
+                                                     Background="#404040"
+                                                     Foreground="#22AA22">
+                                            <!-- <ProgressBar.></ProgressBar.> -->
+                                        </ProgressBar>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
             
@@ -74,7 +108,7 @@
                                        Fill="#404040"
                                        HorizontalAlignment="Stretch"
                                        IsVisible="{Binding IsLastItem}"
-                                       MaxWidth="175"/>
+                                       MaxWidth="200"/>
                         </StackPanel>
                     </DataTemplate>
             

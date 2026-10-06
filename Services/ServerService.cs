@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Text;
 using System.Net.Http;
@@ -16,20 +17,25 @@ namespace UnrealFrontiersLauncher
 
         public async Task<(bool Success, int CurrentPlayers, int MaxPlayers)> GetPlayerCount(string serverId)
         {
-            var response = await _httpClient.GetAsync($"/server-management/player-count/{serverId}");
-            var responseMessage = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/server-management/player-count/{serverId}");
+                var responseMessage = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
-            {
-                var data = JsonSerializer.Deserialize<JsonElement>(responseMessage);
-                int currentPlayers = data.GetProperty("playerCount").GetInt32();
-                int maxPlayers = data.GetProperty("maxPlayers").GetInt32();
-                return (true, currentPlayers, maxPlayers);
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = JsonSerializer.Deserialize<JsonElement>(responseMessage);
+                    int currentPlayers = data.GetProperty("playerCount").GetInt32();
+                    int maxPlayers = data.GetProperty("maxPlayers").GetInt32();
+                    return (true, currentPlayers, maxPlayers);
+                }
             }
-            else
+            catch (Exception e)
             {
-                return (false, 0, 0);
+                Console.WriteLine($"Failed fetching player count for {serverId}: {e.Message}");
             }
+
+            return (false, 0, 0);
         }
     }
 } 

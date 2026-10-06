@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -28,6 +29,42 @@ public class Modpack : INotifyPropertyChanged
         }
     }
 
+    private int _currentPlayers;
+    public int CurrentPlayers
+    {
+        get => _currentPlayers;
+        set
+        {
+            if (_currentPlayers != value)
+            {
+                _currentPlayers = value;
+                OnPropertyChanged(nameof(CurrentPlayers));
+                OnPropertyChanged(nameof(PlayerCount));
+                OnPropertyChanged(nameof(PlayerCountProgress));
+            }
+        }
+    }
+
+    private int _maxPlayers;
+    public int MaxPlayers
+    {
+        get => _maxPlayers;
+        set
+        {
+            if (_maxPlayers != value)
+            {
+                _maxPlayers = value;
+                OnPropertyChanged(nameof(MaxPlayers));
+                OnPropertyChanged(nameof(PlayerCount));
+                OnPropertyChanged(nameof(PlayerCountProgress));
+            }
+        }
+    }
+
+    public bool _hasPlayerData = false;
+    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : "Loading...";
+    public double PlayerCountProgress => MaxPlayers > 0 ? ((double)CurrentPlayers / MaxPlayers) * 100 : 0;
+
     private bool _isSelected;
     public bool IsSelected
     {
@@ -47,6 +84,17 @@ public class Modpack : INotifyPropertyChanged
     new SolidColorBrush(Color.FromRgb(0x6D, 0x20, 0x8F)) : 
     new SolidColorBrush(Color.Parse("Transparent"));
 
+    public async Task UpdatePlayerCount(ServerService server)
+    {
+        var (success, currentPlayers, maxPlayers) = await server.GetPlayerCount(Value);
+        if (success)
+        {
+            _hasPlayerData = true;
+            CurrentPlayers = currentPlayers;
+            MaxPlayers = maxPlayers;
+        }
+    }
+    
     private bool _isHovered;
     public bool IsHovered
     {

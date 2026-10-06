@@ -3,12 +3,17 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using System.Threading.Tasks;
+using System;
+using System.Linq;
+using UnrealFrontiersLauncher.Preferences;
 
 namespace UnrealFrontiersLauncher.ViewModels;
 
 public class MainPageViewModel : INotifyPropertyChanged
 {
     private MainPage _pageReference;
+    private readonly ServerService _serverService;
     public ObservableCollection<Modpack> Modpacks { get; set; }
     private Modpack _selectedModpack;
     public Modpack SelectedModpack
@@ -88,14 +93,14 @@ public class MainPageViewModel : INotifyPropertyChanged
         HoveredTab = null;
     }
 
-    public MainPageViewModel(MainPage page)
+    public MainPageViewModel(MainPage page, ServerService serverService)
     {
         _pageReference = page;
+        _serverService = serverService;
         Modpacks = new ObservableCollection<Modpack>
         {
-            new Modpack { Name = "Monifactory", Value = "monifactory", IsSelected=true },
-            new Modpack { Name = "(Beta) Create", Value = "create" },
-            new Modpack { Name = "Unreal Zaruba", Value = "unreal_zaruba", IsEnabled = false },
+            new Modpack { Name = "Unreal Domains: Create", Value = "create" },
+            new Modpack { Name = "Monifactory", Value = "monifactory"},
         };
 
         if (Modpacks.Count > 0)
@@ -104,9 +109,23 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
 
         SelectedTab = "game";
-        SelectedModpack = Modpacks[0];
+        var preferences = Preferences.Preferences.Load();
+        SelectedModpack = Modpacks.FirstOrDefault(modpack => modpack.Value == preferences.LastSelectedModpack, Modpacks[0]);
+        SelectedModpack.IsSelected = true;
+        StartPlayerCountUpdates();
     }
-    
+
+    private async void StartPlayerCountUpdates()
+    {
+        while (true)
+        {
+            foreach (var modpack in Modpacks)
+            {
+                _ = modpack.UpdatePlayerCount(_serverService);
+            }
+            await Task.Delay(TimeSpan.FromSeconds(30));
+        }
+    }
 
     public event PropertyChangedEventHandler PropertyChanged;
     public void OnPropertyChanged([CallerMemberName] string propertyName = null)

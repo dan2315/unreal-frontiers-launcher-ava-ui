@@ -20,6 +20,7 @@ public partial class MainPage : UserControl
 	private PlayerProfileProvider _playerProfileProvider;
 	private MainPageViewModel _viewModel;
 	private MainWindow _mainWindow;
+	private ServerService _serverService;
 #if WINDOWS
 	private ISystemInfo _systemInfo = new Windows.SystemInfo();
 #elif LINUX
@@ -28,14 +29,15 @@ public partial class MainPage : UserControl
 	public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
 	public MainPage() {}
-	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, MainWindow mainWindow)
+	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow)
 	{
 		_playerProfileProvider = playerProfileProvider;
 		_popUpService = popUpService;
 		_gameLauncher = gameLauncher;
 		_instanceManager = instanceManager;
+		_serverService = serverService;
 		_mainWindow = mainWindow;
-		_viewModel = new MainPageViewModel(this);
+		_viewModel = new MainPageViewModel(this, _serverService);
 		DataContext = _viewModel;
 		
 		InitializeComponent();
@@ -130,7 +132,6 @@ public partial class MainPage : UserControl
 	
 private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
 {
-    // Use index access to get the first item
     if (e.AddedItems.Count > 0 && e.AddedItems[0] is Modpack currentModpack)
     {
         if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is Modpack previousModpack)
@@ -144,6 +145,9 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
         }
 
         currentModpack.IsSelected = true;
+        var prefs = Preferences.Preferences.Get();
+        prefs.SetSelectedModpack(currentModpack.Value);
+        prefs.Save();
         string selectedValue = currentModpack.Value;
         Console.WriteLine($"Selected Server: {currentModpack.Name}");
 
@@ -173,7 +177,7 @@ private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs 
 
 	private void OnShowFolderClicked(object sender, RoutedEventArgs e) 
 	{
-		var installFolder = Path.Combine(AppSettings.LauncherBasePath, "Install");
+		var installFolder = Path.Combine(AppStaticData.LauncherBasePath, "Install");
 		MinecraftPath minecraftPath = new MinecraftPath()
 		{
 			BasePath = GameLauncher.EnsurePathExists(_instanceManager.selectedInstance.GetResourcePath()),
