@@ -20,7 +20,7 @@ public class MinecraftInstance
     public string ForgeVersion => _forgeVersion;
     public string ServerIp => _serverIp;
     public string ServerPort => _serverPort;
-    public string Address => _serverIp + ":" + _serverPort;
+    public string Address => _serverPort.Equals(String.Empty) ? _serverIp : _serverIp + ":" + _serverPort;
 
     public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue)
     {
@@ -31,7 +31,14 @@ public class MinecraftInstance
 
         var splitedAddress = serverAddress.Split(":");
         _serverIp = splitedAddress[0];
-        _serverPort = splitedAddress[1];
+        if (splitedAddress.Length > 1)
+        {
+            _serverPort = splitedAddress[1];
+        }
+        else
+        {
+            _serverPort = String.Empty;
+        }
 
         _launchConfiguration = new (defaultRamValue);
     }
@@ -56,7 +63,7 @@ public class MinecraftInstance
 
     public string GetResourcePath()
     {
-        var path = Path.Combine(AppSettings.LauncherBasePath, "Instances", _name);
+        var path = Path.Combine(AppStaticData.LauncherBasePath, "Instances", _name);
         return path;
     }
 

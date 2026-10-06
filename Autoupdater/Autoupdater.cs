@@ -7,15 +7,15 @@ using UnrealFrontiersLauncher;
 
 public class Autoupdater
 {
-    private static string VersionFileUrl = AppSettings.GetFileDownloadPath("version", "launcher");
+    private static string VersionFileUrl = AppStaticData.GetFileDownloadPath("version", "launcher");
 #if WINDOWS
-    private static string InstallerDownloadUrl = AppSettings.GetFileDownloadPath("UFLauncher_installer.exe", "launcher");
+    private static string InstallerDownloadUrl = AppStaticData.GetFileDownloadPath("UFLauncher_installer.exe", "launcher");
     private const string InstallerFileName = "UFLauncher_installer.exe";
 #elif LINUX
-    private static string InstallerDownloadUrl = AppSettings.GetFileDownloadPath("install.sh", "launcher");
+    private static string InstallerDownloadUrl = AppStaticData.GetFileDownloadPath("install.sh", "launcher");
     private const string InstallerFileName = "install.sh";
 #endif
-    private const string CurrentVersion = "0.3.2";
+    private const string CurrentVersion = "0.3.4";
 
     public static Action<float> OnProgress;
     public static Action<string> OnSetStatus;
@@ -37,7 +37,7 @@ public class Autoupdater
 #if WINDOWS
                 RunWindowsInstaller();
 #elif LINUX
-                InstallAndRunFlatpak();
+                InstallAndRunInstallation();
 #endif
             }
             else
@@ -125,7 +125,7 @@ public class Autoupdater
         Environment.Exit(0);
     }
 #elif LINUX
-    private static void InstallAndRunFlatpak()
+    private static void InstallAndRunInstallation()
     {
         string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
 

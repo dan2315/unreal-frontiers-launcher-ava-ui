@@ -14,7 +14,7 @@ public class HttpClientService
     public HttpClientService()
     {
         _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri(AppSettings.ServerURL);
+        _httpClient.BaseAddress = new Uri(AppStaticData.ServerURL);
     }
 
     public void SetAuthHeader(string accessToken)

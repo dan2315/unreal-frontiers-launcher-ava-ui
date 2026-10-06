@@ -9,7 +9,7 @@ namespace UnrealFrontiersLauncher
 {
     public class InstanceManager
     {
-        public static string instancesPath = Path.Combine(AppSettings.LauncherBasePath, "Instances");
+        public static string instancesPath = Path.Combine(AppStaticData.LauncherBasePath, "Instances");
         Dictionary<string, MinecraftInstance> minecraftInstances = new();
         public MinecraftInstance? selectedInstance;
 
@@ -81,7 +81,7 @@ namespace UnrealFrontiersLauncher
 
         public static async Task<VersionInfo> GetVersionInfo(string instanceId)
         {
-            string url = AppSettings.GetVersionInfoURL(instanceId);
+            string url = AppStaticData.GetVersionInfoURL(instanceId);
             Console.WriteLine(url);
 
             using (var httpClient = new HttpClient())

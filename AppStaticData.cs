@@ -3,7 +3,7 @@ using System.IO;
 
 namespace UnrealFrontiersLauncher;
 
-public static class AppSettings
+public static class AppStaticData
 {
     public static string ServerURL = "https://unrealfrontiers.xyz";
 #if WINDOWS

@@ -143,7 +143,7 @@ namespace UnrealFrontiersLauncher
 
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                FileName = $"{AppSettings.ServerURL}{url}",
+                FileName = $"{AppStaticData.ServerURL}{url}",
                 UseShellExecute = true
             });
 

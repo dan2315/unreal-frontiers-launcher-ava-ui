@@ -26,8 +26,8 @@ public class ModpackInstaller
 
     public async Task InstallModpackAsync(MinecraftInstance minecraftInstance, IProgress<ByteProgress> onProgressChanged, IProgress<InstallerProgressChangedEventArgs> onFileChanged)
     {
-        string indexUrl = AppSettings.GetInstanceIndexes(minecraftInstance.Id);
-        string obsoleteFilesUrl = AppSettings.GetInstanceObsoleteFiles(minecraftInstance.Id);
+        string indexUrl = AppStaticData.GetInstanceIndexes(minecraftInstance.Id);
+        string obsoleteFilesUrl = AppStaticData.GetInstanceObsoleteFiles(minecraftInstance.Id);
         string resourcePath = minecraftInstance.GetResourcePath();
 
         List<string> obsoleteFiles = await FetchObsoleteFilesAsync(obsoleteFilesUrl);
@@ -65,7 +65,7 @@ public class ModpackInstaller
             var (filePath, fileInfo) = index;
             var correctedFilePath = filePath.Replace("\\", "/");
 
-            string fileUrl = AppSettings.GetFileDownloadPath(correctedFilePath, minecraftInstance.Id);
+            string fileUrl = AppStaticData.GetFileDownloadPath(correctedFilePath, minecraftInstance.Id);
 
             return new GameFile(correctedFilePath)
             {

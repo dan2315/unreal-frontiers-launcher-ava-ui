@@ -22,7 +22,7 @@
 
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
       <DefineConstants>LINUX</DefineConstants>
-      <SelfContained>true</SelfContained>
+<!--      <SelfContained>true</SelfContained> ???-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,8 +56,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="flatpak-builder/dod.unrealfrontiers.launcher.desktop" CopyToPublishDirectory="PreserveNewest">
-      <LinuxPath>/usr/share/applications/unreal-frontiers-launcher.desktop</LinuxPath>
-    </Content>
+    <Compile Remove="NavigationFrame\NavigationService.cs" />
   </ItemGroup>
 </Project>

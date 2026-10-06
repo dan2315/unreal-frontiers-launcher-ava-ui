@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Avalonia.Threading;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Installer.Forge;
@@ -28,7 +26,7 @@ namespace UnrealFrontiersLauncher
             try
             {
                 Console.WriteLine("Launching " + minecraftInstance.Name);
-                var installFolder = Path.Combine(AppSettings.LauncherBasePath, "Install");
+                var installFolder = Path.Combine(AppStaticData.LauncherBasePath, "Install");
                 MinecraftPath minecraftPath = new MinecraftPath()
                 {
                     BasePath = EnsurePathExists(minecraftInstance.GetResourcePath()),
