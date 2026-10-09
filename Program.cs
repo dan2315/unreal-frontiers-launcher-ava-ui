@@ -27,7 +27,6 @@ namespace UnrealFrontiersLauncher
                              .UsePlatformDetect()
                              .LogToTrace()
                              .UseReactiveUI()
-                             .With(new Win32PlatformOptions())
                              .AfterSetup(_ =>
                              {
                                  var app = App.Current;
@@ -54,7 +53,6 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<AuthPage>();
             services.AddSingleton<MainPage>();
             services.AddSingleton<NavigationService>();  
-            services.AddSingleton<HttpClientService>();
             services.AddTransient<DeepLinkHandler>();
 
 

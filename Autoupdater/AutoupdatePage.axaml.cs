@@ -21,7 +21,7 @@ public partial class AutoupdatePage : UserControl
 
     public void TryAutoupdateOrOtherwise(Action? updateIsNotRequiredFallback = null)
     {
-        Autoupdater.AutopdateOrOtherwise(updateIsNotRequiredFallback);
+        _ = Autoupdater.CheckForUpdatesAsync(updateIsNotRequiredFallback ?? (() => { }));
     }
     
     public async void AnimateOpacity(StyledElement target)

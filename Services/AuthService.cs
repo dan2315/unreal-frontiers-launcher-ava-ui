@@ -3,6 +3,7 @@ using System.Text;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using UnrealFrontiersLauncher.ApiResponses.Auth;
@@ -40,7 +41,7 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        public async Task<(bool Success, string Message, string AccessToken, string RefreshToken, string Nickname)> Login(string nicknameOrEmail, string password)
+        public async Task<(bool Success, string Message, string? AccessToken, string? RefreshToken, string? Nickname)> Login(string nicknameOrEmail, string password)
         {
             var payload = new { nicknameOrEmail, password };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -52,11 +53,11 @@ namespace UnrealFrontiersLauncher
             {
                 var data = JsonSerializer.Deserialize<JsonElement>(responseMessage);
 
-                string nickname = data.GetProperty("nickname").GetString();
-                string accessToken = data.GetProperty("accessToken").GetString();
-                string refreshToken = data.GetProperty("refreshToken").GetString();
+                string nickname = data.GetProperty("nickname").GetString()!;
+                string accessToken = data.GetProperty("accessToken").GetString()!;
+                string refreshToken = data.GetProperty("refreshToken").GetString()!;
 
-                _tokenStorage.SaveTokens(accessToken, refreshToken);
+                ApplyTokens(accessToken, refreshToken);
                 return (true, "Login successful.", accessToken, refreshToken, nickname);
             }
             else
@@ -102,38 +103,51 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        public async Task<(bool, string?)> TryAuthWithTokens() 
+        public async Task<(bool, string?)> TryAuthWithTokens()
         {
             (string accessToken, string refreshToken) = _tokenStorage.LoadTokens();
-            var accessResponse = await _httpClient.GetAsync("/auth/request_access");
+            if (accessToken.Length == 0 && refreshToken.Length == 0) return (false, null);
 
-            if (accessResponse.IsSuccessStatusCode)
+            try
             {
-                var responseMessage = await accessResponse.Content.ReadAsStringAsync();
-                var data = JsonSerializer.Deserialize<JsonElement>(responseMessage);
-                var access = data.GetProperty("access").GetBoolean();
-                var nickname = data.GetProperty("nickname").GetString();
+                var accessResponse = await _httpClient.GetAsync("/auth/request_access");
 
-                return (access, nickname);
-            } 
+                if (accessResponse.IsSuccessStatusCode)
+                {
+                    var data = JsonSerializer.Deserialize<JsonElement>(await accessResponse.Content.ReadAsStringAsync());
+                    return (data.GetProperty("access").GetBoolean(), data.GetProperty("nickname").GetString());
+                }
 
-            var payload = new { refreshToken };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var refreshResponse = await _httpClient.PostAsync("/auth/refresh_tokens", content);
-            
-            if (refreshResponse.IsSuccessStatusCode) 
+                var payload = new { refreshToken };
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var refreshResponse = await _httpClient.PostAsync("/auth/refresh_tokens", content);
+
+                if (refreshResponse.IsSuccessStatusCode)
+                {
+                    var data = JsonSerializer.Deserialize<JsonElement>(await refreshResponse.Content.ReadAsStringAsync());
+                    var newAccessToken = data.GetProperty("accessToken").GetString()!;
+                    var newRefreshToken = data.TryGetProperty("refreshToken", out var refreshElement)
+                        ? refreshElement.GetString() ?? refreshToken
+                        : refreshToken;
+                    ApplyTokens(newAccessToken, newRefreshToken);
+
+                    return (true, data.GetProperty("nickname").GetString());
+                }
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
             {
-                var data = JsonSerializer.Deserialize<JsonElement>(await refreshResponse.Content.ReadAsStringAsync());
-                var newAccessToken = data.GetProperty("accessToken").GetString();
-                var nickname = data.GetProperty("nickname").GetString();
-                _tokenStorage.SaveTokens(newAccessToken, refreshToken);
-            
-                return(true, nickname);
+                Console.WriteLine($"Token authentication failed: {ex.Message}");
             }
 
             return (false, null);
         }
-        public async Task<(bool Success, string Message)> DiscordAuth(string? nickname)
+
+        private void ApplyTokens(string accessToken, string refreshToken)
+        {
+            _tokenStorage.SaveTokens(accessToken, refreshToken);
+            _httpClient.SetAuthHeader(accessToken);
+        }
+        public Task<(bool Success, string Message)> DiscordAuth(string? nickname)
         {
             var url = "/auth/auth_discord";
             if (!string.IsNullOrEmpty(nickname))
@@ -148,7 +162,7 @@ namespace UnrealFrontiersLauncher
             });
 
             // Indicate that the method triggered the process successfully
-            return (true, "Discord authentication initiated. Follow the browser instructions.");
+            return Task.FromResult((true, "Discord authentication initiated. Follow the browser instructions."));
         }
 
         public async Task<(bool success, string? accessToken, string? refreshToken, string? nickname)> CompleteDiscordAuthSession(string state, string nickname) 
@@ -162,10 +176,10 @@ namespace UnrealFrontiersLauncher
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var responseObject = JsonSerializer.Deserialize<JsonElement>(responseContent);
                 var recievedNickname = responseObject.GetProperty("nickname").GetString();
-                var accessToken = responseObject.GetProperty("accessToken").GetString();
-                var refreshToken = responseObject.GetProperty("refreshToken").GetString();
+                var accessToken = responseObject.GetProperty("accessToken").GetString()!;
+                var refreshToken = responseObject.GetProperty("refreshToken").GetString()!;
 
-                _tokenStorage.SaveTokens(accessToken, refreshToken);
+                ApplyTokens(accessToken, refreshToken);
                 return (true, accessToken, refreshToken, recievedNickname);
             }
             else
@@ -188,7 +202,7 @@ namespace UnrealFrontiersLauncher
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var responseObject = JsonSerializer.Deserialize<JsonElement>(responseContent);
-                var message = responseObject.GetProperty("message").GetString();
+                var message = responseObject.GetProperty("message").GetString()!;
                 
                 return message;
             }
@@ -207,18 +221,18 @@ namespace UnrealFrontiersLauncher
             navigationService.NavigateTo<MainPage>();
         }
 
-        public async Task GrantAccess(PlayerProfileProvider profileProvider, AuthPage.AccessData parameters)
+        public void GrantAccess(PlayerProfileProvider profileProvider, AuthPage.AccessData parameters)
         {
             if (parameters.accessToken != null && parameters.refreshToken != null)
             {
-                _tokenStorage.SaveTokens(parameters.accessToken, parameters.refreshToken);
+                ApplyTokens(parameters.accessToken, parameters.refreshToken);
             }
-            
-            var response = _httpClient.GetAsync("auth/user");
-            _httpClient.SetAuthHeader(parameters.accessToken);
+            else if (parameters.accessToken != null)
+            {
+                _httpClient.SetAuthHeader(parameters.accessToken);
+            }
 
-            var profile = new PlayerProfile(parameters.nickname);
-            profileProvider.SetProfile(profile);
+            profileProvider.SetProfile(new PlayerProfile(parameters.nickname ?? PlayerProfile.Default.Nickname));
         }
         
         public AuthPage.AccessData ReadAuthParams(NameValueCollection queryParams)

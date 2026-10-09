@@ -6,6 +6,7 @@ namespace UnrealFrontiersLauncher.Preferences;
 
 public class Preferences(string lastSelectedModpack)
 {
+    private const string DefaultModpack = "create";
     private static String _path = Path.Combine(AppStaticData.LauncherBasePath, "preferences.json");
 
     public string LastSelectedModpack { get; set; } = lastSelectedModpack;
@@ -44,18 +45,18 @@ public class Preferences(string lastSelectedModpack)
         
     }
 
-    public static Preferences? Load()
+    public static Preferences Load()
     {
+        if (!File.Exists(_path)) return new Preferences(DefaultModpack);
+
         try
         {
-            var json = File.ReadAllText(_path);
-            var preferences = (Preferences) JsonSerializer.Deserialize(json, typeof(Preferences))!;
-            return preferences;
+            return JsonSerializer.Deserialize<Preferences>(File.ReadAllText(_path)) ?? new Preferences(DefaultModpack);
         }
         catch (Exception e)
         {
             Console.WriteLine("Failed loading preferences: " + e);
-            return new Preferences("create");
+            return new Preferences(DefaultModpack);
         }
     }
 }

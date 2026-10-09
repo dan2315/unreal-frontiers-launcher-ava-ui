@@ -2,224 +2,163 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnrealFrontiersLauncher;
 
-public class Autoupdater
+public static class Autoupdater
 {
-    private static string VersionFileUrl = AppStaticData.GetFileDownloadPath("version", "launcher");
+    private static readonly string VersionFileUrl = AppStaticData.GetFileDownloadPath("version", "launcher");
 #if WINDOWS
-    private static string InstallerDownloadUrl = AppStaticData.GetFileDownloadPath("UFLauncher_installer.exe", "launcher");
     private const string InstallerFileName = "UFLauncher_installer.exe";
 #elif LINUX
-    private static string InstallerDownloadUrl = AppStaticData.GetFileDownloadPath("install.sh", "launcher");
     private const string InstallerFileName = "install.sh";
 #endif
-    private const string CurrentVersion = "0.3.4";
+    private static readonly string InstallerDownloadUrl = AppStaticData.GetFileDownloadPath(InstallerFileName, "launcher");
 
-    public static Action<float> OnProgress;
-    public static Action<string> OnSetStatus;
+    public static Action<float>? OnProgress;
+    public static Action<string>? OnSetStatus;
 
-    public static async Task AutopdateOrOtherwise(Action? updateIsNotRequiredFallback = null)
+    public static Version CurrentVersion
+    {
+        get
+        {
+            var version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0, 0);
+            return new Version(version.Major, version.Minor, Math.Max(version.Build, 0));
+        }
+    }
+
+    public static async Task CheckForUpdatesAsync(Action onContinue)
     {
         try
         {
-            Console.WriteLine("Checking for updates...");
-            OnSetStatus?.Invoke("Checking for updates...");
+            SetStatus("Checking for updates...");
 
-            string latestVersion = await FetchLatestVersion();
+            var latestVersion = await FetchLatestVersion();
 
             if (IsNewVersionAvailable(CurrentVersion, latestVersion))
             {
-                Console.WriteLine($"New launcher version available: {latestVersion}. Download in progress...");
-                OnSetStatus?.Invoke($"New launcher version available: {latestVersion}. Download in progress...");
+                SetStatus($"New launcher version available: {latestVersion}. Download in progress...");
                 await DownloadInstaller();
 #if WINDOWS
-                RunWindowsInstaller();
+                await RunWindowsInstaller();
 #elif LINUX
-                InstallAndRunInstallation();
+                await InstallAndRunInstallation();
 #endif
+                return;
             }
-            else
-            {
-                Console.WriteLine("Your application is up to date.");
-                OnSetStatus?.Invoke($"Your application is up to date.");
-                updateIsNotRequiredFallback?.Invoke();
-            }
+
+            SetStatus("Your application is up to date.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Auto-update failed: {ex.Message}");
-            OnSetStatus?.Invoke($"Auto-update failed: {ex.Message}");
+            SetStatus($"Update check failed: {ex.Message}");
+            await Task.Delay(1500);
         }
+
+        onContinue();
+    }
+
+    public static bool IsNewVersionAvailable(Version current, string latest)
+    {
+        return TryParseVersion(latest, out var latestVersion) && latestVersion > current;
+    }
+
+    public static bool TryParseVersion(string text, out Version version)
+    {
+        var trimmed = text.Trim().TrimStart('v', 'V');
+        var suffixStart = trimmed.IndexOfAny(new[] { '-', '+' });
+        if (suffixStart >= 0) trimmed = trimmed[..suffixStart];
+        return Version.TryParse(trimmed, out version!);
+    }
+
+    private static void SetStatus(string status)
+    {
+        Console.WriteLine(status);
+        OnSetStatus?.Invoke(status);
     }
 
     private static async Task<string> FetchLatestVersion()
     {
-        using var httpClient = new HttpClient();
-        string version = await httpClient.GetStringAsync(VersionFileUrl);
+        var version = await SharedHttp.Api.GetStringAsync(VersionFileUrl);
         return version.Trim();
     }
 
-    private static bool IsNewVersionAvailable(string currentVersion, string latestVersion)
+    private static void EnsureSecureSource(string url)
     {
-        var current = new Version(currentVersion);
-        var latest = new Version(latestVersion);
-        return latest > current;
+        var uri = new Uri(url);
+        if (uri.Scheme != Uri.UriSchemeHttps && !uri.IsLoopback)
+        {
+            throw new InvalidOperationException("Refusing to download an installer over an insecure connection.");
+        }
     }
+
+    private static string InstallerPath => Path.Combine(Path.GetTempPath(), InstallerFileName);
 
     private static async Task DownloadInstaller()
     {
-        string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
+        EnsureSecureSource(InstallerDownloadUrl);
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync(InstallerDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await SharedHttp.Api.GetAsync(InstallerDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
 
         var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-        var totalBytesReadable = totalBytes > 0;
 
-        using var contentStream = await response.Content.ReadAsStreamAsync();
-        using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        await using var fileStream = new FileStream(InstallerPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
 
-        byte[] buffer = new byte[8192]; // Chunk size
+        var buffer = new byte[8192];
         long totalRead = 0;
         int read;
 
-        while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        while ((read = await contentStream.ReadAsync(buffer)) > 0)
         {
-            await fileStream.WriteAsync(buffer, 0, read);
+            await fileStream.WriteAsync(buffer.AsMemory(0, read));
             totalRead += read;
 
-            if (totalBytesReadable)
+            if (totalBytes > 0)
             {
-                float progressValue = (float)totalRead / totalBytes * 100;
-                OnProgress.Invoke(progressValue);
+                OnProgress?.Invoke((float)totalRead / totalBytes * 100);
             }
         }
-
-        Console.WriteLine($"Installer downloaded to: {tempFilePath}");
     }
 
 #if WINDOWS
-    private static void RunWindowsInstaller()
+    private static async Task RunWindowsInstaller()
     {
-        string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
-
-        Console.WriteLine("Running installer...");
-        OnSetStatus?.Invoke($"Running installer...");
-        var installerProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = tempFilePath,
-                Arguments = "/CLOSEAPPLICATIONS",
-                UseShellExecute = true
-            }
-        };
-
-        installerProcess.Start();
-        
-        Task.Delay(1000).Wait();
-        
-        Environment.Exit(0);
-    }
-#elif LINUX
-    private static void InstallAndRunInstallation()
-    {
-        string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
-
-        Console.WriteLine("Running installation script...");
-        OnSetStatus?.Invoke("Running installation script...");
-
-        // Make the script executable
-        var chmodProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "chmod",
-                Arguments = $"+x {tempFilePath}",
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        chmodProcess.Start();
-        chmodProcess.WaitForExit();
-
-        // Run the installation script
-        var installProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = tempFilePath,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        installProcess.Start();
-        installProcess.WaitForExit();
-
-        if (installProcess.ExitCode == 0)
-        {
-            Console.WriteLine("Installation completed successfully.");
-            OnSetStatus?.Invoke("Installation completed successfully.");
-
-            Console.WriteLine("Running application...");
-            OnSetStatus?.Invoke("Running application...");
-            RunUpdatedApplication();
-        }
-        else
-        {
-            Console.WriteLine("Installation failed.");
-            OnSetStatus?.Invoke("Installation failed.");
-        }
-    }
-
-    private static void RunUpdatedApplication()
-    {
-        // Run the newly installed application
-        var runProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "UnrealFrontiersLauncher",
-                UseShellExecute = false,
-                CreateNoWindow = false
-            }
-        };
-
-        try
-        {
-            runProcess.Start();
-            Console.WriteLine("Application started.");
-            OnSetStatus?.Invoke("Application started.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to start application: {ex.Message}");
-            OnSetStatus?.Invoke($"Failed to start application: {ex.Message}");
-        }
-    }
-#endif
-
-    private static async void RestartApplication()
-    {
-#if WINDOWS
-        string exePath = Process.GetCurrentProcess().MainModule.FileName;
+        SetStatus("Running installer...");
         Process.Start(new ProcessStartInfo
         {
-            FileName = exePath,
+            FileName = InstallerPath,
+            Arguments = "/CLOSEAPPLICATIONS",
             UseShellExecute = true
         });
-#elif LINUX
-        RunUpdatedApplication();
-#endif
 
+        await Task.Delay(1000);
         Environment.Exit(0);
     }
-}
+#elif LINUX
+    private static async Task InstallAndRunInstallation()
+    {
+        SetStatus("Running installation script...");
+        File.SetUnixFileMode(InstallerPath, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
 
+        using var installProcess = Process.Start(new ProcessStartInfo
+        {
+            FileName = InstallerPath,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        })!;
+        await installProcess.WaitForExitAsync();
+
+        if (installProcess.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"Installation script exited with code {installProcess.ExitCode}.");
+        }
+
+        SetStatus("Running application...");
+        Process.Start(new ProcessStartInfo { FileName = "UnrealFrontiersLauncher", UseShellExecute = false });
+        Environment.Exit(0);
+    }
+#endif
+}

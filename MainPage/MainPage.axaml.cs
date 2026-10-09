@@ -1,12 +1,10 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using CmlLib.Core;
 using UnrealFrontiersLauncher.Platforms;
 using UnrealFrontiersLauncher.ViewModels;
 
@@ -14,199 +12,234 @@ namespace UnrealFrontiersLauncher;
 
 public partial class MainPage : UserControl
 {
-	private PopupService _popUpService;
-	private InstanceManager _instanceManager;
-	private GameLauncher _gameLauncher;
-	private PlayerProfileProvider _playerProfileProvider;
-	private MainPageViewModel _viewModel;
-	private MainWindow _mainWindow;
-	private ServerService _serverService;
+    private readonly PopupService _popUpService;
+    private readonly InstanceManager _instanceManager;
+    private readonly GameLauncher _gameLauncher;
+    private readonly PlayerProfileProvider _playerProfileProvider;
+    private readonly MainPageViewModel _viewModel;
+    private readonly MainWindow _mainWindow;
+    private readonly ServerService _serverService;
+    private bool _settingsPanelInitialized;
 #if WINDOWS
-	private ISystemInfo _systemInfo = new Windows.SystemInfo();
+    private readonly ISystemInfo _systemInfo = new Windows.SystemInfo();
 #elif LINUX
-	private ISystemInfo _systemInfo = new Linux.SystemInfo();
+    private readonly ISystemInfo _systemInfo = new Linux.SystemInfo();
 #endif
-	public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
+    public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
-	public MainPage() {}
-	public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow)
-	{
-		_playerProfileProvider = playerProfileProvider;
-		_popUpService = popUpService;
-		_gameLauncher = gameLauncher;
-		_instanceManager = instanceManager;
-		_serverService = serverService;
-		_mainWindow = mainWindow;
-		_viewModel = new MainPageViewModel(this, _serverService);
-		DataContext = _viewModel;
-		
-		InitializeComponent();
-		
-		_playerProfileProvider.OnProfileUpdate(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
+    private MinecraftInstance? SelectedInstance => _instanceManager.selectedInstance;
 
-		Loaded += (sender, eventArgs) => {
-			InitSettingsPanel();
-			UpdateSettingsPanel();
-		};
-	}
+    public MainPage() {}
+    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow)
+    {
+        _playerProfileProvider = playerProfileProvider;
+        _popUpService = popUpService;
+        _gameLauncher = gameLauncher;
+        _instanceManager = instanceManager;
+        _serverService = serverService;
+        _mainWindow = mainWindow;
+        _viewModel = new MainPageViewModel(this, _serverService);
+        DataContext = _viewModel;
 
-	public void InitSettingsPanel() 
-	{
-		RamSlider.ValueChanged += UpdateRamThroughSlider;
-		RamEntry.TextChanged += UpdateRamThroughEntry;
-		CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
-		OpenConsoleBox.IsCheckedChanged += UpdateOpenConsole;
-	}
-	public void UpdateSettingsPanel() 
-	{
-		if (_instanceManager.selectedInstance == null) return;
-		var configuration = _instanceManager.selectedInstance.GetLaunchConfiguration();
-		RamSlider.Maximum = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
-		RamSlider.Value = configuration.Ram;
-		RamEntry.Text = configuration.Ram.ToString();
-		CloseLauncherBox.IsChecked = configuration.NeedToClose;
-		OpenConsoleBox.IsChecked = configuration.NeedToOpenConsole;
-	}
+        InitializeComponent();
 
-	private void UpdateRamThroughSlider(object? sender, RangeBaseValueChangedEventArgs  args) 
-	{
-		RamEntry.Text = ((int)args.NewValue).ToString();
-		_instanceManager.selectedInstance.ApplyNewRamValue((int)args.NewValue);
-	}
+        _playerProfileProvider.OnProfileUpdate(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
 
-	private void UpdateRamThroughEntry(object? sender, TextChangedEventArgs  args) 
-	{
-		var entry = sender as TextBox;
-		if (entry == null) return;
+        Loaded += (_, _) =>
+        {
+            InitSettingsPanel();
+            UpdateSettingsPanel();
+        };
+    }
 
-		string newText = string.Concat(entry.Text.Where(char.IsDigit));
-		newText = newText == "" ? "0" : newText;
+    public void InitSettingsPanel()
+    {
+        if (_settingsPanelInitialized) return;
+        _settingsPanelInitialized = true;
 
-		if (entry.Text != newText)
-		{
-			entry.Text = newText;
-		}
+        RamSlider.ValueChanged += UpdateRamThroughSlider;
+        RamEntry.TextChanged += UpdateRamThroughEntry;
+        RamEntry.LostFocus += (_, _) => NormalizeRamEntry();
+        CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
+        OpenConsoleBox.IsCheckedChanged += UpdateOpenConsole;
+    }
 
-		int value =int.Parse(newText);
-		if (value > RamSlider.Maximum) 
-		{
-			value = (int)RamSlider.Maximum;
-			entry.Text = value.ToString();
-		}
-		RamSlider.Value = value;
-		_instanceManager.selectedInstance.ApplyNewRamValue(value);
-	}
+    public void UpdateSettingsPanel()
+    {
+        if (SelectedInstance == null) return;
+        var configuration = SelectedInstance.GetLaunchConfiguration();
+        var systemRamMb = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
 
-	private void UpdateCloseLauncher(object? sender, RoutedEventArgs  args)
-	{
-		if (sender is CheckBox checkBox)
-		{
-			_instanceManager.selectedInstance.ApplyNewShouldCloseValue(checkBox.IsChecked.Value);
-		}
-	}
-	
-	private void UpdateOpenConsole(object? sender, RoutedEventArgs  args)
-	{
-		if (sender is CheckBox checkBox)
-		{
-			_instanceManager.selectedInstance.ApplyNewShouldOpenConsoleValue(checkBox.IsChecked.Value);
-		}
-	}
+        RamSlider.Minimum = MinecraftInstance.MinRamMb;
+        RamSlider.Maximum = Math.Max(systemRamMb, MinecraftInstance.MinRamMb);
+        RamSlider.Value = configuration.Ram;
+        RamEntry.Text = configuration.Ram.ToString();
+        CloseLauncherBox.IsChecked = configuration.NeedToClose;
+        OpenConsoleBox.IsChecked = configuration.NeedToOpenConsole;
+    }
 
-    private async void OnLaunchButtonClicked(object sender, RoutedEventArgs  e)
-	{
-		Console.WriteLine("LaunchGame");
-		bool answer = await _popUpService.ShowYesNoDialogAsync("Launching...", "Вы намерены запустить майнкрафт?");
-		if (!answer)
-		{
-			LaunchButton.IsEnabled = true;
-			return;
-		} 
-		_gameLauncher.LaunchMinecraft(_instanceManager.selectedInstance, PlayerProfile, OnDownloadProgress, OnDownloadFileChanged, OnDownloadSpeedChanged, () => LaunchButton.IsEnabled = true, _mainWindow);
-	}
+    private void UpdateRamThroughSlider(object? sender, RangeBaseValueChangedEventArgs args)
+    {
+        RamEntry.Text = ((int)args.NewValue).ToString();
+        SelectedInstance?.ApplyNewRamValue((int)args.NewValue);
+    }
+
+    private void UpdateRamThroughEntry(object? sender, TextChangedEventArgs args)
+    {
+        if (sender is not TextBox entry) return;
+
+        var digits = string.Concat((entry.Text ?? "").Where(char.IsDigit));
+        if (entry.Text != digits)
+        {
+            entry.Text = digits;
+            return;
+        }
+
+        if (!int.TryParse(digits, out var value) || value > RamSlider.Maximum)
+        {
+            value = (int)RamSlider.Maximum;
+            entry.Text = value.ToString();
+            return;
+        }
+
+        if (value < MinecraftInstance.MinRamMb) return;
+
+        RamSlider.Value = value;
+        SelectedInstance?.ApplyNewRamValue(value);
+    }
+
+    private void NormalizeRamEntry()
+    {
+        if (int.TryParse(RamEntry.Text, out var value) && value >= MinecraftInstance.MinRamMb) return;
+        RamEntry.Text = MinecraftInstance.MinRamMb.ToString();
+    }
+
+    private void UpdateCloseLauncher(object? sender, RoutedEventArgs args)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            SelectedInstance?.ApplyNewShouldCloseValue(checkBox.IsChecked == true);
+        }
+    }
+
+    private void UpdateOpenConsole(object? sender, RoutedEventArgs args)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            SelectedInstance?.ApplyNewShouldOpenConsoleValue(checkBox.IsChecked == true);
+        }
+    }
+
+    private async void OnLaunchButtonClicked(object sender, RoutedEventArgs e)
+    {
+        var instance = SelectedInstance;
+        if (instance == null) return;
+
+        bool answer = await _popUpService.ShowYesNoDialogAsync("Launching...", "Вы намерены запустить майнкрафт?");
+        if (!answer) return;
+
+        SetLaunchEnabled(false);
+        await _gameLauncher.LaunchMinecraft(
+            instance,
+            PlayerProfile,
+            OnDownloadProgress,
+            OnDownloadFileChanged,
+            OnDownloadSpeedChanged,
+            () => SetLaunchEnabled(true),
+            OnLaunchFailed,
+            _mainWindow);
+    }
+
+    private void SetLaunchEnabled(bool enabled)
+    {
+        // Selection events can fire while the XAML is still being loaded.
+        if (LaunchButton != null) LaunchButton.IsEnabled = enabled;
+    }
+
+    private async void OnLaunchFailed(string message)
+    {
+        SetLaunchEnabled(true);
+        await _popUpService.ShowOkDialogAsync("Launch failed", message);
+    }
 
     private void OnDownloadSpeedChanged(string speedText)
     {
         DownloadSpeed.Text = speedText;
     }
-	
-private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
-{
-    if (e.AddedItems.Count > 0 && e.AddedItems[0] is Modpack currentModpack)
+
+    private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
     {
+        if (e.AddedItems.Count == 0 || e.AddedItems[0] is not Modpack currentModpack)
+        {
+            ModpackCollectionView.SelectedItem = _viewModel.Modpacks.FirstOrDefault();
+            return;
+        }
+
         if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is Modpack previousModpack)
         {
-	        if (!currentModpack.IsEnabled)
-	        {
-		        ModpackCollectionView.SelectedItem = previousModpack;
-		        return;
-	        }
+            if (!currentModpack.IsEnabled)
+            {
+                ModpackCollectionView.SelectedItem = previousModpack;
+                return;
+            }
             previousModpack.IsSelected = false;
         }
 
         currentModpack.IsSelected = true;
-        var prefs = Preferences.Preferences.Get();
-        prefs.SetSelectedModpack(currentModpack.Value);
-        prefs.Save();
-        string selectedValue = currentModpack.Value;
+        var preferences = Preferences.Preferences.Get();
+        preferences.SetSelectedModpack(currentModpack.Value);
+        preferences.Save();
         Console.WriteLine($"Selected Server: {currentModpack.Name}");
 
-        await _instanceManager.SelectInstance(selectedValue);
+        SetLaunchEnabled(false);
+        var loaded = await _instanceManager.SelectInstance(currentModpack.Value);
+        if (_viewModel.SelectedModpack != currentModpack) return;
+
+        SetLaunchEnabled(loaded);
         UpdateSettingsPanel();
-    }
-    else
-    {
-        ModpackCollectionView.SelectedItem = _viewModel.Modpacks.FirstOrDefault();
-    }
-}
 
-	private void OnDownloadProgress(float progress)
-	{
-		LaunchProgressBar.Value = progress * 100; 
-		DownloadProgress.Text = $"{progress * 100:F2} %";
-		if (Math.Abs(progress - 1f) < 0.001f)
-		{
-			DownloadProgress.Text = $"Downloaded!";
-		}
-	}
-
-	private void OnDownloadFileChanged(string file) 
-	{
-		TaskName.Text = file;
-	}
-
-	private void OnShowFolderClicked(object sender, RoutedEventArgs e) 
-	{
-		var installFolder = Path.Combine(AppStaticData.LauncherBasePath, "Install");
-		MinecraftPath minecraftPath = new MinecraftPath()
-		{
-			BasePath = GameLauncher.EnsurePathExists(_instanceManager.selectedInstance.GetResourcePath()),
-			Resource = GameLauncher.EnsurePathExists(_instanceManager.selectedInstance.GetResourcePath()),
-			Versions = GameLauncher.EnsurePathExists(Path.Combine(installFolder, "versions")),
-			Library = GameLauncher.EnsurePathExists(Path.Combine(installFolder, "libraries")),
-			Runtime = GameLauncher.EnsurePathExists(Path.Combine(installFolder, "runtime")),
-			Assets = GameLauncher.EnsurePathExists(Path.Combine(installFolder, "assets"))
-		};
-
-		Process.Start(new ProcessStartInfo
+        if (!loaded && TaskName != null)
         {
-            FileName = _instanceManager.selectedInstance.GetResourcePath(),
+            TaskName.Text = $"Could not load version info for {currentModpack.Name}";
+        }
+    }
+
+    private void OnDownloadProgress(float progress)
+    {
+        LaunchProgressBar.Value = progress * 100;
+        DownloadProgress.Text = Math.Abs(progress - 1f) < 0.001f ? "Downloaded!" : $"{progress * 100:F2} %";
+    }
+
+    private void OnDownloadFileChanged(string file)
+    {
+        TaskName.Text = file;
+    }
+
+    private void OnShowFolderClicked(object sender, RoutedEventArgs e)
+    {
+        if (SelectedInstance == null) return;
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = GameLauncher.EnsurePathExists(SelectedInstance.GetResourcePath()),
             UseShellExecute = true,
             Verb = "open"
         });
-	}
+    }
 
-	private void Modpack_OnPointerEntered(object? sender, PointerEventArgs e)
-	{
-		if (sender is not Border border) return;
-		if (border.DataContext is not Modpack modpack) return;
-		modpack.IsHovered = true;
-	}
+    private void Modpack_OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (sender is Border { DataContext: Modpack modpack })
+        {
+            modpack.IsHovered = true;
+        }
+    }
 
-	private void Modpack_OnPointerExited(object? sender, PointerEventArgs e)
-	{
-		if (sender is not Border border) return;
-		if (border.DataContext is not Modpack modpack) return;
-		modpack.IsHovered = false;
-	}
+    private void Modpack_OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        if (sender is Border { DataContext: Modpack modpack })
+        {
+            modpack.IsHovered = false;
+        }
+    }
 }

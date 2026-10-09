@@ -11,6 +11,7 @@ public class DeepLinkHandler
 {
     private static Mutex? _mutex;
     const string appMutexName = "Global\\UnrealFrontiersLauncher";
+    const string FocusMessage = "uflauncher://focus";
 
     AuthService _authService;
     PlayerProfileProvider _profileProvider;
@@ -27,10 +28,11 @@ public class DeepLinkHandler
 
     public async Task InitializeAsync(string[] args)
     {
-        _mutex = new Mutex(true, appMutexName);
-        if (!_mutex.WaitOne(TimeSpan.Zero, true))
+        _mutex = new Mutex(true, appMutexName, out var isFirstInstance);
+        if (!isFirstInstance)
         {
-            await SendMessageToMainInstance(args.First(arg => arg.StartsWith("uflauncher://")));
+            var deepLink = args.FirstOrDefault(arg => arg.StartsWith("uflauncher://")) ?? FocusMessage;
+            await SendMessageToMainInstance(deepLink);
             Environment.Exit(0);
             return;
         }
@@ -94,7 +96,7 @@ public class DeepLinkHandler
 
     private async Task HandleDeepLinkAsync(string message)
     {
-        if (Uri.TryCreate(message, UriKind.Absolute, out Uri uri))
+        if (Uri.TryCreate(message, UriKind.Absolute, out Uri? uri))
         {
            await OnDeepLinkRecieved(uri); 
         }

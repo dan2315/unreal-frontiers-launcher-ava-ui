@@ -13,7 +13,7 @@ public class HttpClientService
     
     public HttpClientService()
     {
-        _httpClient = new HttpClient();
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
         _httpClient.BaseAddress = new Uri(AppStaticData.ServerURL);
     }
 

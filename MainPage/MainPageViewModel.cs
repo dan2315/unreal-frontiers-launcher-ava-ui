@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using System.Threading;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
@@ -14,6 +15,7 @@ public class MainPageViewModel : INotifyPropertyChanged
 {
     private MainPage _pageReference;
     private readonly ServerService _serverService;
+    private static readonly TimeSpan PlayerCountPollInterval = TimeSpan.FromSeconds(30);
     public ObservableCollection<Modpack> Modpacks { get; set; }
     private Modpack _selectedModpack;
     public Modpack SelectedModpack
@@ -109,22 +111,20 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
 
         SelectedTab = "game";
-        var preferences = Preferences.Preferences.Load();
+        var preferences = Preferences.Preferences.Get();
         SelectedModpack = Modpacks.FirstOrDefault(modpack => modpack.Value == preferences.LastSelectedModpack, Modpacks[0]);
         SelectedModpack.IsSelected = true;
-        StartPlayerCountUpdates();
+        _ = PollPlayerCountsAsync();
     }
 
-    private async void StartPlayerCountUpdates()
+    private async Task PollPlayerCountsAsync()
     {
-        while (true)
+        using var timer = new PeriodicTimer(PlayerCountPollInterval);
+        do
         {
-            foreach (var modpack in Modpacks)
-            {
-                _ = modpack.UpdatePlayerCount(_serverService);
-            }
-            await Task.Delay(TimeSpan.FromSeconds(30));
+            await Task.WhenAll(Modpacks.Select(modpack => modpack.UpdatePlayerCount(_serverService)));
         }
+        while (await timer.WaitForNextTickAsync());
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

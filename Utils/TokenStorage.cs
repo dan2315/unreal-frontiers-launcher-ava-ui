@@ -1,63 +1,49 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace UnrealFrontiersLauncher
 {
-    public class TokenStorage 
+    public class TokenStorage
     {
-#if  WINDOWS
-        private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UnrealFrontiers");
-#elif LINUX
-        private static readonly string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
-#endif
+        private static readonly string AppDataPath = OperatingSystem.IsWindows()
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UnrealFrontiers")
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
+
         private static readonly string TokenFilePath = Path.Combine(AppDataPath, "tokens.dat");
         private static readonly string KeyFilePath = Path.Combine(AppDataPath, "encryption_key.dat");
-        private static readonly int KeySize = 16;
+        private const int KeySize = 32;
+        private const UnixFileMode OwnerReadWrite = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 
         public TokenStorage()
         {
-            if (!Directory.Exists(AppDataPath))
-            {
-                Directory.CreateDirectory(AppDataPath);
-            }
-        }
-
-        private byte[] LoadOrGenerateEncryptionKey()
-        {
-            if (File.Exists(KeyFilePath))
-            {
-                return File.ReadAllBytes(KeyFilePath);
-            }
-            else
-            {
-                byte[] key = new byte[KeySize];
-                RandomNumberGenerator.Fill(key);
-
-                File.WriteAllBytes(KeyFilePath, key);
-                File.SetAttributes(KeyFilePath, FileAttributes.Hidden);
-
-                return key;
-            }
+            Directory.CreateDirectory(AppDataPath);
         }
 
         public void SaveTokens(string accessToken, string refreshToken)
         {
-            var tokens = $"{accessToken}|{refreshToken}";
-            var encryptedTokens = Encrypt(tokens);
-
-            File.WriteAllBytes(TokenFilePath, encryptedTokens);
+            var data = Encoding.UTF8.GetBytes($"{accessToken}|{refreshToken}");
+            File.WriteAllBytes(TokenFilePath, Protect(data));
+            RestrictToOwner(TokenFilePath);
         }
 
         public (string accessToken, string refreshToken) LoadTokens()
         {
             if (!File.Exists(TokenFilePath)) return ("", "");
 
-            var encryptedTokens = File.ReadAllBytes(TokenFilePath);
-            var decryptedTokens = Decrypt(encryptedTokens);
-            var tokens = decryptedTokens.Split('|');
-
-            return (tokens[0], tokens[1]);
+            try
+            {
+                var data = Unprotect(File.ReadAllBytes(TokenFilePath));
+                var tokens = Encoding.UTF8.GetString(data).Split('|', 2);
+                return tokens.Length == 2 ? (tokens[0], tokens[1]) : ("", "");
+            }
+            catch (Exception ex) when (ex is CryptographicException or IOException or ArgumentException)
+            {
+                Console.WriteLine($"Stored tokens are unreadable and will be discarded: {ex.Message}");
+                if (ex is not IOException) DeleteTokens();
+                return ("", "");
+            }
         }
 
         public void DeleteTokens()
@@ -68,43 +54,51 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        private byte[] Encrypt(string plainText)
+        private static byte[] Protect(byte[] data)
         {
-            byte[] key = LoadOrGenerateEncryptionKey(); // Load or generate user-specific key
-            using (Aes aes = Aes.Create())
+            if (OperatingSystem.IsWindows())
             {
-                aes.Key = key;
-                aes.GenerateIV();
-                byte[] iv = aes.IV;
-                using (var encryptor = aes.CreateEncryptor(aes.Key, iv))
-                using (var ms = new MemoryStream())
-                {
-                    ms.Write(iv, 0, iv.Length);
-                    using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                    using (var sw = new StreamWriter(cs))
-                    {
-                        sw.Write(plainText);
-                    }
-                    return ms.ToArray();
-                }
+                return ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser);
             }
+
+            using var aes = Aes.Create();
+            aes.Key = LoadOrCreateKey();
+            aes.GenerateIV();
+            var cipher = aes.EncryptCbc(data, aes.IV);
+            return [.. aes.IV, .. cipher];
         }
 
-        private string Decrypt(byte[] cipherText)
+        private static byte[] Unprotect(byte[] data)
         {
-            byte[] key = LoadOrGenerateEncryptionKey(); // Load or generate user-specific key
-            using (Aes aes = Aes.Create())
+            if (OperatingSystem.IsWindows())
             {
-                aes.Key = key;
-                byte[] iv = new byte[aes.BlockSize / 8];
-                Array.Copy(cipherText, iv, iv.Length);
-                using (var decryptor = aes.CreateDecryptor(aes.Key, iv))
-                using (var ms = new MemoryStream(cipherText, iv.Length, cipherText.Length - iv.Length))
-                using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                using (var sr = new StreamReader(cs))
-                {
-                    return sr.ReadToEnd();
-                }
+                return ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+            }
+
+            using var aes = Aes.Create();
+            aes.Key = LoadOrCreateKey();
+            var ivLength = aes.BlockSize / 8;
+            return aes.DecryptCbc(data.AsSpan(ivLength), data.AsSpan(0, ivLength));
+        }
+
+        private static byte[] LoadOrCreateKey()
+        {
+            if (File.Exists(KeyFilePath))
+            {
+                return File.ReadAllBytes(KeyFilePath);
+            }
+
+            var key = RandomNumberGenerator.GetBytes(KeySize);
+            File.WriteAllBytes(KeyFilePath, key);
+            RestrictToOwner(KeyFilePath);
+            return key;
+        }
+
+        private static void RestrictToOwner(string path)
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(path, OwnerReadWrite);
             }
         }
     }

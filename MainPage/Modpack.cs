@@ -61,8 +61,9 @@ public class Modpack : INotifyPropertyChanged
         }
     }
 
-    public bool _hasPlayerData = false;
-    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : "Loading...";
+    private bool _hasPlayerData;
+    private bool _playerDataUnavailable;
+    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : _playerDataUnavailable ? "Unavailable" : "Loading...";
     public double PlayerCountProgress => MaxPlayers > 0 ? ((double)CurrentPlayers / MaxPlayers) * 100 : 0;
 
     private bool _isSelected;
@@ -92,6 +93,12 @@ public class Modpack : INotifyPropertyChanged
             _hasPlayerData = true;
             CurrentPlayers = currentPlayers;
             MaxPlayers = maxPlayers;
+            OnPropertyChanged(nameof(PlayerCount));
+        }
+        else if (!_hasPlayerData)
+        {
+            _playerDataUnavailable = true;
+            OnPropertyChanged(nameof(PlayerCount));
         }
     }
     
