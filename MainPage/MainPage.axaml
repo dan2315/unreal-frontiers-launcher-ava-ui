@@ -143,10 +143,10 @@
                         <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125">
                             
                             <TabItem.Header>
-                                <StackPanel>
-                                    <Image Source="../Assets/Images/sword.png" Width="30" Height="30" Margin="18 0 0 0"></Image>
-                                    <TextBlock Margin="18 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
-                                    <Rectangle Margin="18 0 0 0" Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Svg Path="/Assets/Images/svg/tab_play.svg" Width="30" Height="30" HorizontalAlignment="Center"/>
+                                    <TextBlock Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
+                                    <Rectangle Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
                                 </StackPanel>
                             </TabItem.Header>
                             
@@ -218,10 +218,10 @@
                             </TabItem.Styles>
                             
                             <TabItem.Header>
-                                <StackPanel>
-                                    <Image Margin="3 0 0 0" Source="../Assets/Images/settings.png" Width="30" Height="30"></Image>
-                                    <TextBlock Margin="0 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Настройки"></TextBlock>
-                                    <Rectangle Margin="0 0 0 0" Height="1" Fill="White" IsVisible="{Binding}" HorizontalAlignment="Stretch"></Rectangle>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Svg Path="/Assets/Images/svg/tab_settings.svg" Width="30" Height="30" HorizontalAlignment="Center"/>
+                                    <TextBlock Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Настройки"></TextBlock>
+                                    <Rectangle Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
                                 </StackPanel>
                             </TabItem.Header>
                             
@@ -319,13 +319,11 @@
                             </TabItem.Styles>
                             
                             <TabItem.Header>
-                                <Border Margin="9 0 0 0">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <Svg Margin="0 0 0 0" Path="/Assets/Images/svg/profile.svg" Width="30" Height="30"/>
-                                        <TextBlock Margin="0 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Профиль"></TextBlock>
-                                        <Rectangle Margin="0 0 0 0" Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
+                                <StackPanel HorizontalAlignment="Center">
+                                        <Svg Path="/Assets/Images/svg/tab_profile.svg" Width="30" Height="30" HorizontalAlignment="Center"/>
+                                        <TextBlock Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Профиль"></TextBlock>
+                                        <Rectangle Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
                                     </StackPanel>
-                                </Border>
                             </TabItem.Header>
                             
                             <!-- Profile Content -->
