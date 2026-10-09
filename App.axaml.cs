@@ -5,6 +5,8 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace UnrealFrontiersLauncher;
 
@@ -13,8 +15,6 @@ public class App : Application
     public static new App Current => (App)Application.Current;
 
     public IServiceProvider Services { get; private set; }
-
-    private bool _internetConnection = false;
 
     public override void Initialize()
     {
@@ -26,7 +26,7 @@ public class App : Application
         Services = serviceProvider;
     }
 
-    public async override void OnFrameworkInitializationCompleted()
+    public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -39,35 +39,37 @@ public class App : Application
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Init(navigation);
             desktop.MainWindow = mainWindow;
-            
-            var authPage = Services.GetRequiredService<AuthPage>();
-            navigation.RegisterPage(authPage);
-            var mainPage = Services.GetRequiredService<MainPage>();
-            navigation.RegisterPage(mainPage);
+
             var autoupdatePage = Services.GetRequiredService<AutoupdatePage>();
             navigation.RegisterPage(autoupdatePage);
-            
-            _ = Services.GetRequiredService<DeepLinkHandler>().InitializeAsync(Environment.GetCommandLineArgs());
-            
-            _internetConnection = await BackendConnectionDetector.ConnectionStatus();
-
-            if (!_internetConnection)
-            {
-                Services.GetRequiredService<PlayerProfileProvider>().SetProfile(PlayerProfile.Default);
-                navigation.NavigateTo(mainPage);
-                return;
-            }
-            
             navigation.NavigateTo(autoupdatePage);
-            autoupdatePage.TryAutoupdateOrOtherwise(
-                () =>
-                {
-                    _ = authPage.TryAutoAuth();
-                }
-                );
+
+            Dispatcher.UIThread.Post(() => _ = StartAsync(navigation, autoupdatePage), DispatcherPriority.Background);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async Task StartAsync(NavigationService navigation, AutoupdatePage autoupdatePage)
+    {
+        _ = Services.GetRequiredService<DeepLinkHandler>().InitializeAsync(Environment.GetCommandLineArgs());
+
+        var authPage = Services.GetRequiredService<AuthPage>();
+        navigation.RegisterPage(authPage);
+        var mainPage = Services.GetRequiredService<MainPage>();
+        navigation.RegisterPage(mainPage);
+
+        Autoupdater.OnSetStatus?.Invoke("Connecting to server...");
+        var backendReachable = await BackendConnectionDetector.ConnectionStatus();
+
+        if (!backendReachable)
+        {
+            Services.GetRequiredService<PlayerProfileProvider>().SetProfile(PlayerProfile.Default);
+            navigation.NavigateTo(mainPage);
+            return;
+        }
+
+        autoupdatePage.TryAutoupdateOrOtherwise(() => _ = authPage.TryAutoAuth());
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

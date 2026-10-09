@@ -27,7 +27,7 @@ Write-Host "Releasing $packId $releaseVersion"
 
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 dotnet publish $project -c Release -r win-x64 --self-contained `
-    -p:DebugType=None -p:DebugSymbols=false -p:Version=$releaseVersion -p:Backend=$backend -o $publishDir
+    -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false -p:Version=$releaseVersion -p:Backend=$backend -o $publishDir
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed' }
 
 # Previous full packages in $releasesDir are used to generate delta updates.
