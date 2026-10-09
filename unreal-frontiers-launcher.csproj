@@ -26,6 +26,10 @@
 <!--      <SelfContained>true</SelfContained> ???-->
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Backend)' == 'local'">
+      <DefineConstants>$(DefineConstants);LOCAL_BACKEND</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>

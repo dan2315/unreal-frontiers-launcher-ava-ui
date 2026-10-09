@@ -8,8 +8,8 @@ namespace UnrealFrontiersLauncher
     public class TokenStorage
     {
         private static readonly string AppDataPath = OperatingSystem.IsWindows()
-            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UnrealFrontiers")
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppStaticData.DataFolderName)
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", AppStaticData.DataFolderName);
 
         private static readonly string TokenFilePath = Path.Combine(AppDataPath, "tokens.dat");
         private static readonly string KeyFilePath = Path.Combine(AppDataPath, "encryption_key.dat");

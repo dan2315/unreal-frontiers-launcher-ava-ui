@@ -9,6 +9,8 @@ public static class SentryIntegration
 
     public static void Initialize()
     {
+        if (AppStaticData.IsLocalBackend) return;
+
         SentrySdk.Init(options =>
         {
             options.Dsn = Environment.GetEnvironmentVariable("SENTRY_DSN") ?? DefaultDsn;

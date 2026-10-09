@@ -2,6 +2,7 @@
 param(
     [string]$Version,
     [switch]$Upload,
+    [switch]$Local,
     [string]$Server = 'root@192.168.100.148',
     [string]$RemotePath = '/var/lib/docker/volumes/compose_compose_modpack_data/_data/launcher'
 )
@@ -10,9 +11,14 @@ $ErrorActionPreference = 'Stop'
 
 $repo = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $repo 'unreal-frontiers-launcher.csproj'
-$publishDir = Join-Path $PSScriptRoot 'publish\win-x64'
-$releasesDir = Join-Path $PSScriptRoot 'Releases'
-$packId = 'UnrealFrontiersLauncher'
+if ($Local -and $Upload) { throw '-Local builds target localhost and must not be uploaded.' }
+
+$suffix = if ($Local) { '-local' } else { '' }
+$publishDir = Join-Path $PSScriptRoot "publish\win-x64$suffix"
+$releasesDir = Join-Path $PSScriptRoot "Releases$suffix"
+$packId = if ($Local) { 'UnrealFrontiersLauncherLocal' } else { 'UnrealFrontiersLauncher' }
+$packTitle = if ($Local) { 'Unreal Frontiers (Local)' } else { 'Unreal Frontiers' }
+$backend = if ($Local) { 'local' } else { 'production' }
 $mainExe = 'UnrealFrontiersLauncher.exe'
 
 $releaseVersion = if ($Version) { $Version } else { ([xml](Get-Content $project)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1 }
@@ -21,13 +27,18 @@ Write-Host "Releasing $packId $releaseVersion"
 
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 dotnet publish $project -c Release -r win-x64 --self-contained `
-    -p:DebugType=None -p:DebugSymbols=false -p:Version=$releaseVersion -o $publishDir
+    -p:DebugType=None -p:DebugSymbols=false -p:Version=$releaseVersion -p:Backend=$backend -o $publishDir
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed' }
 
 # Previous full packages in $releasesDir are used to generate delta updates.
 vpk pack --packId $packId --packVersion $releaseVersion --packDir $publishDir --mainExe $mainExe `
-    --runtime win-x64 --packTitle 'Unreal Frontiers' --icon (Join-Path $repo 'Assets\Images\logo.ico') --outputDir $releasesDir
+    --runtime win-x64 --packTitle $packTitle --icon (Join-Path $repo 'Assets\Images\logo.ico') --outputDir $releasesDir
 if ($LASTEXITCODE -ne 0) { throw 'vpk pack failed' }
+
+if ($Local) {
+    Write-Host "Done. Local backend build is in $releasesDir (run the *-Setup.exe)."
+    return
+}
 
 # Launchers installed before Velopack look for "version" and run UFLauncher_installer.exe.
 $setup = Get-ChildItem $releasesDir -Filter '*-Setup.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1

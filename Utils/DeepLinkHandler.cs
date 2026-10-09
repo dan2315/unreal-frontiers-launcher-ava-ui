@@ -10,7 +10,8 @@ using UnrealFrontiersLauncher;
 public class DeepLinkHandler
 {
     private static Mutex? _mutex;
-    const string appMutexName = "Global\\UnrealFrontiersLauncher";
+    const string appMutexName = "Global\\UnrealFrontiersLauncher" + AppStaticData.InstanceSuffix;
+    const string PipeName = "OnLaunchPipe" + AppStaticData.InstanceSuffix;
     const string FocusMessage = "uflauncher://focus";
 
     AuthService _authService;
@@ -44,7 +45,7 @@ public class DeepLinkHandler
     {
         try
         {
-            using (var client = new NamedPipeClientStream(".", "OnLaunchPipe", PipeDirection.Out))
+            using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out))
             {
                 await client.ConnectAsync(1000);
                 using (var writer = new StreamWriter(client))
@@ -66,7 +67,7 @@ public class DeepLinkHandler
         {
             while (true)
             {
-                using (var server = new NamedPipeServerStream("OnLaunchPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous))
+                using (var server = new NamedPipeServerStream(PipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous))
                 {
                     try
                     {

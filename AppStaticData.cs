@@ -1,17 +1,42 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace UnrealFrontiersLauncher;
 
 public static class AppStaticData
 {
-    public static string ServerURL = "https://unrealfrontiers.xyz";
-    public static string LauncherBasePath = OperatingSystem.IsWindows()
-        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UnrealFrontiers")
-        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "UnrealFrontiers");
-    public static string RemoteIndexesURI (string instanceId)  => GetFileDownloadPath("indexes.json", instanceId);
-    public static string GetFileDownloadPath(string filename, string instanceId) => $"{ServerURL}/update/download_file/{instanceId}?file={Uri.EscapeDataString(filename)}";
-    public static string GetVersionInfoURL(string instanceId) => $"{ServerURL}/update/get_version_data/{instanceId}";
-    public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}/update/indexes/{instanceId}";
-    public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}/update/obsolete/{instanceId}";
+#if LOCAL_BACKEND
+    public const bool IsLocalBackend = true;
+    private const string DefaultServerUrl = "http://localhost:3000";
+    private const string UpdateRoute = "/updateclient";
+    public const string InstanceSuffix = ".Local";
+#else
+    public const bool IsLocalBackend = false;
+    private const string DefaultServerUrl = "https://unrealfrontiers.xyz";
+    private const string UpdateRoute = "/update";
+    public const string InstanceSuffix = "";
+#endif
+
+    public const string DataFolderName = "UnrealFrontiers" + InstanceSuffix;
+
+    public static readonly string ServerURL = ResolveServerUrl();
+
+    public static readonly string LauncherBasePath = OperatingSystem.IsWindows()
+        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DataFolderName)
+        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", DataFolderName);
+
+    public static string RemoteIndexesURI(string instanceId) => GetFileDownloadPath("indexes.json", instanceId);
+    public static string GetFileDownloadPath(string filename, string instanceId) => $"{ServerURL}{UpdateRoute}/download_file/{instanceId}?file={Uri.EscapeDataString(filename)}";
+    public static string GetVersionInfoURL(string instanceId) => $"{ServerURL}{UpdateRoute}/get_version_data/{instanceId}";
+    public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}{UpdateRoute}/indexes/{instanceId}";
+    public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}{UpdateRoute}/obsolete/{instanceId}";
+
+    private static string ResolveServerUrl()
+    {
+#if LOCAL_BACKEND
+        var overrideUrl = Environment.GetEnvironmentVariable("UF_SERVER_URL");
+        if (!string.IsNullOrWhiteSpace(overrideUrl)) return overrideUrl.TrimEnd('/');
+#endif
+        return DefaultServerUrl;
+    }
 }
