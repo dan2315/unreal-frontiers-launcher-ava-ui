@@ -140,7 +140,7 @@
                             VerticalAlignment="Stretch"
                             Orientation="Horizontal">
                     <TabControl Margin="10 -10 10 0">
-                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125" HorizontalContentAlignment="Center">
                             
                             <TabItem.Header>
                                 <StackPanel HorizontalAlignment="Center">
@@ -192,7 +192,7 @@
                             </Grid>
                         </TabItem>
                         
-                        <TabItem Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125">
+                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125" HorizontalContentAlignment="Center">
                             
                             <TabItem.Styles>
                                 <Style Selector="TabItem:pointerover /template/ ContentPresenter">
@@ -293,7 +293,7 @@
                         </TabItem>
                         
                         <!-- Profile Tab -->
-                        <TabItem Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125" >
+                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125" HorizontalContentAlignment="Center">
                             
                             <TabItem.Styles>
                                 <Style Selector="TabItem:pointerover /template/ ContentPresenter">
