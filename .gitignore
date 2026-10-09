@@ -15,3 +15,5 @@ obj
 flatpak-builder
 .flatpak-builder/
 .avalonia-build-tasks/
+Packaging/publish/
+Packaging/Releases/

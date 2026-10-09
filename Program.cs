@@ -4,6 +4,8 @@ using Avalonia.ReactiveUI;
 using Avalonia.Svg.Skia;
 using Microsoft.Extensions.DependencyInjection;
 using UnrealFrontiersLauncher.Sentry;
+using UnrealFrontiersLauncher.Windows;
+using Velopack;
 
 namespace UnrealFrontiersLauncher
 {
@@ -12,6 +14,13 @@ namespace UnrealFrontiersLauncher
         [STAThread]
         public static void Main(string[] args)
         {
+            VelopackApp.Build()
+                .OnAfterInstallFastCallback(_ => UrlSchemeRegistration.Register())
+                .OnAfterUpdateFastCallback(_ => UrlSchemeRegistration.Register())
+                .OnBeforeUninstallFastCallback(_ => UrlSchemeRegistration.Unregister())
+                .Run();
+
+            LegacyDataMigration.MigrateFromInnoInstall();
             SentryIntegration.Initialize();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }

@@ -39,19 +39,52 @@ public class PathSafetyTests
     }
 }
 
-public class AutoupdaterTests
+public class LegacyDataMigrationTests : IDisposable
 {
-    [Theory]
-    [InlineData("1.3.5", true)]
-    [InlineData("v1.4.0", true)]
-    [InlineData("1.3.5-beta", true)]
-    [InlineData("1.3.4", false)]
-    [InlineData("1.2.0", false)]
-    [InlineData("garbage", false)]
-    [InlineData("", false)]
-    public void IsNewVersionAvailable_ComparesAgainstCurrent(string latest, bool expected)
+    private readonly string _root = Path.Combine(Path.GetTempPath(), "uf-migration-" + Guid.NewGuid().ToString("N"));
+    private string Legacy => Path.Combine(_root, "legacy");
+    private string Target => Path.Combine(_root, "target");
+
+    public void Dispose()
     {
-        Assert.Equal(expected, Autoupdater.IsNewVersionAvailable(new Version(1, 3, 4), latest));
+        if (Directory.Exists(_root)) Directory.Delete(_root, true);
+    }
+
+    [Fact]
+    public void Migrate_MovesInstancesAndPreferences()
+    {
+        Directory.CreateDirectory(Path.Combine(Legacy, "Instances", "Create"));
+        File.WriteAllText(Path.Combine(Legacy, "Instances", "Create", "launch.json"), "{}");
+        File.WriteAllText(Path.Combine(Legacy, "preferences.json"), "{}");
+        File.WriteAllText(Path.Combine(Legacy, "UnrealFrontiersLauncher.exe"), "binary");
+
+        LegacyDataMigration.Migrate(Legacy, Target);
+
+        Assert.True(File.Exists(Path.Combine(Target, "Instances", "Create", "launch.json")));
+        Assert.True(File.Exists(Path.Combine(Target, "preferences.json")));
+        Assert.False(Directory.Exists(Path.Combine(Legacy, "Instances")));
+        Assert.True(File.Exists(Path.Combine(Legacy, "UnrealFrontiersLauncher.exe")));
+    }
+
+    [Fact]
+    public void Migrate_DoesNotOverwriteExistingData()
+    {
+        Directory.CreateDirectory(Path.Combine(Legacy, "Instances"));
+        File.WriteAllText(Path.Combine(Legacy, "preferences.json"), "old");
+        Directory.CreateDirectory(Target);
+        File.WriteAllText(Path.Combine(Target, "preferences.json"), "new");
+
+        LegacyDataMigration.Migrate(Legacy, Target);
+
+        Assert.Equal("new", File.ReadAllText(Path.Combine(Target, "preferences.json")));
+        Assert.True(File.Exists(Path.Combine(Legacy, "preferences.json")));
+    }
+
+    [Fact]
+    public void Migrate_IgnoresMissingLegacyRoot()
+    {
+        LegacyDataMigration.Migrate(Legacy, Target);
+        Assert.False(Directory.Exists(Target));
     }
 }
 
