@@ -1,19 +1,18 @@
 using System;
-using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UnrealFrontiersLauncher;
-   
+
 public static class BackendConnectionDetector
 {
-    public static async Task<bool> ConnectionStatus(string testUrl = "http://www.google.com")
+    public static async Task<bool> ConnectionStatus(string? testUrl = null)
     {
         try
         {
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(5);
-            using var response = await client.GetAsync(testUrl);
-            return response.IsSuccessStatusCode;
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var response = await SharedHttp.Api.GetAsync(testUrl ?? AppStaticData.ServerURL, cts.Token);
+            return true;
         }
         catch
         {

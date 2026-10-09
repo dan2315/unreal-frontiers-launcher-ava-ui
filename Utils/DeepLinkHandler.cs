@@ -11,29 +11,28 @@ public class DeepLinkHandler
 {
     private static Mutex? _mutex;
     const string appMutexName = "Global\\UnrealFrontiersLauncher";
+    const string FocusMessage = "uflauncher://focus";
 
     AuthService _authService;
-    UserProvider _profileProvider;
+    PlayerProfileProvider _profileProvider;
     PopupService _popupService;
     NavigationService _navigation;
 
-    EntryModal _entryModal;
-
-    public DeepLinkHandler(AuthService authService, UserProvider profileProvider, NavigationService navigation, EntryModal entryModal, PopupService popupService) 
+    public DeepLinkHandler(AuthService authService, PlayerProfileProvider profileProvider, NavigationService navigation, PopupService popupService) 
     {
         _authService = authService;
         _profileProvider = profileProvider;
         _navigation = navigation;
-        _entryModal = entryModal;
         _popupService = popupService;
     }
 
     public async Task InitializeAsync(string[] args)
     {
-        _mutex = new Mutex(true, appMutexName);
-        if (!_mutex.WaitOne(TimeSpan.Zero, true))
+        _mutex = new Mutex(true, appMutexName, out var isFirstInstance);
+        if (!isFirstInstance)
         {
-            await SendMessageToMainInstance(args.First(arg => arg.StartsWith("uflauncher://")));
+            var deepLink = args.FirstOrDefault(arg => arg.StartsWith("uflauncher://")) ?? FocusMessage;
+            await SendMessageToMainInstance(deepLink);
             Environment.Exit(0);
             return;
         }
@@ -97,7 +96,7 @@ public class DeepLinkHandler
 
     private async Task HandleDeepLinkAsync(string message)
     {
-        if (Uri.TryCreate(message, UriKind.Absolute, out Uri uri))
+        if (Uri.TryCreate(message, UriKind.Absolute, out Uri? uri))
         {
            await OnDeepLinkRecieved(uri); 
         }
@@ -111,7 +110,7 @@ public class DeepLinkHandler
 
             if (uri.Host == "auth-response")
             {
-                DiscordAuth.OnDiscordAuthResponseRecieved(uri, _authService, _profileProvider, _navigation, _entryModal, _popupService);
+                DiscordAuth.OnDiscordAuthResponseRecieved(uri, _authService, _profileProvider, _navigation , _popupService);
             }
             if (uri.Host == "email-verified-response")
             {

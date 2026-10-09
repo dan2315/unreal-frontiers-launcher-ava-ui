@@ -1,8 +1,11 @@
 ﻿using System;
 using Avalonia;
+using Avalonia.ReactiveUI;
 using Avalonia.Svg.Skia;
 using Microsoft.Extensions.DependencyInjection;
 using UnrealFrontiersLauncher.Sentry;
+using UnrealFrontiersLauncher.Windows;
+using Velopack;
 
 namespace UnrealFrontiersLauncher
 {
@@ -11,6 +14,13 @@ namespace UnrealFrontiersLauncher
         [STAThread]
         public static void Main(string[] args)
         {
+            VelopackApp.Build()
+                .OnAfterInstallFastCallback(_ => UrlSchemeRegistration.Register())
+                .OnAfterUpdateFastCallback(_ => UrlSchemeRegistration.Register())
+                .OnBeforeUninstallFastCallback(_ => UrlSchemeRegistration.Unregister())
+                .Run();
+
+            LegacyDataMigration.MigrateFromInnoInstall();
             SentryIntegration.Initialize();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
@@ -25,7 +35,7 @@ namespace UnrealFrontiersLauncher
             return AppBuilder.Configure<App>()
                              .UsePlatformDetect()
                              .LogToTrace()
-                             .With(new Win32PlatformOptions())
+                             .UseReactiveUI()
                              .AfterSetup(_ =>
                              {
                                  var app = App.Current;
@@ -39,9 +49,10 @@ namespace UnrealFrontiersLauncher
 
             services.AddSingleton<HttpClientService>();
             services.AddSingleton<AuthService>();
+            services.AddSingleton<ServerService>();
             services.AddSingleton<GameLauncher>();
             services.AddSingleton<InstanceManager>();
-            services.AddSingleton<UserProvider>();
+            services.AddSingleton<PlayerProfileProvider>();
             
             services.AddSingleton<MainWindow>();
             services.AddSingleton<PopupService>(); 
@@ -50,7 +61,7 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<AutoupdatePage>();
             services.AddSingleton<AuthPage>();
             services.AddSingleton<MainPage>();
-            services.AddSingleton<NavigationService>();
+            services.AddSingleton<NavigationService>();  
             services.AddTransient<DeepLinkHandler>();
 
 

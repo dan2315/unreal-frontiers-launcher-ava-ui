@@ -21,7 +21,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
     private bool _isRegisterMode;
 
     private AuthService _authService;
-    private readonly UserProvider _userProvider;
+    private readonly PlayerProfileProvider _playerProfileProvider;
     private NavigationService _navigationService;
     private PopupService _popupService;
 
@@ -52,6 +52,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
             if (string.IsNullOrEmpty(_authError))
                 return null;
 
+            return _authError;
             try
             {
                 using var jsonDoc = JsonDocument.Parse(_authError);
@@ -78,15 +79,15 @@ public class AuthPageViewModel : INotifyPropertyChanged
     public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
 
     public bool IsLoginMode => !IsRegisterMode;
-    public string PageTitle => IsRegisterMode ? "Регистрация аккаунта" : "Войти";
+    public string PageTitle => IsRegisterMode ? "Регистрация" : "Войти";
     public string ActionButtonText => IsRegisterMode ? "Создать аккаунт" : "Войти";
-    public string ToggleMessage => IsLoginMode ? "Нет аккаунта" : "Есть аккаунт";
+    public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
     public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
 
-    public AuthPageViewModel(AuthService authService, UserProvider userProvider, NavigationService navigationService, PopupService popupService)
+    public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider, NavigationService navigationService, PopupService popupService)
     {
         _authService = authService;
-        _userProvider = userProvider;
+        _playerProfileProvider = playerProfileProvider;
         _navigationService = navigationService;
         _popupService = popupService;
         NicknameEntry = new ValidatableEntry(ValidateNickname, this);
@@ -127,7 +128,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
             if (!response.Success)
             {
-                AuthError = response.Error;
+                AuthError = response.Message;
                 Console.WriteLine(AuthError);
                 return;
             }
@@ -138,8 +139,15 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public async void InitiateDiscordAuth(string? nickname)
     {
-
-        await _authService.DiscordAuth();
+        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
+        if (nickname is string nicknameString)
+        {
+            await _authService.DiscordAuth(nicknameString);
+        }
+        else
+        {
+            await _authService.DiscordAuth(null);
+        }
         PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
     }
 
@@ -151,7 +159,13 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public void InitiatePasswordRecovery()
     {
-        //TODO: PageReference.DisplayAlert("Ой-ёй","Больше не забывай =- )", "Ну ладно :("); 
+        var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
+        {
+            var message = await _authService.SendResetPasswordEmail(email);
+            await _popupService.ShowOkDialogAsync("Восстановление пароля", message);
+            _navigationService.GetBack();
+        });
+        _navigationService.NavigateTo(entryModal);
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

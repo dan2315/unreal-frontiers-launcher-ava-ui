@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -22,9 +23,16 @@ public partial class MainWindow : Window
         _navigationService = navigationService;
     }
 
-    public void GetToPreviousPage(object? sender, RoutedEventArgs args)
+    public void GetToAuthPage(object? sender, RoutedEventArgs args)
     {
-        _navigationService.GetBack();
+        if (_navigationService.CurrentContent is AuthPage authPage)
+        {
+            Close();
+        }
+        else
+        {
+            _navigationService.NavigateTo<AuthPage>();
+        }
     }
 
     private void OnMinimizeClick(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

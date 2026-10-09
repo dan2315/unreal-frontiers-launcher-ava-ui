@@ -6,6 +6,9 @@ using UnrealFrontiersLauncher;
 
 public class MinecraftInstance
 {
+    public const int DefaultRamMb = 4096;
+    public const int MinRamMb = 1024;
+
     private string _id;
     private string _name;
     private string _gameVersion;
@@ -20,7 +23,7 @@ public class MinecraftInstance
     public string ForgeVersion => _forgeVersion;
     public string ServerIp => _serverIp;
     public string ServerPort => _serverPort;
-    public string Address => _serverIp + ":" + _serverPort;
+    public string Address => _serverPort.Length == 0 ? _serverIp : $"{_serverIp}:{_serverPort}";
 
     public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue)
     {
@@ -29,15 +32,27 @@ public class MinecraftInstance
         _gameVersion = gameVersion;
         _forgeVersion = forgeVersion;
 
-        var splitedAddress = serverAddress.Split(":");
-        _serverIp = splitedAddress[0];
-        _serverPort = splitedAddress[1];
-
+        (_serverIp, _serverPort) = SplitAddress(serverAddress);
         _launchConfiguration = new (defaultRamValue);
     }
 
-    public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string serverAddress, int defaultRamValue)
-        : this(instanceId, instanceName, gameVersion, "none", serverAddress, defaultRamValue) { }
+    [JsonConstructor]
+    public MinecraftInstance(string id, string name, string gameVersion, string forgeVersion, string serverIp, string serverPort)
+    {
+        _id = id;
+        _name = name;
+        _gameVersion = gameVersion;
+        _forgeVersion = forgeVersion;
+        _serverIp = serverIp;
+        _serverPort = serverPort;
+        _launchConfiguration = new (DefaultRamMb);
+    }
+
+    public static (string Ip, string Port) SplitAddress(string? address)
+    {
+        var parts = (address ?? string.Empty).Split(':', 2);
+        return (parts[0], parts.Length > 1 ? parts[1] : string.Empty);
+    }
 
     public void SaveToFile()
     {
@@ -56,7 +71,7 @@ public class MinecraftInstance
 
     public string GetResourcePath()
     {
-        var path = Path.Combine(AppSettings.LauncherBasePath, "Instances", _name);
+        var path = Path.Combine(AppStaticData.LauncherBasePath, "Instances", PathSafety.SanitizeFileName(_name));
         return path;
     }
 
@@ -110,7 +125,7 @@ public class MinecraftInstance
             Console.WriteLine("Configuration file not found. Using default settings.");
             _launchConfiguration = new LaunchConfiguration
             {
-                Ram = _launchConfiguration.Ram,
+                Ram = _launchConfiguration.Ram > 0 ? _launchConfiguration.Ram : DefaultRamMb,
                 NeedToClose = true,
                 NeedToOpenConsole = false
             };
@@ -122,7 +137,7 @@ public class MinecraftInstance
         {
             var jsonData = File.ReadAllText(path);
 
-            _launchConfiguration = JsonSerializer.Deserialize<LaunchConfiguration>(jsonData);
+            _launchConfiguration = JsonSerializer.Deserialize<LaunchConfiguration>(jsonData)!;
 
             if (_launchConfiguration == null)
             {
@@ -134,7 +149,7 @@ public class MinecraftInstance
             Console.WriteLine($"Error loading configuration: {ex.Message}");
             _launchConfiguration = new LaunchConfiguration
             {
-                Ram = 8128, // Fallback to default value in MB
+                Ram = DefaultRamMb,
                 NeedToClose = true,
                 NeedToOpenConsole = false
             };

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Installer.Forge;
@@ -14,125 +15,140 @@ namespace UnrealFrontiersLauncher
 {
     public class GameLauncher
     {
-        public async void LaunchMinecraft(
+        private static readonly TimeSpan SpeedWindow = TimeSpan.FromSeconds(5);
+
+        public async Task LaunchMinecraft(
             MinecraftInstance minecraftInstance,
-            string login,
+            PlayerProfile playerProfile,
             Action<float> onProgressChanged,
             Action<string> onFileChanged,
             Action<string> onDownloadSpeedUpdated,
-            Action onGameLaunched)
+            Action onGameQuit,
+            Action<string> onError,
+            MainWindow mainWindow)
         {
             try
             {
                 Console.WriteLine("Launching " + minecraftInstance.Name);
-                var installFolder = Path.Combine(AppSettings.LauncherBasePath, "Install");
-                MinecraftPath minecraftPath = new MinecraftPath()
-                {
-                    BasePath = EnsurePathExists(minecraftInstance.GetResourcePath()),
-                    Resource = EnsurePathExists(minecraftInstance.GetResourcePath()),
-                    Versions = EnsurePathExists(Path.Combine(installFolder, "versions")),
-                    Library = EnsurePathExists(Path.Combine(installFolder, "libraries")),
-                    Runtime = EnsurePathExists(Path.Combine(installFolder, "runtime")),
-                    Assets = EnsurePathExists(Path.Combine(installFolder, "assets"))
-                };
-
-                Queue<(DateTime Timestamp, long Bytes)> speedSamples = new Queue<(DateTime, long)>();
-                TimeSpan rollingWindow = TimeSpan.FromSeconds(5);
-                Stopwatch stopwatch = new Stopwatch();
-                var evaluateSpeed = (long progressedBytes) =>
-                {
-                    DateTime now = DateTime.UtcNow;
-
-                    // Add the current sample to the queue
-                    speedSamples.Enqueue((now, progressedBytes));
-
-                    // Remove samples outside the rolling window
-                    while (speedSamples.Count > 0 && speedSamples.Peek().Timestamp < now - rollingWindow)
-                    {
-                        speedSamples.Dequeue();
-                    }
-
-                    // Calculate the speed over the rolling window
-                    if (speedSamples.Count > 1)
-                    {
-                        var oldest = speedSamples.Peek();
-                        var newest = speedSamples.Last();
-                        double elapsedSeconds = (newest.Timestamp - oldest.Timestamp).TotalSeconds;
-                        long bytesTransferred = newest.Bytes - oldest.Bytes;
-
-                        if (elapsedSeconds > 0)
-                        {
-                            double speed = bytesTransferred / elapsedSeconds; // Bytes per second
-                            string speedReadable = $"{speed / 1024 / 1024:F2} MB/s";
-                            onDownloadSpeedUpdated.Invoke(speedReadable);
-                        }
-                    }
-                };
+                var minecraftPath = CreateMinecraftPath(minecraftInstance);
+                var reportSpeed = CreateSpeedReporter(onDownloadSpeedUpdated);
 
                 var launcher = new MinecraftLauncher(minecraftPath);
-                var byteProgress = new Progress<ByteProgress>(progress =>
+                IProgress<ByteProgress> byteProgress = new Progress<ByteProgress>(progress =>
                 {
                     if (progress.TotalBytes == 0) return;
                     onProgressChanged((float)progress.ProgressedBytes / progress.TotalBytes);
-                    evaluateSpeed.Invoke(progress.ProgressedBytes);
+                    reportSpeed(progress.ProgressedBytes);
                 });
-                var fileProgress = new Progress<InstallerProgressChangedEventArgs>(args => onFileChanged.Invoke($"[{args.ProgressedTasks}/{args.TotalTasks}] {args.EventType}: {args.Name}"));
+                IProgress<InstallerProgressChangedEventArgs> fileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+                    onFileChanged($"[{args.ProgressedTasks}/{args.TotalTasks}] {args.EventType}: {args.Name}"));
 
-                launcher.ByteProgressChanged += (sender, args) =>
-                {
-                    evaluateSpeed.Invoke(args.ProgressedBytes);
-                    onProgressChanged.Invoke((float)args.ProgressedBytes / args.TotalBytes);
-                };
-
-                launcher.FileProgressChanged += (sender, args) =>
-                {
-                    onFileChanged.Invoke($"[{args.ProgressedTasks}/{args.TotalTasks}] {args.EventType}: {args.Name}");
-                };
+                launcher.ByteProgressChanged += (_, args) => byteProgress.Report(args);
+                launcher.FileProgressChanged += (_, args) => fileProgress.Report(args);
 
                 var forge = new ForgeInstaller(launcher);
-                var forgeInstallOptions = new ForgeInstallOptions();
-                forgeInstallOptions.ByteProgress = byteProgress;
-                forgeInstallOptions.FileProgress = fileProgress;
-                var version_name = await forge.Install(minecraftInstance.GameVersion, minecraftInstance.ForgeVersion, forgeInstallOptions);
+                var versionName = await forge.Install(
+                    minecraftInstance.GameVersion,
+                    minecraftInstance.ForgeVersion,
+                    new ForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
 
-                var process = await launcher.InstallAndBuildProcessAsync(version_name, new MLaunchOption
+                var launchConfiguration = minecraftInstance.GetLaunchConfiguration();
+                var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
                 {
-                    Session = MSession.CreateOfflineSession(login),
-                    MaximumRamMb = minecraftInstance.GetLaunchConfiguration().Ram,
+                    Session = MSession.CreateOfflineSession(playerProfile.Nickname),
+                    MaximumRamMb = launchConfiguration.Ram,
                 });
-                process.StartInfo.Arguments += "";
 
-                HttpClient httpClient = new();
-                var modpackInstaller = new ModpackInstaller(httpClient, 5, TimeSpan.FromSeconds(5));
+                var modpackInstaller = new ModpackInstaller(SharedHttp.Transfer, 5, TimeSpan.FromSeconds(30));
                 await modpackInstaller.InstallModpackAsync(minecraftInstance, byteProgress, fileProgress);
 
-                var serverList = new ServerListManager(minecraftInstance);
-                serverList.EnsureCorrespondingServerEntryExist();
+                new ServerListManager(minecraftInstance).EnsureCorrespondingServerEntryExist();
 
                 Console.WriteLine("Executing command:");
                 Console.WriteLine(process.StartInfo.FileName + " " + process.StartInfo.Arguments);
 
+                LoggingWindow? loggingWindow = null;
+                if (launchConfiguration.NeedToOpenConsole)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        loggingWindow = new LoggingWindow(minecraftInstance.Name);
+                        loggingWindow.Show();
+                    });
+                }
+
                 var processUtil = new ProcessWrapper(process);
-                processUtil.OutputReceived += (s, e) => Console.WriteLine(e);
+                processUtil.OutputReceived += (_, line) =>
+                {
+                    Console.WriteLine(line);
+                    loggingWindow?.AppendLog(line);
+                };
                 processUtil.StartWithEvents();
+
+                if (launchConfiguration.NeedToClose)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(mainWindow.Close);
+                }
+
                 await processUtil.WaitForExitTaskAsync();
-                onGameLaunched.Invoke();
+                await Dispatcher.UIThread.InvokeAsync(() => loggingWindow?.Close());
+                onGameQuit();
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error occured while launching {minecraftInstance?.Name}. Exception: {e}");
+                Console.WriteLine($"Error occured while launching {minecraftInstance.Name}. Exception: {e}");
+                onError(e.Message);
             }
+        }
+
+        private static MinecraftPath CreateMinecraftPath(MinecraftInstance minecraftInstance)
+        {
+            var installFolder = Path.Combine(AppStaticData.LauncherBasePath, "Install");
+            var resourcePath = EnsurePathExists(minecraftInstance.GetResourcePath());
+
+            return new MinecraftPath
+            {
+                BasePath = resourcePath,
+                Resource = resourcePath,
+                Versions = EnsurePathExists(Path.Combine(installFolder, "versions")),
+                Library = EnsurePathExists(Path.Combine(installFolder, "libraries")),
+                Runtime = EnsurePathExists(Path.Combine(installFolder, "runtime")),
+                Assets = EnsurePathExists(Path.Combine(installFolder, "assets"))
+            };
+        }
+
+        private static Action<long> CreateSpeedReporter(Action<string> onSpeedUpdated)
+        {
+            var samples = new Queue<(DateTime Timestamp, long Bytes)>();
+
+            return progressedBytes =>
+            {
+                var now = DateTime.UtcNow;
+                samples.Enqueue((now, progressedBytes));
+
+                while (samples.Count > 0 && samples.Peek().Timestamp < now - SpeedWindow)
+                {
+                    samples.Dequeue();
+                }
+
+                if (samples.Count < 2) return;
+
+                var oldest = samples.Peek();
+                var newest = samples.Last();
+                var elapsedSeconds = (newest.Timestamp - oldest.Timestamp).TotalSeconds;
+
+                if (elapsedSeconds > 0)
+                {
+                    var bytesPerSecond = (newest.Bytes - oldest.Bytes) / elapsedSeconds;
+                    onSpeedUpdated($"{bytesPerSecond / 1024 / 1024:F2} MB/s");
+                }
+            };
         }
 
         public static string EnsurePathExists(string path)
         {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-                Console.WriteLine($"Created missing directory: {path}");
-            }
+            Directory.CreateDirectory(path);
             return path;
         }
     }
-
 }

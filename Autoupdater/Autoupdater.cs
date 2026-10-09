@@ -1,116 +1,65 @@
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using UnrealFrontiersLauncher;
+using Velopack;
 
-public class Autoupdater
+public static class Autoupdater
 {
-    private static string VersionFileUrl = AppSettings.GetFileDownloadPath("version", "launcher");
-    private static string InstallerDownloadUrl = AppSettings.GetFileDownloadPath("UFLauncher_installer.exe", "launcher");
-    private const string InstallerFileName = "UFLauncher_installer.exe";
-    private const string CurrentVersion = "0.2.9";
+    public static Action<float>? OnProgress;
+    public static Action<string>? OnSetStatus;
 
-    public static async void AutopdateOrOtherwise(Action? updateCompleted = null)
+    public static Version CurrentVersion
+    {
+        get
+        {
+            var version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0, 0);
+            return new Version(version.Major, version.Minor, Math.Max(version.Build, 0));
+        }
+    }
+
+    public static async Task CheckForUpdatesAsync(Action onContinue)
     {
         try
         {
-            Console.WriteLine("Checking for updates...");
+            var manager = new UpdateManager(new ServerUpdateSource());
 
-            // TODO: Delete
-            updateCompleted?.Invoke();
-            return;
-            
-            string latestVersion = await FetchLatestVersion();
-
-            if (IsNewVersionAvailable(CurrentVersion, latestVersion))
+            if (!manager.IsInstalled)
             {
-                Console.WriteLine($"New launcher version available: {latestVersion}. Download in progress...");
-                await DownloadInstaller();
-                RunInstaller();
+                SetStatus("Not an installed build, skipping update check.");
             }
             else
             {
-                Console.WriteLine("Your application is up to date.");
-                updateCompleted?.Invoke();
+                SetStatus("Checking for updates...");
+                var update = await manager.CheckForUpdatesAsync();
+
+                if (update != null)
+                {
+                    SetStatus($"New launcher version available: {update.TargetFullRelease.Version}. Download in progress...");
+                    await manager.DownloadUpdatesAsync(update, percent =>
+                        Dispatcher.UIThread.Post(() => OnProgress?.Invoke(percent)));
+
+                    SetStatus("Installing update...");
+                    manager.ApplyUpdatesAndRestart(update);
+                    return;
+                }
+
+                SetStatus("Your application is up to date.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Auto-update failed: {ex.Message}");
+            SetStatus($"Update check failed: {ex.Message}");
+            await Task.Delay(1500);
         }
+
+        onContinue();
     }
 
-    private static async Task<string> FetchLatestVersion()
+    private static void SetStatus(string status)
     {
-        using var httpClient = new HttpClient();
-        Console.WriteLine("Fetching version information...");
-        string version = await httpClient.GetStringAsync(VersionFileUrl);
-        return version.Trim();
-    }
-
-    private static bool IsNewVersionAvailable(string currentVersion, string latestVersion)
-    {
-        var current = new Version(currentVersion);
-        var latest = new Version(latestVersion);
-        return latest > current;
-    }
-
-    private static async Task DownloadInstaller()
-    {
-        string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
-
-        Console.WriteLine("Downloading installer...");
-
-        using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync(InstallerDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-
-        using var contentStream = await response.Content.ReadAsStreamAsync();
-        using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
-        await contentStream.CopyToAsync(fileStream);
-
-        Console.WriteLine($"Installer downloaded to: {tempFilePath}");
-    }
-
-    private static void RunInstaller()
-    {
-        string tempFilePath = Path.Combine(Path.GetTempPath(), InstallerFileName);
-
-        Console.WriteLine("Running installer...");
-        var installerProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = tempFilePath,
-                Arguments = "/CLOSEAPPLICATIONS",
-                UseShellExecute = true
-            }
-        };
-
-        installerProcess.Start();
-        Console.WriteLine("Installer started. Waiting for it to finish...");
-
-        installerProcess.WaitForExit();
-
-        Console.WriteLine("Restarting current application...");
-        RestartApplication();
-    }
-
-    private static async void RestartApplication()
-    {
-        string exePath = Process.GetCurrentProcess().MainModule.FileName;
-
-        Console.WriteLine($"Restarting application: {exePath}");
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = exePath,
-            UseShellExecute = true
-        });
-
-        Environment.Exit(0);
+        Console.WriteLine(status);
+        OnSetStatus?.Invoke(status);
     }
 }
-

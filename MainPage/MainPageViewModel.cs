@@ -3,12 +3,19 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
+using System.Linq;
+using UnrealFrontiersLauncher.Preferences;
 
 namespace UnrealFrontiersLauncher.ViewModels;
 
 public class MainPageViewModel : INotifyPropertyChanged
 {
     private MainPage _pageReference;
+    private readonly ServerService _serverService;
+    private static readonly TimeSpan PlayerCountPollInterval = TimeSpan.FromSeconds(30);
     public ObservableCollection<Modpack> Modpacks { get; set; }
     private Modpack _selectedModpack;
     public Modpack SelectedModpack
@@ -65,12 +72,12 @@ public class MainPageViewModel : INotifyPropertyChanged
 
     public string PlayText
     {
-        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.User.Login}"; }
+        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.PlayerProfile.Nickname}"; }
     }
 
     public string? PlayerName
     {
-        get { return _pageReference.User?.Login; }
+        get { return _pageReference.PlayerProfile?.Nickname; }
     }
 
     public void OnTabSelectedCommand(string selectedTab)
@@ -88,14 +95,14 @@ public class MainPageViewModel : INotifyPropertyChanged
         HoveredTab = null;
     }
 
-    public MainPageViewModel(MainPage page)
+    public MainPageViewModel(MainPage page, ServerService serverService)
     {
         _pageReference = page;
+        _serverService = serverService;
         Modpacks = new ObservableCollection<Modpack>
         {
-            new Modpack { Name = "All The Mods 9", Value = "all_the_mods_nine", IsSelected=true },
-            new Modpack { Name = "(Beta) Create", Value = "create" },
-            new Modpack { Name = "Unreal Zaruba", Value = "unreal_zaruba", IsEnabled = false },
+            new Modpack { Name = "Unreal Domains: Create", Value = "create" },
+            new Modpack { Name = "Monifactory", Value = "monifactory"},
         };
 
         if (Modpacks.Count > 0)
@@ -104,9 +111,21 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
 
         SelectedTab = "game";
-        SelectedModpack = Modpacks[0];
+        var preferences = Preferences.Preferences.Get();
+        SelectedModpack = Modpacks.FirstOrDefault(modpack => modpack.Value == preferences.LastSelectedModpack, Modpacks[0]);
+        SelectedModpack.IsSelected = true;
+        _ = PollPlayerCountsAsync();
     }
-    
+
+    private async Task PollPlayerCountsAsync()
+    {
+        using var timer = new PeriodicTimer(PlayerCountPollInterval);
+        do
+        {
+            await Task.WhenAll(Modpacks.Select(modpack => modpack.UpdatePlayerCount(_serverService)));
+        }
+        while (await timer.WaitForNextTickAsync());
+    }
 
     public event PropertyChangedEventHandler PropertyChanged;
     public void OnPropertyChanged([CallerMemberName] string propertyName = null)

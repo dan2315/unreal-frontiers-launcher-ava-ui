@@ -1,23 +1,23 @@
 using System;
 using UnrealFrontiersLauncher;
 
-public class UserProvider
+public class PlayerProfileProvider
 {
-    private User? _currentUser;
+    private PlayerProfile? _currentProfile;
     private Action _onProfileChanged;
 
-    public User GetProfile()
+    public PlayerProfile GetProfile()
     {
-        return _currentUser;
+        return _currentProfile;
     }
 
-    public void SetProfile(User profile)
+    public void SetProfile(PlayerProfile profile)
     {
-        _currentUser = profile;
+        _currentProfile = profile;
         _onProfileChanged?.Invoke();
     }
 
-    public void Subscribe(Action onProfileChanged)
+    public void OnProfileUpdate(Action onProfileChanged)
     {
         _onProfileChanged = onProfileChanged;
     }

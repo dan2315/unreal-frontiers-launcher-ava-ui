@@ -44,8 +44,6 @@ public class App : Application
             navigation.RegisterPage(authPage);
             var mainPage = Services.GetRequiredService<MainPage>();
             navigation.RegisterPage(mainPage);
-            var entryModal = Services.GetRequiredService<EntryModal>(); 
-            navigation.RegisterPage(entryModal);
             var autoupdatePage = Services.GetRequiredService<AutoupdatePage>();
             navigation.RegisterPage(autoupdatePage);
             
@@ -55,13 +53,18 @@ public class App : Application
 
             if (!_internetConnection)
             {
-                Services.GetRequiredService<UserProvider>().SetProfile(User.Default);
+                Services.GetRequiredService<PlayerProfileProvider>().SetProfile(PlayerProfile.Default);
                 navigation.NavigateTo(mainPage);
                 return;
             }
-
+            
             navigation.NavigateTo(autoupdatePage);
-            autoupdatePage.TryAutoupdate();
+            autoupdatePage.TryAutoupdateOrOtherwise(
+                () =>
+                {
+                    _ = authPage.TryAutoAuth();
+                }
+                );
         }
 
         base.OnFrameworkInitializationCompleted();

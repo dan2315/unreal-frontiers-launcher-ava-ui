@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Unreal Frontiers
-Exec=/path/to/UnrealFrontiersLauncher %u
-Icon=/path/to/logo.png
+Exec=UnrealFrontiersLauncher %u
+Icon=dod.unrealfrontiers.launcher
 Type=Application
 Categories=Game;
 MimeType=x-scheme-handler/uflauncher;
@@ -9,4 +9,4 @@ Actions=OpenURL;
 
 [Desktop Action OpenURL]
 Name=Open URL
-Exec=/path/to/UnrealFrontiersLauncher %u
+Exec=UnrealFrontiersLauncher %u

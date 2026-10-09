@@ -1,7 +1,7 @@
-
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 
 namespace UnrealFrontiersLauncher
 {
@@ -10,15 +10,12 @@ namespace UnrealFrontiersLauncher
         Action<string> _clickAction;
         NavigationService _navigationService;
         
-        public EntryModal(NavigationService navigationService)
+        public EntryModal(NavigationService navigationService, string info, Action<string> clickAction)
         {
             _navigationService = navigationService;
-
-        }
-
-        public void InitializeComponentOverride(string info, Action<string> clickAction)  {
-            this.InitializeComponent();
             _clickAction = clickAction;
+            InitializeComponent();
+            
             InfoLabel.Text = info;
             SubmitButton.Click += OnSubmitClicked;
             CancelButton.Click += OnCancelClicked;
@@ -27,7 +24,6 @@ namespace UnrealFrontiersLauncher
         private void OnSubmitClicked(object? sender, RoutedEventArgs e)
         {
             _clickAction?.Invoke(UserInput.Text);
-            _navigationService.GetBack();
         }
 
         private void OnCancelClicked(object? sender, RoutedEventArgs e)

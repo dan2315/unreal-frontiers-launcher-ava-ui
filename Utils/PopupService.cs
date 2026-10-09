@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 
@@ -11,6 +11,9 @@ namespace UnrealFrontiersLauncher
     public class PopupService
     {
         private readonly MainWindow _mainWindow;
+        
+        private FontFamily MontserratBold = (FontFamily)Application.Current.Resources["MontserratBold"];
+        private FontFamily MontserratRegular = (FontFamily)Application.Current.Resources["MontserratRegular"];
 
         public PopupService(MainWindow mainWindow)
         {
@@ -32,6 +35,8 @@ namespace UnrealFrontiersLauncher
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Content = CreateDialogContent(message, new[] { "OK" }, out var resultTask),
                 CanResize = false,
+                SystemDecorations = SystemDecorations.None,
+                CornerRadius = CornerRadius.Parse("5")
             };
 
             await dialog.ShowDialog(_mainWindow);
@@ -54,6 +59,8 @@ namespace UnrealFrontiersLauncher
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Content = CreateDialogContent(message, new[] { "Ok", "Cancel" }, out var resultTask),
                 CanResize = false,
+                Background = Brushes.Transparent,
+                SystemDecorations = SystemDecorations.None,
             };
 
             await dialog.ShowDialog(_mainWindow);
@@ -66,17 +73,27 @@ namespace UnrealFrontiersLauncher
             var resultCompletionSource = new TaskCompletionSource<string>();
             resultTask = resultCompletionSource;
 
+            var border = new Border()
+            {   
+                Background = Brushes.DimGray,
+                CornerRadius = new CornerRadius(10)
+            };
+            
             var stackPanel = new StackPanel
             {
-                Spacing = 20,
+                Spacing = 70,
+                VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(20)
             };
+            border.Child = stackPanel; 
 
             // Message
             stackPanel.Children.Add(new TextBlock
             {
                 Text = message,
+                FontSize = 16,
                 TextWrapping = TextWrapping.Wrap,
+                FontFamily = MontserratBold,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
             });
 
@@ -93,7 +110,8 @@ namespace UnrealFrontiersLauncher
                 var button = new Button
                 {
                     Content = buttonText,
-                    Width = 80
+                    Width = 80,
+                    FontFamily = MontserratBold,
                 };
                 button.Click += (_, _) =>
                 {
@@ -106,7 +124,7 @@ namespace UnrealFrontiersLauncher
 
             stackPanel.Children.Add(buttonPanel);
 
-            return stackPanel;
+            return border;
         }
     }
 }

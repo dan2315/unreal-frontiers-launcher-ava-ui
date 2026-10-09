@@ -9,7 +9,6 @@
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="TextBox">
-            <!-- <Setter Property="FontSize" Value="16"/> -->
             <Setter Property="FontFamily" Value="{StaticResource MontserratRegular}"  />
         </Style>
         <Style Selector="TextBlock.Error">
@@ -79,7 +78,7 @@
                                      CornerRadius="8"
                                      Opacity="50"
                                      Background="#DCDCDC"
-                                     Foreground="#B2B2B2"
+                                     Foreground="#222222"
                                      BorderThickness="1"
                                      Height="35">
                                     <TextBox.Styles>
@@ -112,7 +111,7 @@
                                      CornerRadius="8"
                                      Opacity="50"
                                      Background="#DCDCDC"
-                                     Foreground="#B2B2B2"
+                                     Foreground="#222222"
                                      Height="35">
                                     <TextBox.Styles>
                                         <Style Selector="TextBox">
@@ -144,7 +143,7 @@
                                      CornerRadius="8"
                                      Opacity="50"
                                      Background="#DCDCDC"
-                                     Foreground="#B2B2B2"
+                                     Foreground="#222222"
                                      Height="35">
                                     <TextBox.Styles>
                                         <Style Selector="TextBox">
@@ -177,7 +176,7 @@
                                      CornerRadius="8"
                                      Opacity="50"
                                      Background="#DCDCDC"
-                                     Foreground="#B2B2B2"
+                                     Foreground="#222222"
                                      Height="35">
                                     <TextBox.Styles>
                                         <Style Selector="TextBox">
@@ -212,10 +211,10 @@
                                 Height="35">
                                 <Button.Styles>
                                     <Style Selector="Button">
-                                        <Setter Property="Foreground" Value="#B2B2B2"/>
+                                        <Setter Property="Foreground" Value="White"/>
                                     </Style>
                                     <Style Selector="Button:pointerover">
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Foreground" Value="#222222"/>
                                     </Style>
                                 </Button.Styles>
                                 <Button.Transitions>
@@ -226,7 +225,8 @@
                         </Button>
 
                         <Grid Grid.ColumnDefinitions="175, *">
-                            <Button x:Name="StartDiscordAuthButton" 
+                            <Button x:Name="StartDiscordAuthButton"
+                                    IsVisible="{Binding IsLoginMode}"
                                     Click="InitiateDiscordAuth"
                                     CornerRadius="5"
                                     Background="#5464f7"
@@ -244,10 +244,10 @@
                                 </Button.Content>
                                 <Button.Styles>
                                     <Style Selector="Button">
-                                        <Setter Property="Foreground" Value="#B2B2B2"/>
+                                        <Setter Property="Foreground" Value="White"/>
                                     </Style>
                                     <Style Selector="Button:pointerover">
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Foreground" Value="#222222"/>
                                     </Style>
                                 </Button.Styles>
                                 <Button.Transitions>
@@ -259,37 +259,48 @@
                             
 
                             <Button Content="Войти с Google (WIP)" 
+                                    IsVisible="{Binding IsLoginMode}"
                                     Grid.Column="1"
                                     IsEnabled="False"
                                     CornerRadius="5"
                                     Background="Black"
-                                    Foreground="White"
+                                    Foreground="#222222"
+                                    FontWeight="200"
                                     FontFamily="{StaticResource MontserratRegular}"
                                     BorderThickness="0"
-                                    Height="35"/>
+                                    Height="35">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Foreground" Value="#222222"/>
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
                         </Grid>
                         
                         
                         <Grid Grid.ColumnDefinitions="Auto, *" Margin="0 10 0 20">
                             <TextBlock Text="{Binding ToggleMessage}" 
                                        Grid.Column="0"
-                                       Foreground="#B2B2B2"
+                                       Foreground="#222222"
                                        TextDecorations="Underline" 
                                        HorizontalAlignment="Center"
                                        Margin="15 0 20 0"
                                        FontFamily="{StaticResource MontserratBold}"
-                                       FontSize="18"
+                                       FontSize="17"
                                        PointerPressed="ToggleView">
                             </TextBlock>
 
                             <!-- Forgot Password -->
-                            <TextBlock Text="Забыл пароль"
+                            <TextBlock Text="Забыли пароль?"
                                        Grid.Column="1"
-                                       Foreground="#B2B2B2"
+                                       Foreground="#222222"
                                        TextDecorations="Underline"
                                        HorizontalAlignment="Center" 
                                        FontFamily="{StaticResource MontserratBold}"
-                                       FontSize="18" 
+                                       FontSize="17" 
                                        PointerPressed="InitiatePasswordRecovery">
                             </TextBlock>
                         </Grid>

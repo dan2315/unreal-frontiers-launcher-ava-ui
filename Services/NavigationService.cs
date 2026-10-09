@@ -15,6 +15,7 @@ public class NavigationService
     public static Dictionary<Type, UserControl> Pages => _pages;
     private static Dictionary<Type, UserControl> _pages = new();
     private IPageTransition _transition;
+    public object? CurrentContent => _mainWindow.ContentControl.Content;
     
     private void SetWindowContent(object value)
     {
@@ -27,8 +28,8 @@ public class NavigationService
         {
             Duration = TimeSpan.FromMilliseconds(500),
             Orientation = PageSlide.SlideAxis.Vertical,
-            SlideInEasing = new BounceEaseIn(),
-            SlideOutEasing = new BounceEaseIn(),
+            SlideInEasing = new CubicEaseOut(),
+            SlideOutEasing = new CubicEaseIn(),
         };
     }
 
@@ -39,7 +40,6 @@ public class NavigationService
     
     public void NavigateTo(object nextPage)
     {
-        // Animate
         if (pagesStack.Count > 0)
         {
             _transition.Start(pagesStack.Peek() as Visual, nextPage as Visual, true, CancellationToken.None);

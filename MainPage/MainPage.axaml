@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="using:UnrealFrontiersLauncher.ViewModels"
         xmlns:converters="using:UnrealFrontiersLauncher.Converters"
-        xmlns:elements="using:UnrealFrontiersLauncher"
         x:Class="UnrealFrontiersLauncher.MainPage"
         x:DataType="local:MainPageViewModel">
 
@@ -24,7 +23,7 @@
         
         <!-- Left Side Panel -->
         <StackPanel Grid.Column="0"
-                    Width="230">
+                    Width="280">
             <StackPanel.Background>
                 <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
                     <GradientStop Color="#100F12" Offset="0.0"></GradientStop>
@@ -32,7 +31,7 @@
                     <GradientStop Color="#100F12" Offset="1.0"></GradientStop>
                 </LinearGradientBrush>
             </StackPanel.Background>
-            <TextBlock Text="Modpacks"
+            <TextBlock Text="Servers"
                        TextAlignment="Center"
                        FontSize="34"
                        Foreground="White"
@@ -45,6 +44,13 @@
                               SelectedItem="{Binding SelectedModpack}"
                               SelectionChanged="OnInstanceSelected" Background="Transparent"
                               BorderBrush="Transparent">
+                
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Background="Transparent">
@@ -54,19 +60,46 @@
                                     CornerRadius="10"
                                     PointerEntered="Modpack_OnPointerEntered"
                                     PointerExited="Modpack_OnPointerExited"
-                                    Height="50"
-                                    MaxWidth="180">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Image Source="{Binding Icon}"
-                                           Width="30"
-                                           Height="30"
-                                           Margin="0,0,10,0"/>
-                                    <TextBlock Text="{Binding Name}"
-                                               FontSize="16" VerticalAlignment="Center"
-                                               Foreground="{Binding TextColor}"
-                                               FontFamily="{StaticResource MontserratLight}"
-                                               MaxWidth="115">
-                                    </TextBlock>
+                                    Height="75"
+                                    MaxWidth="250">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Image Source="{Binding Icon}"
+                                               Width="30"
+                                               Height="30"
+                                               Margin="0,0,10,0"/>
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="16" VerticalAlignment="Center"
+                                                   Foreground="{Binding TextColor}"
+                                                   FontFamily="{StaticResource MontserratLight}"
+                                                   MaxWidth="250">
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <!-- Player Count -->
+                                    <StackPanel Margin="0,8,0,0" MaxWidth="200">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding PlayerCount}"
+                                                       FontSize="12"
+                                                       Foreground="#D0D0D0"
+                                                       FontFamily="{StaticResource MontserratLight}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding MaxPlayers}"
+                                                       FontSize="12"
+                                                       Foreground="#D0D0D0"
+                                                       FontFamily="{StaticResource MontserratLight}"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding PlayerCountProgress}"
+                                                     MinHeight="4"
+                                                     MinWidth="130"
+                                                     Background="#404040"
+                                                     Foreground="#22AA22">
+                                            <!-- <ProgressBar.></ProgressBar.> -->
+                                        </ProgressBar>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
             
@@ -75,7 +108,7 @@
                                        Fill="#404040"
                                        HorizontalAlignment="Stretch"
                                        IsVisible="{Binding IsLastItem}"
-                                       MaxWidth="175"/>
+                                       MaxWidth="200"/>
                         </StackPanel>
                     </DataTemplate>
             
@@ -237,7 +270,7 @@
                                                 VerticalAlignment="Center"
                                                 FontFamily="{StaticResource MontserratBold}"
                                                 Margin="5 5 0 0"/>
-                                        <CheckBox IsEnabled="False"
+                                        <CheckBox x:Name="OpenConsoleBox"
                                                   Margin="0 5 0 0"
                                                   CornerRadius="2"/>
                                     </StackPanel>
@@ -250,11 +283,115 @@
                                                 FontFamily="{StaticResource MontserratBold}" 
                                                 Margin="5 0 0 10"/>
                                         
-                                        <CheckBox IsEnabled="False" 
-                                                  Margin="0 0 0 8"
-                                                  CornerRadius="2"/>
+                                        <CheckBox x:Name="CloseLauncherBox" 
+                                                Margin="0 0 0 8"
+                                                CornerRadius="2"/>
                                     </StackPanel>
                                     <Rectangle Height="1" Fill="Black"></Rectangle>
+                                </StackPanel>
+                            </Border>
+                        </TabItem>
+                        
+                        <!-- Profile Tab -->
+                        <TabItem Margin=" 0 0 10 0" CornerRadius="0 0 5 5" Width="125" >
+                            
+                            <TabItem.Styles>
+                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
+                                                <GradientStop Color="#8a58bb" Offset="0.2" />
+                                                <GradientStop Color="#ee4aef" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                
+                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#8a58bb"/>
+                                    <Setter Property="Opacity" Value="50"></Setter>
+                                </Style>
+                            </TabItem.Styles>
+                            
+                            <TabItem.Header>
+                                <Border Margin="9 0 0 0">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Svg Margin="0 0 0 0" Path="/Assets/Images/svg/profile.svg" Width="30" Height="30"/>
+                                        <TextBlock Margin="0 0 0 0" Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Профиль"></TextBlock>
+                                        <Rectangle Margin="0 0 0 0" Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
+                                    </StackPanel>
+                                </Border>
+                            </TabItem.Header>
+                            
+                            <!-- Profile Content -->
+                            <Border Grid.Column="0"
+                                    Background="#201E24"
+                                    Margin="10"
+                                    CornerRadius="5"
+                                    BorderBrush="Black"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <StackPanel>
+                                        <Border Background="#1b191f" CornerRadius="5 5 0 0">
+                                            <TextBlock Text="Профиль"
+                                                       FontSize="18"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       Margin="10"
+                                                       TextAlignment="Center"/>
+                                        </Border>
+                                        <Rectangle Height="1" Fill="Black"></Rectangle>
+                                    </StackPanel>
+                                    
+                                    <!-- Profile Options -->
+                                    <StackPanel Margin="20">
+                                        <!-- Add Password Button -->
+                                        <Button Foreground="White"
+                                                Classes="idle_anim"
+                                                VerticalAlignment="Bottom"
+                                                CornerRadius="5"
+                                                MaxWidth="250"
+                                                Height="40"
+                                                Margin="0 10 0 20"
+                                                Background="#6E53A1"
+                                                x:Name="AddPasswordButton">
+                                            <Button.Content>
+                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
+                                                    <Svg Path="../Assets/Images/svg/lock.svg" Height="20" Width="20"/>
+                                                    <TextBlock Grid.Column="1" 
+                                                               FontFamily="{StaticResource MontserratBold}"
+                                                               FontSize="15" 
+                                                               Text="Добавить пароль" 
+                                                               Margin="10 3 0 2"/>
+                                                </Grid>
+                                            </Button.Content>
+                                        </Button>
+                                        
+                                        <!-- Connect Discord Button -->
+                                        <Button Foreground="White"
+                                                Classes="idle_anim"
+                                                VerticalAlignment="Bottom"
+                                                CornerRadius="5"
+                                                MaxWidth="250"
+                                                Height="40"
+                                                Background="#5865F2"
+                                                x:Name="ConnectDiscordButton">
+                                            <Button.Content>
+                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
+                                                    <Svg Path="../Assets/Images/svg/discord.svg" Height="20" Width="20"/>
+                                                    <TextBlock Grid.Column="1" 
+                                                               FontFamily="{StaticResource MontserratBold}"
+                                                               FontSize="15" 
+                                                               Text="Подключить Discord" 
+                                                               Margin="10 3 0 2"/>
+                                                </Grid>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
                         </TabItem>

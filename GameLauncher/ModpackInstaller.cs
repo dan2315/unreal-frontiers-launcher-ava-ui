@@ -21,87 +21,88 @@ public class ModpackInstaller
     {
         _httpClient = httpClient;
         _maxRetries = maxRetries;
-        _stallThreshold = stallThreshold ?? TimeSpan.FromSeconds(15);
+        _stallThreshold = stallThreshold ?? TimeSpan.FromSeconds(30);
     }
 
     public async Task InstallModpackAsync(MinecraftInstance minecraftInstance, IProgress<ByteProgress> onProgressChanged, IProgress<InstallerProgressChangedEventArgs> onFileChanged)
     {
-        string indexUrl = AppSettings.GetInstanceIndexes(minecraftInstance.Id);
-        string obsoleteFilesUrl = AppSettings.GetInstanceObsoleteFiles(minecraftInstance.Id);
         string resourcePath = minecraftInstance.GetResourcePath();
 
-        List<string> obsoleteFiles = await FetchObsoleteFilesAsync(obsoleteFilesUrl);
-        if (obsoleteFiles != null && obsoleteFiles.Count > 0) 
-        {
-            foreach (var file in obsoleteFiles)
-            {
-                string path = Path.Combine(minecraftInstance.GetResourcePath(), file);
-                var correctedFilePath = path.Replace("\\", "/");
-                try
-                {
-                    if (File.Exists(correctedFilePath))
-                    {
-                        File.Delete(correctedFilePath);
-                        Console.WriteLine($"Deleted: {correctedFilePath}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error deleting file {correctedFilePath}: {ex.Message}");
-                }
-            }
-        }
-        
-        var fileIndexes = await FetchFileIndexesAsync(indexUrl);
+        await DeleteObsoleteFilesAsync(AppStaticData.GetInstanceObsoleteFiles(minecraftInstance.Id), resourcePath);
+
+        var fileIndexes = await FetchFileIndexesAsync(AppStaticData.GetInstanceIndexes(minecraftInstance.Id));
         if (fileIndexes == null || fileIndexes.Count == 0)
         {
             Console.WriteLine("No files found in indexes.");
             return;
         }
 
-        // Create list of game files
         var gameFiles = fileIndexes.Select(index =>
         {
             var (filePath, fileInfo) = index;
             var correctedFilePath = filePath.Replace("\\", "/");
 
-            string fileUrl = AppSettings.GetFileDownloadPath(correctedFilePath, minecraftInstance.Id);
-
             return new GameFile(correctedFilePath)
             {
-                Path = Path.Combine(resourcePath, correctedFilePath),
+                Path = PathSafety.ResolveInside(resourcePath, correctedFilePath),
                 Hash = fileInfo.Hash,
                 Size = fileInfo.Size,
-                Url = fileUrl
+                Url = AppStaticData.GetFileDownloadPath(correctedFilePath, minecraftInstance.Id)
             };
         }).ToList();
 
-        // Create an installer and download the files with retries
         var installer = ParallelGameInstaller.CreateAsCoreCount(_httpClient);
         await InstallWithRetries(installer, gameFiles.Where(file => file.Hash != "0").ToList(), onProgressChanged, onFileChanged);
-        
+
+        // Hash "0" marks user-editable config files: skip verification.
         installer.CheckFileChecksum = false;
         installer.CheckFileSize = false;
-        Console.WriteLine("Processing config files.");
         await InstallWithRetries(installer, gameFiles.Where(file => file.Hash == "0").ToList(), onProgressChanged, onFileChanged);
 
         Console.WriteLine("All files downloaded and verified.");
     }
 
-    private async Task<Dictionary<string, FileMetadata>> FetchFileIndexesAsync(string indexUrl)
+    private async Task DeleteObsoleteFilesAsync(string url, string resourcePath)
     {
-        var response = await _httpClient.GetAsync(indexUrl);
-        response.EnsureSuccessStatusCode();
-        string jsonResponse = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<Dictionary<string, FileMetadata>>(jsonResponse);
+        List<string> obsoleteFiles;
+        try
+        {
+            obsoleteFiles = await FetchObsoleteFilesAsync(url);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or JsonException)
+        {
+            Console.WriteLine($"Could not fetch obsolete files list: {ex.Message}");
+            return;
+        }
+
+        foreach (var file in obsoleteFiles)
+        {
+            try
+            {
+                var path = PathSafety.ResolveInside(resourcePath, file.Replace("\\", "/"));
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                    Console.WriteLine($"Deleted: {path}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting file {file}: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task<Dictionary<string, FileMetadata>?> FetchFileIndexesAsync(string indexUrl)
+    {
+        var json = await _httpClient.GetStringAsync(indexUrl);
+        return JsonSerializer.Deserialize<Dictionary<string, FileMetadata>>(json);
     }
 
     private async Task<List<string>> FetchObsoleteFilesAsync(string url)
     {
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-        string jsonResponse = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<ObsoleteFiles>(jsonResponse).Files;
+        var json = await _httpClient.GetStringAsync(url);
+        return JsonSerializer.Deserialize<ObsoleteFiles>(json)?.Files ?? [];
     }
 
     private async Task InstallWithRetries(
@@ -110,102 +111,113 @@ public class ModpackInstaller
         IProgress<ByteProgress> onProgressChanged,
         IProgress<InstallerProgressChangedEventArgs> onFileChanged)
     {
-        int attempt = 0;
-        while (attempt < _maxRetries)
+        for (int attempt = 1; ; attempt++)
         {
             try
             {
-                Console.WriteLine($"Attempt {attempt + 1}/{_maxRetries} to install files...");
+                Console.WriteLine($"Attempt {attempt}/{_maxRetries} to install files...");
                 await InstallWithStallDetection(installer, gameFiles, onProgressChanged, onFileChanged);
-                return; // Exit loop if successful
+                return;
             }
-            catch (OperationCanceledException)
+            catch (Exception ex) when (ex is OperationCanceledException or HttpRequestException or IOException)
             {
-                attempt++;
-                Console.WriteLine($"Attempt {attempt}/{_maxRetries} failed due to stall. Retrying...");
-                if (attempt < _maxRetries)
-                {
-                    await Task.Delay(500 * (int)Math.Pow(2, attempt - 1)); // Exponential backoff
-                }
-                else
-                {
-                    Console.WriteLine("Maximum retry attempts reached. Download failed.");
-                    throw;
-                }
+                Console.WriteLine($"Attempt {attempt}/{_maxRetries} failed: {ex.Message}");
+                if (attempt >= _maxRetries) throw;
+
+                await Task.Delay(500 * (int)Math.Pow(2, attempt - 1));
             }
         }
     }
 
-    private async Task InstallWithStallDetection(ParallelGameInstaller installer, List<GameFile> gameFiles, IProgress<ByteProgress> onProgressChanged, IProgress<InstallerProgressChangedEventArgs> onFileChanged)
+    private async Task InstallWithStallDetection(
+        ParallelGameInstaller installer,
+        List<GameFile> gameFiles,
+        IProgress<ByteProgress> onProgressChanged,
+        IProgress<InstallerProgressChangedEventArgs> onFileChanged)
     {
         using var cts = new CancellationTokenSource();
-        var progressTracker = new ProgressMonitor(onProgressChanged, _stallThreshold, cts);
+        var monitor = new ProgressMonitor(onProgressChanged, onFileChanged, _stallThreshold, cts);
 
-        try
-        {
-            var wrappedProgress = new Progress<ByteProgress>(progressTracker.ReportProgress);
-            await progressTracker.MonitorProgress(async () =>
-            {
-                await installer.Install(gameFiles, fileProgress: onFileChanged, byteProgress: wrappedProgress, cancellationToken: cts.Token);
-            });
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        await monitor.MonitorProgress(() =>
+            installer.Install(gameFiles, fileProgress: monitor.FileProgress, byteProgress: monitor.ByteProgress, cancellationToken: cts.Token).AsTask());
     }
 }
 
 public class ProgressMonitor
 {
-    private readonly IProgress<ByteProgress> _progress;
     private readonly TimeSpan _stallThreshold;
-    private readonly CancellationTokenSource _cts;
-    private long _lastReportedBytes = 0;
-    private DateTime _lastProgressTime = DateTime.UtcNow;
+    private readonly CancellationTokenSource _installCts;
+    private long _lastReportedBytes;
+    private long _lastActivityTicks = DateTime.UtcNow.Ticks;
 
-    public ProgressMonitor(IProgress<ByteProgress> progress, TimeSpan stallThreshold, CancellationTokenSource cts)
+    public IProgress<ByteProgress> ByteProgress { get; }
+    public IProgress<InstallerProgressChangedEventArgs> FileProgress { get; }
+
+    public ProgressMonitor(
+        IProgress<ByteProgress> byteProgress,
+        IProgress<InstallerProgressChangedEventArgs> fileProgress,
+        TimeSpan stallThreshold,
+        CancellationTokenSource installCts)
     {
-        _progress = progress;
         _stallThreshold = stallThreshold;
-        _cts = cts;
+        _installCts = installCts;
+
+        ByteProgress = new Progress<ByteProgress>(progress =>
+        {
+            if (progress.ProgressedBytes > _lastReportedBytes)
+            {
+                _lastReportedBytes = progress.ProgressedBytes;
+                Touch();
+            }
+
+            byteProgress.Report(progress);
+        });
+
+        FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+        {
+            Touch();
+            fileProgress.Report(args);
+        });
     }
 
-    public async Task MonitorProgress(Func<Task> downloadTask)
+    public async Task MonitorProgress(Func<Task> installTask)
     {
-        Task monitorTask = Task.Run(async () =>
-        {
-            while (!_cts.Token.IsCancellationRequested)
-            {
-                await Task.Delay(_stallThreshold);
-
-                if ((DateTime.UtcNow - _lastProgressTime) > _stallThreshold)
-                {
-                    Console.WriteLine("Download stalled. Cancelling...");
-                    _cts.Cancel();
-                }
-            }
-        });
+        Touch();
+        using var monitorCts = new CancellationTokenSource();
+        var monitorTask = WatchForStall(monitorCts.Token);
 
         try
         {
-            await downloadTask();
+            await installTask();
         }
         finally
         {
-            _cts.Cancel();
+            monitorCts.Cancel();
             await monitorTask;
         }
     }
 
-    public void ReportProgress(ByteProgress progress)
-    {
-        if (progress.ProgressedBytes > _lastReportedBytes)
-        {
-            _lastReportedBytes = progress.ProgressedBytes;
-            _lastProgressTime = DateTime.UtcNow;
-        }
+    private void Touch() => Interlocked.Exchange(ref _lastActivityTicks, DateTime.UtcNow.Ticks);
 
-        _progress?.Report(progress);
+    private async Task WatchForStall(CancellationToken token)
+    {
+        try
+        {
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), token);
+
+                var idle = DateTime.UtcNow - new DateTime(Interlocked.Read(ref _lastActivityTicks), DateTimeKind.Utc);
+                if (idle > _stallThreshold)
+                {
+                    Console.WriteLine("Download stalled. Cancelling...");
+                    _installCts.Cancel();
+                    return;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 }
