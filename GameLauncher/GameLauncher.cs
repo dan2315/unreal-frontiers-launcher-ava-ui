@@ -8,6 +8,8 @@ using Avalonia.Threading;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Installer.Forge;
+using CmlLib.Core.Installer.NeoForge;
+using CmlLib.Core.Installer.NeoForge.Installers;
 using CmlLib.Core.Installers;
 using CmlLib.Core.ProcessBuilder;
 
@@ -55,11 +57,7 @@ namespace UnrealFrontiersLauncher
                 launcher.ByteProgressChanged += (_, args) => byteProgress.Report(args);
                 launcher.FileProgressChanged += (_, args) => fileProgress.Report(args);
 
-                var forge = new ForgeInstaller(launcher);
-                var versionName = await forge.Install(
-                    minecraftInstance.GameVersion,
-                    minecraftInstance.ForgeVersion,
-                    new ForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
+                var versionName = await InstallLoaderAsync(launcher, minecraftInstance, byteProgress, fileProgress);
 
                 var launchConfiguration = minecraftInstance.GetLaunchConfiguration();
                 var accessToken = await _authService.GetFreshAccessTokenAsync();
@@ -110,6 +108,26 @@ namespace UnrealFrontiersLauncher
                 Console.WriteLine($"Error occured while launching {minecraftInstance.Name}. Exception: {e}");
                 onError(e.Message);
             }
+        }
+
+        private static Task<string> InstallLoaderAsync(
+            MinecraftLauncher launcher,
+            MinecraftInstance instance,
+            IProgress<ByteProgress> byteProgress,
+            IProgress<InstallerProgressChangedEventArgs> fileProgress)
+        {
+            if (instance.Loader == ModLoader.NeoForge)
+            {
+                return new NeoForgeInstaller(launcher).Install(
+                    instance.GameVersion,
+                    instance.ForgeVersion,
+                    new NeoForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
+            }
+
+            return new ForgeInstaller(launcher).Install(
+                instance.GameVersion,
+                instance.ForgeVersion,
+                new ForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
         }
 
         public static void ApplyGameEnvironment(Process process, string? accessToken)

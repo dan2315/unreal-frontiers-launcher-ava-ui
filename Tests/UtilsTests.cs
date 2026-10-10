@@ -170,3 +170,53 @@ public class GameEnvironmentTests
         Assert.Equal("token-from-launcher", output);
     }
 }
+
+public class ModLoaderTests
+{
+    [Theory]
+    [InlineData("1.21.1", "21.1.252", ModLoader.NeoForge)]
+    [InlineData("1.21", "21.0.167", ModLoader.NeoForge)]
+    [InlineData("1.20.4", "20.4.237", ModLoader.NeoForge)]
+    [InlineData("1.20.1", "47.4.0", ModLoader.Forge)]
+    [InlineData("1.21.1", "52.0.40", ModLoader.Forge)]
+    [InlineData("1.18.2", "40.2.21", ModLoader.Forge)]
+    [InlineData("1.21.1", "", ModLoader.Forge)]
+    public void Resolve_InfersLoaderFromVersionFormat(string game, string loader, string expected)
+    {
+        Assert.Equal(expected, ModLoader.Resolve(null, game, loader));
+    }
+
+    [Theory]
+    [InlineData("neoforge", "1.20.1", "47.4.0", ModLoader.NeoForge)]
+    [InlineData("NeoForge", "1.20.1", "47.4.0", ModLoader.NeoForge)]
+    [InlineData("neo_forge", "1.20.1", "47.4.0", ModLoader.NeoForge)]
+    [InlineData("forge", "1.21.1", "21.1.252", ModLoader.Forge)]
+    public void Resolve_PrefersTheExplicitLoader(string explicitLoader, string game, string loader, string expected)
+    {
+        Assert.Equal(expected, ModLoader.Resolve(explicitLoader, game, loader));
+    }
+
+    [Fact]
+    public void Instance_RoundTripsLoaderThroughInstanceJson()
+    {
+        var instance = new MinecraftInstance("zaruba", "Unreal Zaruba", "1.21.1", "21.1.252", "unrealfrontiers.com:25570", 4096);
+        Assert.Equal(ModLoader.NeoForge, instance.Loader);
+
+        var json = System.Text.Json.JsonSerializer.Serialize(instance);
+        var restored = System.Text.Json.JsonSerializer.Deserialize<MinecraftInstance>(json)!;
+
+        Assert.Equal(ModLoader.NeoForge, restored.Loader);
+        Assert.Equal("21.1.252", restored.ForgeVersion);
+        Assert.Equal("unrealfrontiers.com:25570", restored.Address);
+    }
+
+    [Fact]
+    public void Instance_FromOldInstanceJsonWithoutLoaderStillResolves()
+    {
+        const string oldJson = """{"Id":"create","Name":"Create","GameVersion":"1.20.1","ForgeVersion":"47.4.0","ServerIp":"example.com","ServerPort":"25565"}""";
+
+        var restored = System.Text.Json.JsonSerializer.Deserialize<MinecraftInstance>(oldJson)!;
+
+        Assert.Equal(ModLoader.Forge, restored.Loader);
+    }
+}

@@ -8,6 +8,7 @@ namespace UnrealFrontiersLauncher
         public string minecraftVersion { get; set; } = "";
         public string forgeVersion { get; set; } = "";
         public string serverAddress { get; set; } = "";
+        public string loader { get; set; } = "";
         public int minRam { get; set; }
     }
 }

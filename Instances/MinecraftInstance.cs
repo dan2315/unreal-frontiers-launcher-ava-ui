@@ -13,6 +13,7 @@ public class MinecraftInstance
     private string _name;
     private string _gameVersion;
     private string _forgeVersion;
+    private string _loader;
     private string _serverIp;
     private string _serverPort;
     [JsonIgnore] private LaunchConfiguration _launchConfiguration;
@@ -21,28 +22,31 @@ public class MinecraftInstance
     public string Name => _name;
     public string GameVersion => _gameVersion;
     public string ForgeVersion => _forgeVersion;
+    public string Loader => _loader;
     public string ServerIp => _serverIp;
     public string ServerPort => _serverPort;
     public string Address => _serverPort.Length == 0 ? _serverIp : $"{_serverIp}:{_serverPort}";
 
-    public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue)
+    public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue, string? loader = null)
     {
         _id = instanceId;
         _name = instanceName;
         _gameVersion = gameVersion;
         _forgeVersion = forgeVersion;
+        _loader = ModLoader.Resolve(loader, gameVersion, forgeVersion);
 
         (_serverIp, _serverPort) = SplitAddress(serverAddress);
         _launchConfiguration = new (defaultRamValue);
     }
 
     [JsonConstructor]
-    public MinecraftInstance(string id, string name, string gameVersion, string forgeVersion, string serverIp, string serverPort)
+    public MinecraftInstance(string id, string name, string gameVersion, string forgeVersion, string serverIp, string serverPort, string? loader = null)
     {
         _id = id;
         _name = name;
         _gameVersion = gameVersion;
         _forgeVersion = forgeVersion;
+        _loader = ModLoader.Resolve(loader, gameVersion, forgeVersion);
         _serverIp = serverIp;
         _serverPort = serverPort;
         _launchConfiguration = new (DefaultRamMb);

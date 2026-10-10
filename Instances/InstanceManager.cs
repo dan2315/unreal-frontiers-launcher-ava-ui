@@ -102,7 +102,8 @@ namespace UnrealFrontiersLauncher
                 versionInfo.minecraftVersion,
                 versionInfo.forgeVersion,
                 versionInfo.serverAddress,
-                versionInfo.minRam > 0 ? versionInfo.minRam : MinecraftInstance.DefaultRamMb
+                versionInfo.minRam > 0 ? versionInfo.minRam : MinecraftInstance.DefaultRamMb,
+                versionInfo.loader
             );
             instance.LoadLaunchConfiguration();
             return instance;
