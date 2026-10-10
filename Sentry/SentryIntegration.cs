@@ -9,7 +9,7 @@ public static class SentryIntegration
 
     public static void Initialize()
     {
-        if (AppStaticData.IsLocalBackend) return;
+        if (AppStaticData.IsTestMode) return;
 
         SentrySdk.Init(options =>
         {

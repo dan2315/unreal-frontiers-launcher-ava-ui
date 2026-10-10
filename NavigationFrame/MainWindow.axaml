@@ -25,7 +25,7 @@
                         <Svg Path="/Assets/Images/svg/arrow_left.svg" Width="18" Height="18"/>
                     </Button>
 
-                    <TextBlock Grid.Column="1" Text="Unreal Frontiers Launcher" FontFamily="MontserratRegular" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
+                    <TextBlock x:Name="TitleText" Grid.Column="1" Text="Unreal Frontiers Launcher" FontFamily="MontserratRegular" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
                     
                     <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button BorderThickness="0" Width="50" Click="OnMinimizeClick" Background="Black" PointerEntered="InputElement_OnPointerEntered" PointerExited="InputElement_OnPointerExited">

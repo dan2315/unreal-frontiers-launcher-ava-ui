@@ -10,8 +10,8 @@ using UnrealFrontiersLauncher;
 public class DeepLinkHandler
 {
     private static Mutex? _mutex;
-    const string appMutexName = "Global\\UnrealFrontiersLauncher" + AppStaticData.InstanceSuffix;
-    const string PipeName = "OnLaunchPipe" + AppStaticData.InstanceSuffix;
+    static readonly string appMutexName = "Global\\UnrealFrontiersLauncher" + AppStaticData.InstanceSuffix;
+    static readonly string PipeName = "OnLaunchPipe" + AppStaticData.InstanceSuffix;
     const string FocusMessage = "uflauncher://focus";
 
     AuthService _authService;

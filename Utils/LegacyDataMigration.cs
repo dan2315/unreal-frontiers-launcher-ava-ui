@@ -9,7 +9,7 @@ public static class LegacyDataMigration
 
     public static void MigrateFromInnoInstall()
     {
-        if (!OperatingSystem.IsWindows() || AppStaticData.IsLocalBackend) return;
+        if (!OperatingSystem.IsWindows() || AppStaticData.IsTestMode) return;
 
         var legacyRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Unreal Frontiers");
         Migrate(legacyRoot, AppStaticData.LauncherBasePath);

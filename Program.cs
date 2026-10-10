@@ -20,6 +20,15 @@ namespace UnrealFrontiersLauncher
                 .OnBeforeUninstallFastCallback(_ => UrlSchemeRegistration.Unregister())
                 .Run();
 
+            try
+            {
+                _ = AppStaticData.ServerURL;
+            }
+            catch (Exception exception)
+            {
+                Environment.Exit(FatalStartup.Fail(exception));
+            }
+
             CrashLog.Install();
             LegacyDataMigration.MigrateFromInnoInstall();
             SentryIntegration.Initialize();

@@ -5,20 +5,26 @@ namespace UnrealFrontiersLauncher;
 
 public static class AppStaticData
 {
-#if LOCAL_BACKEND
-    public const bool IsLocalBackend = true;
-    private const string DefaultServerUrl = "http://localhost:3000";
-    public const string InstanceSuffix = ".Local";
+#if DEBUG
+    private const LauncherMode DefaultMode = LauncherMode.Test;
 #else
-    public const bool IsLocalBackend = false;
-    private const string DefaultServerUrl = "https://unrealfrontiers.com";
-    public const string InstanceSuffix = "";
+    private const LauncherMode DefaultMode = LauncherMode.Production;
 #endif
 
     private const string UpdateRoute = "/updateclient";
-    public const string DataFolderName = "UnrealFrontiers" + InstanceSuffix;
 
-    public static readonly string ServerURL = ResolveServerUrl();
+    public static readonly LauncherMode Mode = LauncherModeResolver.Resolve(
+        Environment.GetEnvironmentVariable("UF_MODE"), Environment.GetCommandLineArgs(), DefaultMode);
+
+    public static bool IsTestMode => Mode == LauncherMode.Test;
+
+    public static readonly string InstanceSuffix = IsTestMode ? ".Test" : "";
+    public static readonly string DataFolderName = "UnrealFrontiers" + InstanceSuffix;
+
+    public static readonly string ServerURL = LauncherModeResolver.ResolveServerUrl(
+        Mode, Environment.GetEnvironmentVariable("UF_SERVER_URL"));
+
+    public static string TestBanner => LauncherModeResolver.DescribeTestBackend(ServerURL);
 
     public static readonly string LauncherBasePath = OperatingSystem.IsWindows()
         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DataFolderName)
@@ -30,13 +36,4 @@ public static class AppStaticData
     public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}{UpdateRoute}/indexes/{instanceId}";
     public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}{UpdateRoute}/obsolete/{instanceId}";
     public static string GetModpackListURL() => $"{ServerURL}{UpdateRoute}/modpacks";
-
-    private static string ResolveServerUrl()
-    {
-#if LOCAL_BACKEND
-        var overrideUrl = Environment.GetEnvironmentVariable("UF_SERVER_URL");
-        if (!string.IsNullOrWhiteSpace(overrideUrl)) return overrideUrl.TrimEnd('/');
-#endif
-        return DefaultServerUrl;
-    }
 }

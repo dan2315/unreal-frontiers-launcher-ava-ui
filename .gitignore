@@ -17,5 +17,3 @@ flatpak-builder
 .avalonia-build-tasks/
 Packaging/publish/
 Packaging/Releases/
-Packaging/Releases-local/
-Packaging/publish/win-x64-local/

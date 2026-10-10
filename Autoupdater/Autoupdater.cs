@@ -25,9 +25,9 @@ public static class Autoupdater
         {
             var manager = new UpdateManager(new ServerUpdateSource());
 
-            if (AppStaticData.IsLocalBackend)
+            if (AppStaticData.IsTestMode)
             {
-                SetStatus("Local backend build, skipping update check.");
+                SetStatus("Test mode, skipping update check.");
             }
             else if (!manager.IsInstalled)
             {

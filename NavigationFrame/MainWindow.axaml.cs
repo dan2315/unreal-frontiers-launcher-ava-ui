@@ -15,6 +15,13 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = new MainWindowViewModel();
 
+        if (AppStaticData.IsTestMode)
+        {
+            Title = $"Unreal Frontiers Launcher - {AppStaticData.TestBanner}";
+            TitleText.Text = $"Unreal Frontiers Launcher  ·  {AppStaticData.TestBanner}";
+            TitleText.Foreground = new SolidColorBrush(Color.Parse("#FFB347"));
+        }
+
         PointerPressed += (s, e) => BeginMoveDrag(e);
     }
 
