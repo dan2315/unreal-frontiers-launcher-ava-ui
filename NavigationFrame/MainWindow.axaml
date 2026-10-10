@@ -22,20 +22,20 @@
                 <Grid Grid.ColumnDefinitions="*, *, *">
                     <Button CornerRadius="4" Grid.Column="0" BorderThickness="0" Background="Black" Width="50" PointerEntered="InputElement_OnPointerEntered" PointerExited="InputElement_OnPointerExited"
                             Click="GetToAuthPage" Margin="5,0,0,0" HorizontalAlignment="Left">
-                        <Svg Path="/Assets/Images/svg/arrow_left.svg" Width="20"/>
+                        <Svg Path="/Assets/Images/svg/arrow_left.svg" Width="18" Height="18"/>
                     </Button>
 
                     <TextBlock Grid.Column="1" Text="Unreal Frontiers Launcher" FontFamily="MontserratRegular" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
                     
                     <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button BorderThickness="0" Width="50" Click="OnMinimizeClick" Background="Black" PointerEntered="InputElement_OnPointerEntered" PointerExited="InputElement_OnPointerExited">
-                            <Svg Path="/Assets/Images/svg/dash.svg" Height="15"/>
+                            <Svg Path="/Assets/Images/svg/dash.svg" Width="18" Height="18"/>
                         </Button>
                         <!-- <Button BorderThickness="0" Width="50" Click="OnMaximizeClick" Background="Black" PointerEntered="InputElement_OnPointerEntered" PointerExited="InputElement_OnPointerExited"> -->
                         <!--     <PathIcon Height="15" Width="20" Foreground="White" Data="{StaticResource tabs_regular}"/> -->
                         <!-- </Button> -->
                         <Button BorderThickness="0" Width="50" Click="OnCloseClick" Background="Black" PointerEntered="InputElement_OnPointerEntered" PointerExited="InputElement_OnPointerExited">
-                            <Svg Path="/Assets/Images/svg/close_app.svg" Height="15"/>
+                            <Svg Path="/Assets/Images/svg/close_app.svg" Width="18" Height="18"/>
                         </Button>
                     </StackPanel>
                 </Grid>
