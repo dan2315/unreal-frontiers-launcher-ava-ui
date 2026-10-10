@@ -250,3 +250,28 @@ public class CrashLogTests : IDisposable
         Assert.Contains("NullReferenceException", log);
     }
 }
+
+public class GrantAccessTests
+{
+    [Fact]
+    public void GrantAccess_SetsThePlayerProfileSoTheGameCanBeLaunched()
+    {
+        var provider = new PlayerProfileProvider();
+        var auth = new AuthService(new HttpClientService());
+
+        auth.GrantAccess(provider, new AuthPage.AccessData { nickname = "steve" });
+
+        Assert.Equal("steve", provider.GetProfile().Nickname);
+    }
+
+    [Fact]
+    public void GrantAccess_FallsBackToTheDefaultNicknameWhenTheServerSendsNone()
+    {
+        var provider = new PlayerProfileProvider();
+        var auth = new AuthService(new HttpClientService());
+
+        auth.GrantAccess(provider, new AuthPage.AccessData());
+
+        Assert.Equal(PlayerProfile.Default.Nickname, provider.GetProfile().Nickname);
+    }
+}

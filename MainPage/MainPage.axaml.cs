@@ -43,7 +43,11 @@ public partial class MainPage : UserControl
 
         InitializeComponent();
 
-        _playerProfileProvider.OnProfileUpdate(() => _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName)));
+        _playerProfileProvider.OnProfileUpdate(() =>
+        {
+            _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName));
+            _viewModel.OnPropertyChanged(nameof(_viewModel.PlayText));
+        });
 
         Loaded += (_, _) =>
         {
@@ -135,13 +139,20 @@ public partial class MainPage : UserControl
         var instance = SelectedInstance;
         if (instance == null) return;
 
+        var profile = PlayerProfile;
+        if (profile == null)
+        {
+            await _popUpService.ShowOkDialogAsync("Not signed in", "Log in to your account before launching the game.");
+            return;
+        }
+
         bool answer = await _popUpService.ShowYesNoDialogAsync("Launching...", "Вы намерены запустить майнкрафт?");
         if (!answer) return;
 
         SetLaunchEnabled(false);
         await _gameLauncher.LaunchMinecraft(
             instance,
-            PlayerProfile,
+            profile,
             OnDownloadProgress,
             OnDownloadFileChanged,
             OnDownloadSpeedChanged,
