@@ -20,6 +20,7 @@ namespace UnrealFrontiersLauncher
                 .OnBeforeUninstallFastCallback(_ => UrlSchemeRegistration.Unregister())
                 .Run();
 
+            CrashLog.Install();
             LegacyDataMigration.MigrateFromInnoInstall();
             SentryIntegration.Initialize();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

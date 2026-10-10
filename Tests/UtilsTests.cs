@@ -220,3 +220,33 @@ public class ModLoaderTests
         Assert.Equal(ModLoader.Forge, restored.Loader);
     }
 }
+
+public class CrashLogTests : IDisposable
+{
+    private readonly string _previousDirectory = CrashLog.LogDirectory;
+    private readonly string _directory = Path.Combine(Path.GetTempPath(), "uf-crashlog-" + Guid.NewGuid().ToString("N"));
+
+    public CrashLogTests()
+    {
+        CrashLog.LogDirectory = _directory;
+    }
+
+    public void Dispose()
+    {
+        CrashLog.LogDirectory = _previousDirectory;
+        if (Directory.Exists(_directory)) Directory.Delete(_directory, true);
+    }
+
+    [Fact]
+    public void Write_AppendsTheFullExceptionToTheLogFile()
+    {
+        CrashLog.Write("First", new InvalidOperationException("boom"));
+        CrashLog.Write("Second", new NullReferenceException());
+
+        var log = File.ReadAllText(CrashLog.LogFilePath);
+        Assert.Contains("First", log);
+        Assert.Contains("boom", log);
+        Assert.Contains("Second", log);
+        Assert.Contains("NullReferenceException", log);
+    }
+}

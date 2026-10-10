@@ -105,7 +105,7 @@ namespace UnrealFrontiersLauncher
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error occured while launching {minecraftInstance.Name}. Exception: {e}");
+                CrashLog.Write($"Launching {minecraftInstance.Name} failed", e);
                 onError(e.Message);
             }
         }
