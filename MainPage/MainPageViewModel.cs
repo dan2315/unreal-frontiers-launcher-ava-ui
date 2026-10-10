@@ -72,7 +72,7 @@ public class MainPageViewModel : INotifyPropertyChanged
 
     public string PlayText
     {
-        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.PlayerProfile.Nickname}"; }
+        get { return $"Зайти на сервер {SelectedModpack.Name}, как {_pageReference.PlayerProfile?.Nickname}"; }
     }
 
     public string? PlayerName

@@ -133,6 +133,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
                 return;
             }
 
+            _authService.GrantAccess(_playerProfileProvider, new AuthPage.AccessData { nickname = response.Nickname });
             _navigationService.NavigateTo<MainPage>();
         }
     }
