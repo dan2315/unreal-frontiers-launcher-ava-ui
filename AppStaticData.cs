@@ -8,15 +8,14 @@ public static class AppStaticData
 #if LOCAL_BACKEND
     public const bool IsLocalBackend = true;
     private const string DefaultServerUrl = "http://localhost:3000";
-    private const string UpdateRoute = "/updateclient";
     public const string InstanceSuffix = ".Local";
 #else
     public const bool IsLocalBackend = false;
-    private const string DefaultServerUrl = "https://unrealfrontiers.xyz";
-    private const string UpdateRoute = "/update";
+    private const string DefaultServerUrl = "https://unrealfrontiers.com";
     public const string InstanceSuffix = "";
 #endif
 
+    private const string UpdateRoute = "/updateclient";
     public const string DataFolderName = "UnrealFrontiers" + InstanceSuffix;
 
     public static readonly string ServerURL = ResolveServerUrl();
