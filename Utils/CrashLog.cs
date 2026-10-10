@@ -15,6 +15,10 @@ public static class CrashLog
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Write("Unhandled exception", e.ExceptionObject as Exception);
         TaskScheduler.UnobservedTaskException += (_, e) => Write("Unobserved task exception", e.Exception);
+    }
+
+    public static void InstallUiThreadHandler()
+    {
         Dispatcher.UIThread.UnhandledException += (_, e) => Write("UI thread exception", e.Exception);
     }
 

@@ -31,6 +31,7 @@ public class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();
+            CrashLog.InstallUiThreadHandler();
 
             Services.GetRequiredService<PopupService>();
 
