@@ -29,6 +29,7 @@ public static class AppStaticData
     public static string GetVersionInfoURL(string instanceId) => $"{ServerURL}{UpdateRoute}/get_version_data/{instanceId}";
     public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}{UpdateRoute}/indexes/{instanceId}";
     public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}{UpdateRoute}/obsolete/{instanceId}";
+    public static string GetModpackListURL() => $"{ServerURL}{UpdateRoute}/modpacks";
 
     private static string ResolveServerUrl()
     {

@@ -11,6 +11,7 @@ namespace UnrealFrontiersLauncher
         public static string instancesPath = Path.Combine(AppStaticData.LauncherBasePath, "Instances");
         private readonly Dictionary<string, MinecraftInstance> minecraftInstances = new();
         public MinecraftInstance? selectedInstance;
+        public IReadOnlyCollection<MinecraftInstance> Instances => minecraftInstances.Values;
 
         public InstanceManager()
         {
@@ -58,6 +59,11 @@ namespace UnrealFrontiersLauncher
             if (versionInfo != null)
             {
                 var instance = CreateMinecraftInstance(instanceId, versionInfo);
+                if (minecraftInstances.TryGetValue(instanceId, out var previous))
+                {
+                    instance.RestoreInstalledVersion(previous.InstalledVersion);
+                }
+
                 instance.SaveToFile();
                 minecraftInstances[instanceId] = instance;
                 selectedInstance = instance;
@@ -103,7 +109,8 @@ namespace UnrealFrontiersLauncher
                 versionInfo.forgeVersion,
                 versionInfo.serverAddress,
                 versionInfo.minRam > 0 ? versionInfo.minRam : MinecraftInstance.DefaultRamMb,
-                versionInfo.loader
+                versionInfo.loader,
+                versionInfo.version
             );
             instance.LoadLaunchConfiguration();
             return instance;

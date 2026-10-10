@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnrealFrontiersLauncher;
@@ -14,6 +15,7 @@ public class MinecraftInstance
     private string _gameVersion;
     private string _forgeVersion;
     private string _loader;
+    private string _packVersion;
     private string _serverIp;
     private string _serverPort;
     [JsonIgnore] private LaunchConfiguration _launchConfiguration;
@@ -23,24 +25,27 @@ public class MinecraftInstance
     public string GameVersion => _gameVersion;
     public string ForgeVersion => _forgeVersion;
     public string Loader => _loader;
+    public string PackVersion => _packVersion;
+    public string? InstalledVersion { get; private set; }
     public string ServerIp => _serverIp;
     public string ServerPort => _serverPort;
     public string Address => _serverPort.Length == 0 ? _serverIp : $"{_serverIp}:{_serverPort}";
 
-    public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue, string? loader = null)
+    public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue, string? loader = null, string? packVersion = null)
     {
         _id = instanceId;
         _name = instanceName;
         _gameVersion = gameVersion;
         _forgeVersion = forgeVersion;
         _loader = ModLoader.Resolve(loader, gameVersion, forgeVersion);
+        _packVersion = packVersion ?? string.Empty;
 
         (_serverIp, _serverPort) = SplitAddress(serverAddress);
         _launchConfiguration = new (defaultRamValue);
     }
 
     [JsonConstructor]
-    public MinecraftInstance(string id, string name, string gameVersion, string forgeVersion, string serverIp, string serverPort, string? loader = null)
+    public MinecraftInstance(string id, string name, string gameVersion, string forgeVersion, string serverIp, string serverPort, string? loader = null, string? packVersion = null, string? installedVersion = null)
     {
         _id = id;
         _name = name;
@@ -49,6 +54,8 @@ public class MinecraftInstance
         _loader = ModLoader.Resolve(loader, gameVersion, forgeVersion);
         _serverIp = serverIp;
         _serverPort = serverPort;
+        _packVersion = packVersion ?? string.Empty;
+        InstalledVersion = installedVersion;
         _launchConfiguration = new (DefaultRamMb);
     }
 
@@ -56,6 +63,26 @@ public class MinecraftInstance
     {
         var parts = (address ?? string.Empty).Split(':', 2);
         return (parts[0], parts.Length > 1 ? parts[1] : string.Empty);
+    }
+
+    [JsonIgnore]
+    public bool IsInstalled => InstalledVersion != null || HasInstalledMods();
+
+    public void MarkInstalled()
+    {
+        InstalledVersion = _packVersion.Length > 0 ? _packVersion : "unknown";
+        SaveToFile();
+    }
+
+    public void RestoreInstalledVersion(string? version)
+    {
+        InstalledVersion = version;
+    }
+
+    private bool HasInstalledMods()
+    {
+        var mods = Path.Combine(GetResourcePath(), "mods");
+        return Directory.Exists(mods) && Directory.EnumerateFileSystemEntries(mods).Any();
     }
 
     public void SaveToFile()

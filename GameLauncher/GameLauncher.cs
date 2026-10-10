@@ -70,6 +70,7 @@ namespace UnrealFrontiersLauncher
 
                 var modpackInstaller = new ModpackInstaller(SharedHttp.Transfer, 5, TimeSpan.FromSeconds(30));
                 await modpackInstaller.InstallModpackAsync(minecraftInstance, byteProgress, fileProgress);
+                minecraftInstance.MarkInstalled();
 
                 new ServerListManager(minecraftInstance).EnsureCorrespondingServerEntryExist();
 

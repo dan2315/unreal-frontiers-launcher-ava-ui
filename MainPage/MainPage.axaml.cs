@@ -38,7 +38,7 @@ public partial class MainPage : UserControl
         _instanceManager = instanceManager;
         _serverService = serverService;
         _mainWindow = mainWindow;
-        _viewModel = new MainPageViewModel(this, _serverService);
+        _viewModel = new MainPageViewModel(this, _serverService, _instanceManager);
         DataContext = _viewModel;
 
         InitializeComponent();
@@ -53,6 +53,7 @@ public partial class MainPage : UserControl
         {
             InitSettingsPanel();
             UpdateSettingsPanel();
+            _ = _viewModel.RefreshCatalogAsync();
         };
     }
 
@@ -161,6 +162,13 @@ public partial class MainPage : UserControl
             _mainWindow);
     }
 
+    private async void OnRefreshModpacksClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button) button.IsEnabled = false;
+        await _viewModel.RefreshCatalogAsync(force: true);
+        if (sender is Button refreshed) refreshed.IsEnabled = true;
+    }
+
     private void SetLaunchEnabled(bool enabled)
     {
         // Selection events can fire while the XAML is still being loaded.
@@ -183,6 +191,7 @@ public partial class MainPage : UserControl
         if (e.AddedItems.Count == 0 || e.AddedItems[0] is not Modpack currentModpack)
         {
             ModpackCollectionView.SelectedItem = _viewModel.Modpacks.FirstOrDefault();
+            if (_viewModel.Modpacks.Count == 0) SetLaunchEnabled(false);
             return;
         }
 

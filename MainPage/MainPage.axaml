@@ -31,12 +31,31 @@
                     <GradientStop Color="#100F12" Offset="1.0"></GradientStop>
                 </LinearGradientBrush>
             </StackPanel.Background>
-            <TextBlock Text="Servers"
+            <Grid Margin="0,15,0,10">
+                <TextBlock Text="Servers"
+                           TextAlignment="Center"
+                           FontSize="34"
+                           Foreground="White"
+                           FontFamily="{StaticResource MontserratBold}" />
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,12,0"
+                        Padding="6"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="OnRefreshModpacksClicked"
+                        ToolTip.Tip="Refresh the modpack list">
+                    <Svg Path="/Assets/Images/svg/refresh.svg" Width="20" Height="20"/>
+                </Button>
+            </Grid>
+            <TextBlock Text="{Binding CatalogMessage}"
+                       IsVisible="{Binding HasCatalogMessage}"
+                       TextWrapping="Wrap"
                        TextAlignment="Center"
-                       FontSize="34"
-                       Foreground="White"
-                       Margin="0,15,0,20"
-                       FontFamily="{StaticResource MontserratBold}" />
+                       FontSize="12"
+                       Foreground="#E8B83A"
+                       Margin="14,0,14,10"
+                       FontFamily="{StaticResource MontserratLight}" />
 
             <!-- Modpack Collection -->
             <ListBox x:Name="ModpackCollectionView"
@@ -60,7 +79,7 @@
                                     CornerRadius="10"
                                     PointerEntered="Modpack_OnPointerEntered"
                                     PointerExited="Modpack_OnPointerExited"
-                                    Height="75"
+                                    MinHeight="95"
                                     MaxWidth="250">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -75,6 +94,23 @@
                                                    MaxWidth="250">
                                         </TextBlock>
                                     </StackPanel>
+                                    <Grid Margin="0,6,0,0" MaxWidth="200">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Subtitle}"
+                                                   FontSize="11"
+                                                   Foreground="#B8B8B8"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   FontFamily="{StaticResource MontserratLight}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding StatusText}"
+                                                   Margin="8,0,0,0"
+                                                   FontSize="11"
+                                                   Foreground="{Binding StatusColor}"
+                                                   FontFamily="{StaticResource MontserratBold}"/>
+                                    </Grid>
                                     <!-- Player Count -->
                                     <StackPanel Margin="0,8,0,0" MaxWidth="200">
                                         <Grid>

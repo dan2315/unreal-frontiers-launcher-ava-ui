@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -12,7 +13,53 @@ namespace UnrealFrontiersLauncher;
 
 public class Modpack : INotifyPropertyChanged
 {
-    public string Name { get; set; }
+    private string _name = "";
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (_name == value) return;
+            _name = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _subtitle = "";
+    public string Subtitle
+    {
+        get => _subtitle;
+        private set
+        {
+            if (_subtitle == value) return;
+            _subtitle = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _statusText = "";
+    public string StatusText
+    {
+        get => _statusText;
+        private set
+        {
+            if (_statusText == value) return;
+            _statusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private IBrush _statusColor = Brushes.Gray;
+    public IBrush StatusColor
+    {
+        get => _statusColor;
+        private set
+        {
+            _statusColor = value;
+            OnPropertyChanged();
+        }
+    }
+
     public Bitmap Icon { get; set; }
     private string _value;
     public string Value
@@ -23,10 +70,54 @@ public class Modpack : INotifyPropertyChanged
             if (_value != value)
             {
                 _value = value;
-                Icon = new Bitmap(AssetLoader.Open(new Uri($"avares://UnrealFrontiersLauncher/Assets/Images/ModpackIcons/{_value}_icon.png")));
+                Icon = LoadIcon(_value);
                 OnPropertyChanged(nameof(Icon));
             }
         }
+    }
+
+    public void Apply(CatalogEntry entry, bool nameIsAmbiguous)
+    {
+        Name = nameIsAmbiguous ? $"{entry.Name} ({entry.Id})" : entry.Name;
+        Subtitle = BuildSubtitle(entry);
+        StatusText = StatusLabel(entry.Status);
+        StatusColor = StatusBrush(entry.Status);
+    }
+
+    private static string BuildSubtitle(CatalogEntry entry)
+    {
+        var parts = new List<string>();
+        if (entry.MinecraftVersion.Length > 0) parts.Add(entry.MinecraftVersion);
+        parts.Add(entry.Loader == ModLoader.NeoForge ? "NeoForge" : "Forge");
+        if (entry.Version.Length > 0) parts.Add("v" + entry.Version);
+        return string.Join(" · ", parts);
+    }
+
+    private static string StatusLabel(ModpackStatus status) => status switch
+    {
+        ModpackStatus.Installed => "Installed",
+        ModpackStatus.UpdateAvailable => "Update available",
+        ModpackStatus.RemovedFromServer => "Removed from server",
+        ModpackStatus.ServerUnavailable => "Server unavailable",
+        _ => "Not installed"
+    };
+
+    private static IBrush StatusBrush(ModpackStatus status) => status switch
+    {
+        ModpackStatus.Installed => new SolidColorBrush(Color.Parse("#4CC24C")),
+        ModpackStatus.UpdateAvailable => new SolidColorBrush(Color.Parse("#E8B83A")),
+        ModpackStatus.RemovedFromServer => new SolidColorBrush(Color.Parse("#D9744F")),
+        ModpackStatus.ServerUnavailable => new SolidColorBrush(Color.Parse("#8A8A8A")),
+        _ => new SolidColorBrush(Color.Parse("#B0B0B0"))
+    };
+
+    private static Bitmap LoadIcon(string id)
+    {
+        var iconUri = new Uri($"avares://UnrealFrontiersLauncher/Assets/Images/ModpackIcons/{id}_icon.png");
+        var uri = AssetLoader.Exists(iconUri)
+            ? iconUri
+            : new Uri("avares://UnrealFrontiersLauncher/Assets/Images/logo_unrealfrontiers.png");
+        return new Bitmap(AssetLoader.Open(uri));
     }
 
     private int _currentPlayers;
