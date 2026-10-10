@@ -103,6 +103,7 @@ public class MainPageViewModel : INotifyPropertyChanged
         {
             new Modpack { Name = "Unreal Domains: Create", Value = "create" },
             new Modpack { Name = "Monifactory", Value = "monifactory"},
+            new Modpack { Name = "Unreal Zaruba", Value = "zaruba" },
         };
 
         if (Modpacks.Count > 0)
