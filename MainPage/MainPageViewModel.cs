@@ -99,23 +99,60 @@ public class MainPageViewModel : INotifyPropertyChanged
     {
         _pageReference = page;
         _serverService = serverService;
-        Modpacks = new ObservableCollection<Modpack>
-        {
-            new Modpack { Name = "Unreal Domains: Create", Value = "create" },
-            new Modpack { Name = "Monifactory", Value = "monifactory"},
-            new Modpack { Name = "Unreal Zaruba", Value = "zaruba" },
-        };
-
-        if (Modpacks.Count > 0)
-        {
-            Modpacks[Modpacks.Count - 1].IsLastItem = true;
-        }
+        // The last known list right away; the server's replaces it once it answers.
+        Modpacks = new ObservableCollection<Modpack>(ModpackCatalog.LoadCached().Select(Modpack.From));
+        MarkLastItem();
 
         SelectedTab = "game";
         var preferences = Preferences.Preferences.Get();
         SelectedModpack = Modpacks.FirstOrDefault(modpack => modpack.Value == preferences.LastSelectedModpack, Modpacks[0]);
         SelectedModpack.IsSelected = true;
         _ = PollPlayerCountsAsync();
+        _ = RefreshModpacksAsync();
+    }
+
+    /// <summary>
+    /// Brings the list in line with the server's: new modpacks are added, removed ones dropped, names and
+    /// icons updated. Items are matched by modpack id, so the selection survives; if the selected modpack
+    /// is gone, MainPage.OnInstanceSelected selects the first one.
+    /// </summary>
+    private async Task RefreshModpacksAsync()
+    {
+        // Started on the UI thread, so the collection is changed there too.
+        if (await ModpackCatalog.FetchAsync() is not { } fresh) return;
+
+        var desired = fresh.Select(info =>
+        {
+            var existing = Modpacks.FirstOrDefault(m => m.Value == info.modpackId);
+            if (existing == null) return Modpack.From(info);
+            existing.Update(info);
+            return existing;
+        }).ToList();
+
+        for (var i = 0; i < desired.Count; i++)
+        {
+            var at = Modpacks.IndexOf(desired[i]);
+            if (at < 0)
+            {
+                Modpacks.Insert(i, desired[i]);
+                _ = desired[i].UpdatePlayerCount(_serverService);
+            }
+            else if (at != i)
+            {
+                Modpacks.Move(at, i);
+            }
+        }
+        while (Modpacks.Count > desired.Count)
+            Modpacks.RemoveAt(Modpacks.Count - 1);
+
+        MarkLastItem();
+        OnPropertyChanged(nameof(PlayText));
+    }
+
+    private void MarkLastItem()
+    {
+        for (var i = 0; i < Modpacks.Count; i++)
+            Modpacks[i].IsLastItem = i == Modpacks.Count - 1;
     }
 
     private async Task PollPlayerCountsAsync()

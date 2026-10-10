@@ -12,8 +12,21 @@ namespace UnrealFrontiersLauncher;
 
 public class Modpack : INotifyPropertyChanged
 {
-    public string Name { get; set; }
-    public Bitmap Icon { get; set; }
+    private string _name;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public Bitmap Icon { get; private set; }
     private string _value;
     public string Value
     {
@@ -23,10 +36,54 @@ public class Modpack : INotifyPropertyChanged
             if (_value != value)
             {
                 _value = value;
-                Icon = new Bitmap(AssetLoader.Open(new Uri($"avares://UnrealFrontiersLauncher/Assets/Images/ModpackIcons/{_value}_icon.png")));
+                Icon = BundledIcon(_value);
                 OnPropertyChanged(nameof(Icon));
             }
         }
+    }
+
+    /// <summary>A modpack of the server list: its name, and the icon from imageURl when that is a URL.</summary>
+    public static Modpack From(VersionInfo info)
+    {
+        var modpack = new Modpack { Name = info.modpackName, Value = info.modpackId };
+        _ = modpack.LoadIconAsync(info.imageURl);
+        return modpack;
+    }
+
+    public void Update(VersionInfo info)
+    {
+        Name = info.modpackName;
+        _ = LoadIconAsync(info.imageURl);
+    }
+
+    private string? _iconUrl;
+
+    /// <summary>Replaces the bundled icon with the one at <paramref name="url"/> ("none" or not a URL: keeps it).</summary>
+    private async Task LoadIconAsync(string? url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") || url == _iconUrl)
+            return;
+        _iconUrl = url;
+        try
+        {
+            using var stream = new System.IO.MemoryStream(await SharedHttp.Api.GetByteArrayAsync(uri));
+            Icon = new Bitmap(stream);
+            OnPropertyChanged(nameof(Icon));
+        }
+        catch (Exception e)
+        {
+            _iconUrl = null;
+            Console.WriteLine($"Could not load the icon of {Value} from {url}: {e.Message}");
+        }
+    }
+
+    /// <summary>Assets/Images/ModpackIcons/{id}_icon.png, or the launcher logo for modpacks without one.</summary>
+    private static Bitmap BundledIcon(string id)
+    {
+        var icon = new Uri($"avares://UnrealFrontiersLauncher/Assets/Images/ModpackIcons/{id}_icon.png");
+        return new Bitmap(AssetLoader.Open(AssetLoader.Exists(icon)
+            ? icon
+            : new Uri("avares://UnrealFrontiersLauncher/Assets/Images/logo_unrealfrontiers.png")));
     }
 
     private int _currentPlayers;

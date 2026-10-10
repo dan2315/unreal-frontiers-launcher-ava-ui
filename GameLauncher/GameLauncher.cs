@@ -9,7 +9,6 @@ using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Installer.Forge;
 using CmlLib.Core.Installer.NeoForge;
-using CmlLib.Core.Installer.NeoForge.Installers;
 using CmlLib.Core.Installers;
 using CmlLib.Core.ProcessBuilder;
 
@@ -121,7 +120,7 @@ namespace UnrealFrontiersLauncher
                 return new NeoForgeInstaller(launcher).Install(
                     instance.GameVersion,
                     instance.ForgeVersion,
-                    new NeoForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
+                    new ForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
             }
 
             return new ForgeInstaller(launcher).Install(
