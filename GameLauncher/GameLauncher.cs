@@ -16,6 +16,15 @@ namespace UnrealFrontiersLauncher
     public class GameLauncher
     {
         private static readonly TimeSpan SpeedWindow = TimeSpan.FromSeconds(5);
+        private const string AccessTokenVariable = "UF_ACCESS_TOKEN";
+        private const string BackendUrlVariable = "UF_BACKEND_URL";
+
+        private readonly AuthService _authService;
+
+        public GameLauncher(AuthService authService)
+        {
+            _authService = authService;
+        }
 
         public async Task LaunchMinecraft(
             MinecraftInstance minecraftInstance,
@@ -53,11 +62,13 @@ namespace UnrealFrontiersLauncher
                     new ForgeInstallOptions { ByteProgress = byteProgress, FileProgress = fileProgress });
 
                 var launchConfiguration = minecraftInstance.GetLaunchConfiguration();
+                var accessToken = await _authService.GetFreshAccessTokenAsync();
                 var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
                 {
                     Session = MSession.CreateOfflineSession(playerProfile.Nickname),
                     MaximumRamMb = launchConfiguration.Ram,
                 });
+                ApplyGameEnvironment(process, accessToken);
 
                 var modpackInstaller = new ModpackInstaller(SharedHttp.Transfer, 5, TimeSpan.FromSeconds(30));
                 await modpackInstaller.InstallModpackAsync(minecraftInstance, byteProgress, fileProgress);
@@ -99,6 +110,17 @@ namespace UnrealFrontiersLauncher
                 Console.WriteLine($"Error occured while launching {minecraftInstance.Name}. Exception: {e}");
                 onError(e.Message);
             }
+        }
+
+        public static void ApplyGameEnvironment(Process process, string? accessToken)
+        {
+            var environment = process.StartInfo.EnvironmentVariables;
+            environment[BackendUrlVariable] = AppStaticData.ServerURL;
+
+            if (string.IsNullOrEmpty(accessToken))
+                environment.Remove(AccessTokenVariable);
+            else
+                environment[AccessTokenVariable] = accessToken;
         }
 
         private static MinecraftPath CreateMinecraftPath(MinecraftInstance minecraftInstance)

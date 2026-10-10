@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using UnrealFrontiersLauncher;
 
@@ -104,5 +105,68 @@ public class MinecraftInstanceTests
     {
         var instance = new MinecraftInstance("id", "name", "1.20.1", "47.4.0", "play.example.com", 4096);
         Assert.Equal("play.example.com", instance.Address);
+    }
+}
+
+public class GameEnvironmentTests
+{
+    private static Process NewProcess(string fileName = "cmd.exe", string arguments = "")
+    {
+        return new Process
+        {
+            StartInfo = new ProcessStartInfo(fileName, arguments)
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            }
+        };
+    }
+
+    [Fact]
+    public void ApplyGameEnvironment_SetsTokenAndBackendUrl()
+    {
+        var process = NewProcess();
+
+        GameLauncher.ApplyGameEnvironment(process, "access-token");
+
+        Assert.Equal("access-token", process.StartInfo.EnvironmentVariables["UF_ACCESS_TOKEN"]);
+        Assert.Equal(AppStaticData.ServerURL, process.StartInfo.EnvironmentVariables["UF_BACKEND_URL"]);
+    }
+
+    [Fact]
+    public void ApplyGameEnvironment_RemovesInheritedTokenWhenLoggedOut()
+    {
+        var process = NewProcess();
+        process.StartInfo.EnvironmentVariables["UF_ACCESS_TOKEN"] = "stale";
+
+        GameLauncher.ApplyGameEnvironment(process, null);
+
+        Assert.False(process.StartInfo.EnvironmentVariables.ContainsKey("UF_ACCESS_TOKEN"));
+    }
+
+    [Fact]
+    public void ApplyGameEnvironment_KeepsTokenOutOfCommandLine()
+    {
+        var process = NewProcess("java", "-Xmx4G -jar game.jar");
+
+        GameLauncher.ApplyGameEnvironment(process, "secret-token");
+
+        Assert.DoesNotContain("secret-token", process.StartInfo.Arguments);
+    }
+
+    [Fact]
+    public void ApplyGameEnvironment_ReachesChildProcess()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var process = NewProcess("cmd.exe", "/c echo %UF_ACCESS_TOKEN%");
+        GameLauncher.ApplyGameEnvironment(process, "token-from-launcher");
+
+        process.Start();
+        var output = process.StandardOutput.ReadToEnd().Trim();
+        process.WaitForExit();
+
+        Assert.Equal("token-from-launcher", output);
     }
 }

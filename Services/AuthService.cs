@@ -14,13 +14,14 @@ namespace UnrealFrontiersLauncher
     {
         private readonly HttpClientService _httpClient;
         private readonly TokenStorage _tokenStorage;
+        private string _accessToken = "";
 
         public AuthService(HttpClientService httpClient)
         {
             _httpClient = httpClient;
             _tokenStorage = new TokenStorage();
             var tokens = _tokenStorage.LoadTokens();
-            _httpClient.SetAuthHeader(tokens.accessToken);
+            SetAccessToken(tokens.accessToken);
         }
 
         public async Task<(bool Success, string Message)> CreateAccount(string nickname, string email, string password)
@@ -142,9 +143,21 @@ namespace UnrealFrontiersLauncher
             return (false, null);
         }
 
+        public async Task<string?> GetFreshAccessTokenAsync()
+        {
+            await TryAuthWithTokens();
+            return _accessToken.Length > 0 ? _accessToken : null;
+        }
+
         private void ApplyTokens(string accessToken, string refreshToken)
         {
             _tokenStorage.SaveTokens(accessToken, refreshToken);
+            SetAccessToken(accessToken);
+        }
+
+        private void SetAccessToken(string accessToken)
+        {
+            _accessToken = accessToken;
             _httpClient.SetAuthHeader(accessToken);
         }
         public Task<(bool Success, string Message)> DiscordAuth(string? nickname)
@@ -229,7 +242,7 @@ namespace UnrealFrontiersLauncher
             }
             else if (parameters.accessToken != null)
             {
-                _httpClient.SetAuthHeader(parameters.accessToken);
+                SetAccessToken(parameters.accessToken);
             }
 
             profileProvider.SetProfile(new PlayerProfile(parameters.nickname ?? PlayerProfile.Default.Nickname));
