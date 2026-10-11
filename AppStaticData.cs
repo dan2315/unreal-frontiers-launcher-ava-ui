@@ -5,7 +5,7 @@ namespace UnrealFrontiersLauncher;
 
 public static class AppStaticData
 {
-#if DEBUG
+#if DEBUG || DEV_BUILD
     private const LauncherMode DefaultMode = LauncherMode.Test;
 #else
     private const LauncherMode DefaultMode = LauncherMode.Production;

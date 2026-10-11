@@ -26,6 +26,13 @@
 <!--      <SelfContained>true</SelfContained> ???-->
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(DevBuild)' == 'true'">
+      <AssemblyName>UnrealFrontiersLauncherDev</AssemblyName>
+      <ApplicationTitle>Unreal Frontiers Launcher DEV</ApplicationTitle>
+      <ApplicationIcon>Assets/Images/logo-dev.ico</ApplicationIcon>
+      <DefineConstants>$(DefineConstants);DEV_BUILD</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>

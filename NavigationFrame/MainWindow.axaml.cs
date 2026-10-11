@@ -17,8 +17,8 @@ public partial class MainWindow : Window
 
         if (AppStaticData.IsTestMode)
         {
-            Title = $"Unreal Frontiers Launcher - {AppStaticData.TestBanner}";
-            TitleText.Text = $"Unreal Frontiers Launcher  ·  {AppStaticData.TestBanner}";
+            Title = $"Unreal Frontiers Launcher DEV - {AppStaticData.TestBanner}";
+            TitleText.Text = $"Unreal Frontiers Launcher DEV  ·  {AppStaticData.TestBanner}";
             TitleText.Foreground = new SolidColorBrush(Color.Parse("#FFB347"));
         }
 
