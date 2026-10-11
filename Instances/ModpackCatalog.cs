@@ -24,7 +24,8 @@ public record CatalogEntry(
     string Loader,
     string Version,
     string ServerAddress,
-    ModpackStatus Status);
+    ModpackStatus Status,
+    string ImageUrl = "");
 
 public static class ModpackCatalog
 {
@@ -122,7 +123,8 @@ public static class ModpackCatalog
             ModLoader.Resolve(info.loader, info.minecraftVersion, info.forgeVersion),
             info.version,
             info.serverAddress,
-            status);
+            status,
+            info.imageURl);
     }
 
     private static CatalogEntry FromInstance(MinecraftInstance instance, ModpackStatus status) =>

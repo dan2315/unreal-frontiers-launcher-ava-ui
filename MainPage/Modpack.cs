@@ -82,6 +82,7 @@ public class Modpack : INotifyPropertyChanged
         Subtitle = BuildSubtitle(entry);
         StatusText = StatusLabel(entry.Status);
         StatusColor = StatusBrush(entry.Status);
+        _ = LoadRemoteIconAsync(entry.ImageUrl);
     }
 
     private static string BuildSubtitle(CatalogEntry entry)
@@ -111,13 +112,35 @@ public class Modpack : INotifyPropertyChanged
         _ => new SolidColorBrush(Color.Parse("#B0B0B0"))
     };
 
+    private static readonly string AssetRoot = $"avares://{typeof(Modpack).Assembly.GetName().Name}/Assets/Images/";
+
     private static Bitmap LoadIcon(string id)
     {
-        var iconUri = new Uri($"avares://UnrealFrontiersLauncher/Assets/Images/ModpackIcons/{id}_icon.png");
-        var uri = AssetLoader.Exists(iconUri)
-            ? iconUri
-            : new Uri("avares://UnrealFrontiersLauncher/Assets/Images/logo_unrealfrontiers.png");
+        var iconUri = new Uri($"{AssetRoot}ModpackIcons/{id}_icon.png");
+        var uri = AssetLoader.Exists(iconUri) ? iconUri : new Uri(AssetRoot + "logo_unrealfrontiers.png");
         return new Bitmap(AssetLoader.Open(uri));
+    }
+
+    private string? _iconUrl;
+
+    // The bundled icon stays unless the server gives a URL ("none" or empty keeps it).
+    private async Task LoadRemoteIconAsync(string imageUrl)
+    {
+        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") || imageUrl == _iconUrl)
+            return;
+
+        _iconUrl = imageUrl;
+        try
+        {
+            using var stream = new System.IO.MemoryStream(await SharedHttp.Api.GetByteArrayAsync(uri));
+            Icon = new Bitmap(stream);
+            OnPropertyChanged(nameof(Icon));
+        }
+        catch (Exception ex)
+        {
+            _iconUrl = null;
+            Console.WriteLine($"Could not load the icon of {Value}: {ex.Message}");
+        }
     }
 
     private int _currentPlayers;
