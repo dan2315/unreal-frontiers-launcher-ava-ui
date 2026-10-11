@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Output = (Join-Path $PSScriptRoot 'publish\dev'),
+    [string]$Output,
     [switch]$Run
 )
 
@@ -10,7 +10,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$project = Join-Path (Split-Path -Parent $PSScriptRoot) 'unreal-frontiers-launcher.csproj'
+$root = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$project = Join-Path (Split-Path -Parent $root) 'unreal-frontiers-launcher.csproj'
+if (-not $Output) { $Output = Join-Path $root 'publish\dev' }
 
 if (Test-Path $Output) { Remove-Item $Output -Recurse -Force }
 dotnet publish $project -c Release -r win-x64 --self-contained -p:DevBuild=true `
