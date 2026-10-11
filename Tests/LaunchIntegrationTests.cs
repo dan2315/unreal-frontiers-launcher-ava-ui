@@ -21,11 +21,20 @@ public class LaunchIntegrationTests
         Console.WriteLine($"[launch-test] {instance.Name}: {instance.GameVersion} {instance.Loader} {instance.ForgeVersion}");
 
         var auth = new AuthService(new HttpClientService());
+        var nickname = "LauncherTest";
         var error = (string?)null;
+
+        // Optional: a real dev account, so the game gets a token the server accepts.
+        if (Environment.GetEnvironmentVariable("UF_TEST_USER") is { Length: > 0 } user)
+        {
+            var login = await auth.Login(user, Environment.GetEnvironmentVariable("UF_TEST_PASSWORD") ?? "");
+            Assert.True(login.Success, login.Message);
+            nickname = login.Nickname!;
+        }
 
         await new GameLauncher(auth).LaunchMinecraft(
             instance,
-            new PlayerProfile("LauncherTest"),
+            new PlayerProfile(nickname),
             progress => { },
             file => Console.WriteLine($"[launch-test] {file}"),
             speed => { },

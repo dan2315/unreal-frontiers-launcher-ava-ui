@@ -27,9 +27,10 @@ public class MinecraftInstance
     public string Loader => _loader;
     public string PackVersion => _packVersion;
     public string? InstalledVersion { get; private set; }
-    public string ServerIp => _serverIp;
+    // Java resolves "localhost" to ::1 first and does not fall back, but local servers (Docker) listen on IPv4 only.
+    public string ServerIp => string.Equals(_serverIp, "localhost", StringComparison.OrdinalIgnoreCase) ? "127.0.0.1" : _serverIp;
     public string ServerPort => _serverPort;
-    public string Address => _serverPort.Length == 0 ? _serverIp : $"{_serverIp}:{_serverPort}";
+    public string Address => _serverPort.Length == 0 ? ServerIp : $"{ServerIp}:{_serverPort}";
 
     public MinecraftInstance(string instanceId, string instanceName, string gameVersion, string forgeVersion, string serverAddress, int defaultRamValue, string? loader = null, string? packVersion = null)
     {
