@@ -89,6 +89,16 @@ public class LauncherServerUrlTests
         Assert.Throws<InvalidOperationException>(() => LauncherModeResolver.ResolveServerUrl(LauncherMode.Test, value));
     }
 
+    [Theory]
+    [InlineData("http://localhost:3200", "http://127.0.0.1:3200")]
+    [InlineData("http://LocalHost:3200/", "http://127.0.0.1:3200")]
+    [InlineData("http://192.168.1.20:3200", "http://192.168.1.20:3200")]
+    [InlineData("https://dev.example.org", "https://dev.example.org")]
+    public void ForGame_UsesTheIPv4LoopbackForLocalhost(string value, string expected)
+    {
+        Assert.Equal(expected, LauncherModeResolver.ForGame(value));
+    }
+
     [Fact]
     public void TestBanner_NamesTheBackend()
     {

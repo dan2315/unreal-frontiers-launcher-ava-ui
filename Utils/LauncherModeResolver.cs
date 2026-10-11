@@ -64,6 +64,12 @@ public static class LauncherModeResolver
         return LocalHosts.Contains(host) && uri.Port == ProductionLocalPort;
     }
 
+    // The game's JVM resolves "localhost" to ::1 and does not fall back, while local servers listen on IPv4 only.
+    public static string ForGame(string serverUrl) =>
+        Uri.TryCreate(serverUrl, UriKind.Absolute, out var uri) && uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+            ? new UriBuilder(uri) { Host = "127.0.0.1" }.Uri.AbsoluteUri.TrimEnd('/')
+            : serverUrl;
+
     public static string DescribeTestBackend(string serverUrl) =>
         Uri.TryCreate(serverUrl, UriKind.Absolute, out var uri) ? $"TEST ({uri.Authority})" : "TEST";
 }

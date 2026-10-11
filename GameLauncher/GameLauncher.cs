@@ -133,7 +133,7 @@ namespace UnrealFrontiersLauncher
         public static void ApplyGameEnvironment(Process process, string? accessToken)
         {
             var environment = process.StartInfo.EnvironmentVariables;
-            environment[BackendUrlVariable] = AppStaticData.ServerURL;
+            environment[BackendUrlVariable] = LauncherModeResolver.ForGame(AppStaticData.ServerURL);
 
             if (string.IsNullOrEmpty(accessToken))
                 environment.Remove(AccessTokenVariable);
