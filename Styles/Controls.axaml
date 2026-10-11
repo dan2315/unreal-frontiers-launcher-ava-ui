@@ -1,0 +1,142 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Shared control theme for the launcher. -->
+
+  <!-- Primary gradient action button (launch, sign in). -->
+  <Style Selector="Button.uf-primary">
+    <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-primary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfLaunchHoverGradient}" />
+  </Style>
+  <Style Selector="Button.uf-primary:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+  <Style Selector="Button.uf-primary:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="#3A3842" />
+    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+  </Style>
+
+  <!-- Subtle ghost button (window chrome, icon buttons). -->
+  <Style Selector="Button.uf-ghost">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusS}" />
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-ghost:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#2A2731" />
+  </Style>
+  <Style Selector="Button.uf-ghost:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#35323E" />
+  </Style>
+
+  <!-- Card button (profile actions). -->
+  <Style Selector="Button.uf-card">
+    <Setter Property="Background" Value="{StaticResource UfRowBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBorderBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="14,10" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-card:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#3A3743" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+  </Style>
+  <Style Selector="Button.uf-card:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#443F50" />
+  </Style>
+
+  <!-- Text field. -->
+  <Style Selector="TextBox.uf-field">
+    <Setter Property="Background" Value="#16141A" />
+    <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
+    <Setter Property="CaretBrush" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="SelectionBrush" Value="#3D5A4C" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBorderBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="14,10" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontSize" Value="15" />
+  </Style>
+  <Style Selector="TextBox.uf-field:pointerover /template/ Border#PART_BorderElement">
+    <Setter Property="BorderBrush" Value="#55525E" />
+  </Style>
+  <Style Selector="TextBox.uf-field:focus /template/ Border#PART_BorderElement">
+    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+  </Style>
+
+  <!-- Section caption. -->
+  <Style Selector="TextBlock.uf-caption">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{StaticResource UfTextMuteBrush}" />
+  </Style>
+
+  <!-- Card surface. -->
+  <Style Selector="Border.uf-card">
+    <Setter Property="Background" Value="{StaticResource UfCardBrush}" />
+    <Setter Property="BorderBrush" Value="#2E2C34" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusL}" />
+  </Style>
+
+  <!-- Progress bars. -->
+  <Style Selector="ProgressBar.uf-bar">
+    <Setter Property="Background" Value="#26232C" />
+    <Setter Property="Foreground" Value="{StaticResource UfAccentGradient}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="MinHeight" Value="8" />
+  </Style>
+  <Style Selector="ProgressBar.uf-bar /template/ Border#PART_Track">
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="ProgressBar.uf-bar /template/ Border#PART_Indicator">
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+
+  <Style Selector="ProgressBar.uf-thin">
+    <Setter Property="Background" Value="#333036" />
+    <Setter Property="Foreground" Value="{StaticResource UfAccentGradient}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="MinHeight" Value="5" />
+  </Style>
+  <Style Selector="ProgressBar.uf-thin /template/ Border#PART_Track">
+    <Setter Property="CornerRadius" Value="3" />
+  </Style>
+  <Style Selector="ProgressBar.uf-thin /template/ Border#PART_Indicator">
+    <Setter Property="CornerRadius" Value="3" />
+  </Style>
+
+  <!-- Settings slider. -->
+  <Style Selector="Slider.uf-slider">
+    <Setter Property="Foreground" Value="{StaticResource UfMintBrush}" />
+  </Style>
+
+  <!-- Discord brand button on auth page. -->
+  <Style Selector="Button.uf-discord">
+    <Setter Property="Background" Value="#5865F2" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-discord:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#4752C4" />
+  </Style>
+  <Style Selector="Button.uf-discord:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#3C45A5" />
+  </Style>
+</Styles>

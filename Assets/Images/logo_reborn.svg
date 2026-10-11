@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 380" width="1000" height="380" role="img" aria-label="Unreal Frontiers logo with gas giant O">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0EA5E9"/>
+      <stop offset="0.55" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#00E676"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00FFA3"/>
+      <stop offset="0.55" stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#2979FF"/>
+    </linearGradient>
+    <linearGradient id="oRing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00FFA3"/>
+      <stop offset="1" stop-color="#00E5FF"/>
+    </linearGradient>
+    <linearGradient id="oShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.38"/>
+    </linearGradient>
+    <clipPath id="unrealClip">
+      <text x="500" y="195" text-anchor="middle" font-family="Segoe UI, Inter, Montserrat, Arial, sans-serif" font-weight="800" font-size="150" letter-spacing="4" textLength="700" lengthAdjust="spacingAndGlyphs">UNREAL</text>
+    </clipPath>
+    <clipPath id="oClip">
+      <circle cx="344" cy="263" r="21"/>
+    </clipPath>
+  </defs>
+
+  <!-- плоский задник -->
+  <rect width="1000" height="380" fill="#0A1F18"/>
+
+  <!-- верхняя надпись с пейзажем внутри букв -->
+  <text x="500" y="195" text-anchor="middle" font-family="Segoe UI, Inter, Montserrat, Arial, sans-serif" font-weight="800" font-size="150" letter-spacing="4" fill="#ECFDF5" textLength="700" lengthAdjust="spacingAndGlyphs">UNREAL</text>
+  <g clip-path="url(#unrealClip)">
+    <rect x="140" y="55" width="720" height="145" fill="url(#sky)"/>
+    <circle cx="445" cy="118" r="27" fill="#F2FFFA"/>
+    <path d="M140 160 L220 105 L260 135 L310 95 L360 140 L410 110 L460 145 L510 100 L560 140 L610 108 L660 142 L710 102 L760 138 L810 112 L860 160 L860 200 L140 200 Z" fill="#0284C7"/>
+    <path d="M140 172 L200 135 L250 162 L320 128 L380 168 L440 138 L500 170 L570 136 L630 168 L700 134 L770 168 L860 140 L860 200 L140 200 Z" fill="#0B6B4A"/>
+    <g fill="#FFFFFF">
+      <path d="M310 95 L320 109 L310 113 L300 109 Z"/>
+      <path d="M510 100 L520 114 L510 118 L500 114 Z"/>
+      <path d="M710 102 L720 116 L710 120 L700 116 Z"/>
+    </g>
+  </g>
+
+  <!-- FRONTIERS: буквы по фиксированным слотам, вместо O — планета -->
+  <g font-family="Segoe UI, Inter, Montserrat, Arial, sans-serif" font-weight="700" font-size="54" fill="#D7F5E3" text-anchor="middle">
+    <text x="189" y="282">F</text>
+    <text x="267" y="282">R</text>
+    <text x="422" y="282">N</text>
+    <text x="500" y="282">T</text>
+    <text x="578" y="282">I</text>
+    <text x="656" y="282">E</text>
+    <text x="733" y="282">R</text>
+    <text x="811" y="282">S</text>
+  </g>
+
+  <!-- O — газовый гигант с полосами, орбита та же -->
+  <g>
+    <!-- дальняя дуга орбиты -->
+    <g transform="rotate(-16 344 263)">
+      <path d="M219 263 A125 24 0 0 1 469 263" fill="none" stroke="#00E5FF" stroke-width="4" stroke-linecap="round" opacity="0.45"/>
+    </g>
+    <!-- тело планеты -->
+    <circle cx="344" cy="263" r="21" fill="#00B377"/>
+    <g clip-path="url(#oClip)">
+      <rect x="323" y="242" width="42" height="42" fill="#35C98A"/>
+      <path d="M323 242 H365 V249 Q354 250.5 344 249.5 Q334 248.5 323 250 Z" fill="#DCEFE8"/>
+      <path d="M323 250 Q334 248.5 344 249.5 Q354 250.5 365 249.5 V255 Q354 256 344 255 Q334 254 323 256 Z" fill="#6FD3C9"/>
+      <path d="M323 264 Q335 262.5 344 264 Q354 265.5 365 264 V269 Q353 270.5 344 269 Q334 267.5 323 270 Z" fill="#2E7D5F"/>
+      <path d="M323 270 Q334 267.5 344 269 Q353 270.5 365 269.5 V284 H323 Z" fill="#3A7CA5"/>
+      <rect x="323" y="242" width="42" height="42" fill="url(#oShade)"/>
+    </g>
+    <!-- ближняя дуга орбиты -->
+    <g transform="rotate(-16 344 263)">
+      <path d="M219 263 A125 24 0 0 0 469 263" fill="none" stroke="url(#orbit)" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <!-- луна на орбите -->
+    <circle cx="456" cy="241" r="6.5" fill="#E1F5FE" stroke="#0284C7" stroke-width="2"/>
+  </g>
+</svg>

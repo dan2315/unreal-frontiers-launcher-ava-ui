@@ -1,0 +1,73 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Unreal Frontiers launcher design tokens.
+    Brand accents: mint #00FFA3 / cyan #00E5FF (from the Reborn logo),
+    legacy violet kept for gradients and the launch button.
+  -->
+
+  <!-- Brand -->
+  <Color x:Key="UfMint">#00FFA3</Color>
+  <Color x:Key="UfCyan">#00E5FF</Color>
+  <Color x:Key="UfBlue">#2979FF</Color>
+  <Color x:Key="UfViolet">#8A58BB</Color>
+  <Color x:Key="UfMagenta">#EE4AEF</Color>
+  <Color x:Key="UfDeepPurple">#551E6E</Color>
+
+  <!-- Surfaces -->
+  <Color x:Key="UfInk">#0A1F18</Color>
+  <Color x:Key="UfWindow">#100F12</Color>
+  <Color x:Key="UfCard">#201E24</Color>
+  <Color x:Key="UfCardHi">#2A2731</Color>
+  <Color x:Key="UfPanel">#1B191F</Color>
+  <Color x:Key="UfRow">#2F2D36</Color>
+  <Color x:Key="UfBorder">#3A3842</Color>
+  <Color x:Key="UfDivider">#2E2C34</Color>
+
+  <!-- Text -->
+  <Color x:Key="UfText">#F2F5F3</Color>
+  <Color x:Key="UfTextDim">#B9BDC2</Color>
+  <Color x:Key="UfTextMute">#7C828A</Color>
+
+  <!-- Status -->
+  <Color x:Key="UfOk">#4CC24C</Color>
+  <Color x:Key="UfWarn">#E8B83A</Color>
+  <Color x:Key="UfErr">#E5484D</Color>
+
+  <!-- Brushes -->
+  <SolidColorBrush x:Key="UfMintBrush" Color="{StaticResource UfMint}" />
+  <SolidColorBrush x:Key="UfCyanBrush" Color="{StaticResource UfCyan}" />
+  <SolidColorBrush x:Key="UfTextBrush" Color="{StaticResource UfText}" />
+  <SolidColorBrush x:Key="UfTextDimBrush" Color="{StaticResource UfTextDim}" />
+  <SolidColorBrush x:Key="UfTextMuteBrush" Color="{StaticResource UfTextMute}" />
+  <SolidColorBrush x:Key="UfCardBrush" Color="{StaticResource UfCard}" />
+  <SolidColorBrush x:Key="UfCardHiBrush" Color="{StaticResource UfCardHi}" />
+  <SolidColorBrush x:Key="UfPanelBrush" Color="{StaticResource UfPanel}" />
+  <SolidColorBrush x:Key="UfRowBrush" Color="{StaticResource UfRow}" />
+  <SolidColorBrush x:Key="UfBorderBrush" Color="{StaticResource UfBorder}" />
+  <SolidColorBrush x:Key="UfDividerBrush" Color="{StaticResource UfDivider}" />
+
+  <LinearGradientBrush x:Key="UfAccentGradient" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Color="{StaticResource UfMint}" Offset="0.0" />
+    <GradientStop Color="{StaticResource UfCyan}" Offset="0.55" />
+    <GradientStop Color="{StaticResource UfBlue}" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="UfLaunchGradient" StartPoint="0%,0%" EndPoint="100%,60%">
+    <GradientStop Color="#551E6E" Offset="0.0" />
+    <GradientStop Color="#8A58BB" Offset="0.45" />
+    <GradientStop Color="#EA4BED" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="UfLaunchHoverGradient" StartPoint="0%,0%" EndPoint="100%,60%">
+    <GradientStop Color="#6A2A86" Offset="0.0" />
+    <GradientStop Color="#A06BD6" Offset="0.45" />
+    <GradientStop Color="#F066F2" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <!-- Geometry -->
+  <CornerRadius x:Key="UfRadiusS">6</CornerRadius>
+  <CornerRadius x:Key="UfRadiusM">10</CornerRadius>
+  <CornerRadius x:Key="UfRadiusL">16</CornerRadius>
+  <CornerRadius x:Key="UfRadiusXl">24</CornerRadius>
+</ResourceDictionary>

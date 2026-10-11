@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -117,7 +118,7 @@ public class Modpack : INotifyPropertyChanged
     private static Bitmap LoadIcon(string id)
     {
         var iconUri = new Uri($"{AssetRoot}ModpackIcons/{id}_icon.png");
-        var uri = AssetLoader.Exists(iconUri) ? iconUri : new Uri(AssetRoot + "logo_unrealfrontiers.png");
+        var uri = AssetLoader.Exists(iconUri) ? iconUri : new Uri(AssetRoot + "logo_badge.png");
         return new Bitmap(AssetLoader.Open(uri));
     }
 
@@ -191,13 +192,34 @@ public class Modpack : INotifyPropertyChanged
                 _isSelected = value;
                 OnPropertyChanged(nameof(IsSelected));
                 OnPropertyChanged(nameof(BackgroundColor));
+                OnPropertyChanged(nameof(CardBackground));
+                OnPropertyChanged(nameof(CardBorder));
                 OnPropertyChanged(nameof(TextColor));
             }
         }
     }
-    public IBrush BackgroundColor => !IsEnabled ?  new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22)) : IsSelected ? 
-    new SolidColorBrush(Color.FromRgb(0x6D, 0x20, 0x8F)) : 
-    new SolidColorBrush(Color.Parse("Transparent"));
+    private static IBrush Brush(string key, string fallback)
+    {
+        if (Application.Current?.Resources.TryGetResource(key, null, out var value) == true && value is IBrush brush)
+            return brush;
+        return new SolidColorBrush(Color.Parse(fallback));
+    }
+
+    public IBrush CardBackground => IsSelected
+        ? Brush("UfCardHiBrush", "#2A2731")
+        : Brush("UfCardBrush", "#201E24");
+
+    public IBrush CardBorder => IsSelected
+        ? Brush("UfMintBrush", "#00FFA3")
+        : Brush("UfDividerBrush", "#2E2C34");
+
+    public IBrush AccentBrush => Brush("UfMintBrush", "#00FFA3");
+
+    public IBrush BackgroundColor => !IsEnabled
+        ? new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22))
+        : IsSelected
+            ? new SolidColorBrush(Color.FromRgb(0x2A, 0x27, 0x31))
+            : new SolidColorBrush(Color.Parse("Transparent"));
 
     public async Task UpdatePlayerCount(ServerService server)
     {
@@ -235,11 +257,11 @@ public class Modpack : INotifyPropertyChanged
     {
         get
         {
-            if ((IsSelected || IsHovered) && _isEnabled )
+            if ((IsSelected || IsHovered) && _isEnabled)
             {
                 return new SolidColorBrush(Color.Parse("#ffffff"));
             }
-            return new SolidColorBrush(Color.Parse("#606060"));
+            return new SolidColorBrush(Color.Parse("#B9BDC2"));
         }
     }
 

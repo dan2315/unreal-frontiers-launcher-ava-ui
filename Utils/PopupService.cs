@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -30,13 +31,14 @@ namespace UnrealFrontiersLauncher
             var dialog = new Window
             {
                 Title = title,
-                Width = 400,
-                Height = 200,
+                Width = 430,
+                Height = 220,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                Content = CreateDialogContent(message, new[] { "OK" }, out var resultTask),
+                Content = CreateDialogContent(title, message, new[] { "OK" }, out var resultTask),
                 CanResize = false,
+                Background = Brushes.Transparent,
                 SystemDecorations = SystemDecorations.None,
-                CornerRadius = CornerRadius.Parse("5")
+                CornerRadius = CornerRadius.Parse("16")
             };
 
             await dialog.ShowDialog(_mainWindow);
@@ -54,13 +56,14 @@ namespace UnrealFrontiersLauncher
             var dialog = new Window
             {
                 Title = title,
-                Width = 400,
-                Height = 200,
+                Width = 430,
+                Height = 220,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                Content = CreateDialogContent(message, new[] { "Ok", "Cancel" }, out var resultTask),
+                Content = CreateDialogContent(title, message, new[] { "Ok", "Cancel" }, out var resultTask),
                 CanResize = false,
                 Background = Brushes.Transparent,
                 SystemDecorations = SystemDecorations.None,
+                CornerRadius = CornerRadius.Parse("16"),
             };
 
             await dialog.ShowDialog(_mainWindow);
@@ -68,41 +71,65 @@ namespace UnrealFrontiersLauncher
             return result == "Ok";
         }
 
-        private Control CreateDialogContent(string message, string[] buttons, out TaskCompletionSource<string> resultTask)
+        private Control CreateDialogContent(string title, string message, string[] buttons, out TaskCompletionSource<string> resultTask)
         {
             var resultCompletionSource = new TaskCompletionSource<string>();
             resultTask = resultCompletionSource;
 
-            var border = new Border()
-            {   
-                Background = Brushes.DimGray,
-                CornerRadius = new CornerRadius(10)
+            var border = new Border
+            {
+                Background = new SolidColorBrush(Color.Parse("#1B191F")),
+                BorderBrush = new SolidColorBrush(Color.Parse("#2E2C34")),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(16),
+                Padding = new Thickness(24, 20)
             };
-            
+
             var stackPanel = new StackPanel
             {
-                Spacing = 70,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(20)
+                Spacing = 12,
+                VerticalAlignment = VerticalAlignment.Center
             };
-            border.Child = stackPanel; 
+            border.Child = stackPanel;
+
+            // Accent line
+            stackPanel.Children.Add(new Border
+            {
+                Height = 3,
+                Width = 56,
+                CornerRadius = new CornerRadius(2),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Background = Application.Current?.Resources.TryGetResource("UfAccentGradient", null, out var accent) == true && accent is IBrush accentBrush
+                    ? accentBrush
+                    : new SolidColorBrush(Color.Parse("#00FFA3"))
+            });
+
+            // Title
+            stackPanel.Children.Add(new TextBlock
+            {
+                Text = title,
+                FontSize = 17,
+                FontFamily = MontserratBold,
+                Foreground = Brushes.White
+            });
 
             // Message
             stackPanel.Children.Add(new TextBlock
             {
                 Text = message,
-                FontSize = 16,
+                FontSize = 14,
                 TextWrapping = TextWrapping.Wrap,
-                FontFamily = MontserratBold,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                FontFamily = MontserratRegular,
+                Foreground = new SolidColorBrush(Color.Parse("#B9BDC2"))
             });
 
             // Buttons
             var buttonPanel = new StackPanel
             {
                 Orientation = Avalonia.Layout.Orientation.Horizontal,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                Spacing = 10
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                Spacing = 10,
+                Margin = new Thickness(0, 8, 0, 0)
             };
 
             foreach (var buttonText in buttons)
@@ -110,9 +137,24 @@ namespace UnrealFrontiersLauncher
                 var button = new Button
                 {
                     Content = buttonText,
-                    Width = 80,
+                    MinWidth = 90,
+                    Padding = new Thickness(16, 8),
                     FontFamily = MontserratBold,
+                    CornerRadius = new CornerRadius(10),
+                    BorderThickness = new Thickness(0),
+                    Cursor = new Cursor(StandardCursorType.Hand)
                 };
+                if (buttonText == "Ok" || buttonText == "OK")
+                {
+                    if (Application.Current?.Resources.TryGetResource("UfLaunchGradient", null, out var gradient) == true && gradient is IBrush gradientBrush)
+                        button.Background = gradientBrush;
+                    button.Foreground = Brushes.White;
+                }
+                else
+                {
+                    button.Background = new SolidColorBrush(Color.Parse("#2A2731"));
+                    button.Foreground = new SolidColorBrush(Color.Parse("#B9BDC2"));
+                }
                 button.Click += (_, _) =>
                 {
                     resultCompletionSource.SetResult(buttonText);

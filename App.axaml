@@ -6,21 +6,41 @@
 
     <Application.Styles>
         <SimpleTheme/>
-  </Application.Styles>
+        <Styles>
+            <Styles.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceInclude Source="/Styles/Brushes.axaml"/>
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+            </Styles.Resources>
+            <StyleInclude Source="/Styles/Controls.axaml"/>
+        </Styles>
+    </Application.Styles>
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
 
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/Brushes.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
         <FontFamily x:Key="MontserratRegular">/Assets/Fonts/Montserrat-Regular.ttf#Montserrat</FontFamily>
         <FontFamily x:Key="MontserratBold">/Assets/Fonts/Montserrat-Bold.ttf#Montserrat</FontFamily>
         <FontFamily x:Key="MontserratLight">/Assets/Fonts/Montserrat-Light.ttf#Montserrat</FontFamily>
-        
+
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" x:Key="DefaultGradientBrush">
             <GradientStop Color="#551E6E" Offset="0.2" />
             <GradientStop Color="#EA4BED" Offset="1.0" />
         </LinearGradientBrush>
+
+        <!-- Reborn brand logo lockups -->
+        <Bitmap x:Key="UfLogoBanner">/Assets/Images/logo_banner.png</Bitmap>
+        <Bitmap x:Key="UfLogoBadge">/Assets/Images/logo_badge.png</Bitmap>
+        </ResourceDictionary>
     </Application.Resources>
-  
+
 </Application>

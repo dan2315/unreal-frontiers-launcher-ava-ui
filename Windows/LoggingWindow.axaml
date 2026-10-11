@@ -7,23 +7,31 @@
         x:Class="UnrealFrontiersLauncher.LoggingWindow"
         x:DataType="local:LoggingWindow"
         Title="Game Console"
-        Width="800" Height="500">
-    <Grid RowDefinitions="Auto, *">
-        <!-- <StackPanel Orientation="Horizontal" Margin="5" Spacing="25"> -->
-        <!--     <TextBox x:Name="SearchBox" Watermark="Search logs..."  -->
-        <!--              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" /> -->
-        <!--     <CheckBox x:Name="ScrollToBottomCheckBox" Content="Scroll to Bottom"  -->
-        <!--               IsChecked="{Binding ScrollToBottom}" Margin="10,0,0,0"/> -->
-        <!-- </StackPanel> -->
-        <ListBox x:Name="LogsListBox" Grid.Row="1" ItemsSource="{Binding FilteredLogs}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        Width="860" Height="540"
+        MinWidth="560" MinHeight="360"
+        Background="#100F12">
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Background="#0C0B0E" BorderBrush="#232127" BorderThickness="0,0,0,1" Padding="12,8">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Image Source="{StaticResource UfLogoBadge}" Height="24" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="Game Console" FontFamily="{StaticResource MontserratBold}"
+                           FontSize="14" Foreground="White" VerticalAlignment="Center"/>
+                <Border Height="2" Width="48" CornerRadius="1" VerticalAlignment="Center"
+                        Background="{StaticResource UfAccentGradient}"/>
+            </StackPanel>
+        </Border>
+        <ListBox Grid.Row="1" x:Name="LogsListBox" ItemsSource="{Binding FilteredLogs}"
+                 Background="#0C0B0E" BorderThickness="0" Margin="8">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                        <TextBlock Text="{Binding}" 
-                                   TextWrapping="Wrap" 
-                                   HorizontalAlignment="Stretch"
-                                   MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Width}" />
+                    <TextBlock Text="{Binding}"
+                               TextWrapping="Wrap"
+                               FontFamily="Consolas,Menlo,monospace"
+                               FontSize="12"
+                               Foreground="#C9CFd6"
+                               Padding="2,1"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
     </Grid>
-</Window> 
+</Window>
