@@ -102,7 +102,7 @@
                             VerticalAlignment="Center" Background="#26232C" Margin="0,0,12,0">
                         <Border Width="16" Height="16" CornerRadius="8"
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Background="{StaticResource UfLaunchGradient}"/>
+                                Background="#8A58BB"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                         <TextBlock Text="Свечение кнопки «Играть!»"
@@ -163,7 +163,7 @@
                             VerticalAlignment="Center" Background="#26232C" Margin="0,0,12,0">
                         <Border Width="16" Height="16" CornerRadius="8"
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Background="{StaticResource UfAccentGradient}"/>
+                                Background="#00FFA3" Opacity="0.7"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                         <TextBlock Text="Пульсация загрузки"

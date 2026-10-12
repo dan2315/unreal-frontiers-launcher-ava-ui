@@ -24,6 +24,31 @@
   <Color x:Key="UfBorder">#3A3842</Color>
   <Color x:Key="UfDivider">#2E2C34</Color>
 
+  <!-- Muted button surfaces. Neon gradients stay reserved for the
+       launch button; every other button lives on these graphites. -->
+  <Color x:Key="UfBtn">#242228</Color>
+  <Color x:Key="UfBtnHi">#302D38</Color>
+  <Color x:Key="UfBtnDown">#1B191E</Color>
+  <Color x:Key="UfBtnBorder">#3B3943</Color>
+  <Color x:Key="UfBtnBorderHi">#57545F</Color>
+
+  <!-- Muted tinted solids for special actions (auth, discord). -->
+  <Color x:Key="UfAuthBtn">#262040</Color>
+  <Color x:Key="UfAuthBtnHi">#332A54</Color>
+  <Color x:Key="UfAuthBtnDown">#1C1732</Color>
+  <Color x:Key="UfAuthBtnBorder">#443A6E</Color>
+  <Color x:Key="UfAuthBtnBorderHi">#7B3FBF</Color>
+  <Color x:Key="UfDiscordBtn">#3E44A0</Color>
+  <Color x:Key="UfDiscordBtnHi">#4C53B8</Color>
+  <Color x:Key="UfDiscordBtnDown">#33387F</Color>
+  <Color x:Key="UfDiscordBtnBorder">#565CD6</Color>
+  <Color x:Key="UfDiscordBtnBorderHi">#6B71E0</Color>
+
+  <!-- Dropdown menu + danger row. -->
+  <Color x:Key="UfMenu">#17161B</Color>
+  <Color x:Key="UfDangerBg">#2A1C1F</Color>
+  <Color x:Key="UfDangerDown">#3A2227</Color>
+
   <!-- Text -->
   <Color x:Key="UfText">#F2F5F3</Color>
   <Color x:Key="UfTextDim">#B9BDC2</Color>
@@ -46,6 +71,25 @@
   <SolidColorBrush x:Key="UfRowBrush" Color="{StaticResource UfRow}" />
   <SolidColorBrush x:Key="UfBorderBrush" Color="{StaticResource UfBorder}" />
   <SolidColorBrush x:Key="UfDividerBrush" Color="{StaticResource UfDivider}" />
+  <SolidColorBrush x:Key="UfBtnBrush" Color="{StaticResource UfBtn}" />
+  <SolidColorBrush x:Key="UfBtnHiBrush" Color="{StaticResource UfBtnHi}" />
+  <SolidColorBrush x:Key="UfBtnDownBrush" Color="{StaticResource UfBtnDown}" />
+  <SolidColorBrush x:Key="UfBtnBorderBrush" Color="{StaticResource UfBtnBorder}" />
+  <SolidColorBrush x:Key="UfBtnBorderHiBrush" Color="{StaticResource UfBtnBorderHi}" />
+  <SolidColorBrush x:Key="UfAuthBtnBrush" Color="{StaticResource UfAuthBtn}" />
+  <SolidColorBrush x:Key="UfAuthBtnHiBrush" Color="{StaticResource UfAuthBtnHi}" />
+  <SolidColorBrush x:Key="UfAuthBtnDownBrush" Color="{StaticResource UfAuthBtnDown}" />
+  <SolidColorBrush x:Key="UfAuthBtnBorderBrush" Color="{StaticResource UfAuthBtnBorder}" />
+  <SolidColorBrush x:Key="UfAuthBtnBorderHiBrush" Color="{StaticResource UfAuthBtnBorderHi}" />
+  <SolidColorBrush x:Key="UfDiscordBtnBrush" Color="{StaticResource UfDiscordBtn}" />
+  <SolidColorBrush x:Key="UfDiscordBtnHiBrush" Color="{StaticResource UfDiscordBtnHi}" />
+  <SolidColorBrush x:Key="UfDiscordBtnDownBrush" Color="{StaticResource UfDiscordBtnDown}" />
+  <SolidColorBrush x:Key="UfDiscordBtnBorderBrush" Color="{StaticResource UfDiscordBtnBorder}" />
+  <SolidColorBrush x:Key="UfDiscordBtnBorderHiBrush" Color="{StaticResource UfDiscordBtnBorderHi}" />
+  <SolidColorBrush x:Key="UfMenuBrush" Color="{StaticResource UfMenu}" />
+  <SolidColorBrush x:Key="UfDangerBgBrush" Color="{StaticResource UfDangerBg}" />
+  <SolidColorBrush x:Key="UfDangerDownBrush" Color="{StaticResource UfDangerDown}" />
+  <SolidColorBrush x:Key="UfDangerBrush" Color="{StaticResource UfErr}" />
 
   <LinearGradientBrush x:Key="UfAccentGradient" StartPoint="0%,0%" EndPoint="100%,0%">
     <GradientStop Color="{StaticResource UfMint}" Offset="0.0" />
@@ -63,19 +107,6 @@
     <GradientStop Color="#6A2A86" Offset="0.0" />
     <GradientStop Color="#A06BD6" Offset="0.45" />
     <GradientStop Color="#F066F2" Offset="1.0" />
-  </LinearGradientBrush>
-
-  <!-- Deep violet for the sign-in action on the auth page. -->
-  <LinearGradientBrush x:Key="UfAuthGradient" StartPoint="0%,0%" EndPoint="100%,0%">
-    <GradientStop Color="#3D1561" Offset="0.0" />
-    <GradientStop Color="#7B3FBF" Offset="0.5" />
-    <GradientStop Color="#C93BD8" Offset="1.0" />
-  </LinearGradientBrush>
-
-  <LinearGradientBrush x:Key="UfAuthHoverGradient" StartPoint="0%,0%" EndPoint="100%,0%">
-    <GradientStop Color="#4C1D78" Offset="0.0" />
-    <GradientStop Color="#9350DE" Offset="0.5" />
-    <GradientStop Color="#DE52E8" Offset="1.0" />
   </LinearGradientBrush>
 
   <!-- Geometry -->

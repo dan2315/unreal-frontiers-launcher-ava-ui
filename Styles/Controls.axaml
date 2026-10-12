@@ -2,65 +2,74 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!-- Shared control theme for the launcher. -->
 
-  <!-- Primary gradient action button (launch, sign in). -->
-  <Style Selector="Button.uf-primary">
-    <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
-    <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
-    <Setter Property="Padding" Value="16,10" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.uf-primary:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfLaunchHoverGradient}" />
-  </Style>
-  <Style Selector="Button.uf-primary:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
-    <Setter Property="RenderTransform" Value="scale(0.98)" />
-  </Style>
-  <Style Selector="Button.uf-primary:disabled /template/ ContentPresenter">
-    <Setter Property="Background" Value="#3A3842" />
-    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
-  </Style>
-
-  <!-- Mint-to-cyan confirm button ("Готово", "Submit", changelog close). -->
+  <!-- Confirm button ("Готово", "Submit", changelog close): muted graphite
+       with a mint edge on hover. Neon gradients stay reserved for "Играть". -->
   <Style Selector="Button.uf-accent">
-    <Setter Property="Foreground" Value="#06281C" />
-    <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
-    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfBtnBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="16,10" />
     <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-accent /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
   </Style>
   <Style Selector="Button.uf-accent:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
-    <Setter Property="Opacity" Value="0.88" />
+    <Setter Property="Background" Value="{StaticResource UfBtnHiBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
   </Style>
   <Style Selector="Button.uf-accent:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
-    <Setter Property="Opacity" Value="0.75" />
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="RenderTransform" Value="scale(0.98)" />
   </Style>
+  <Style Selector="Button.uf-accent:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="#2E2C34" />
+    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+    <Setter Property="Opacity" Value="0.6" />
+  </Style>
 
-  <!-- Deep-violet sign-in button on the auth page. -->
+  <!-- Sign-in button on the auth page: muted deep violet, calm next
+       to the dark card. -->
   <Style Selector="Button.uf-auth">
     <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
-    <Setter Property="Background" Value="{StaticResource UfAuthGradient}" />
-    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="{StaticResource UfAuthBtnBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfAuthBtnBorderBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="16,10" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
+  <Style Selector="Button.uf-auth /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
   <Style Selector="Button.uf-auth:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfAuthHoverGradient}" />
+    <Setter Property="Background" Value="{StaticResource UfAuthBtnHiBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfAuthBtnBorderHiBrush}" />
   </Style>
   <Style Selector="Button.uf-auth:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfAuthGradient}" />
+    <Setter Property="Background" Value="{StaticResource UfAuthBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfAuthBtnBorderBrush}" />
     <Setter Property="RenderTransform" Value="scale(0.98)" />
   </Style>
   <Style Selector="Button.uf-auth:disabled /template/ ContentPresenter">
-    <Setter Property="Background" Value="#3A3842" />
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="#2E2C34" />
     <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+    <Setter Property="Opacity" Value="0.6" />
   </Style>
 
   <!-- Launch button: static violet gradient. The breathing animation lives
@@ -74,6 +83,13 @@
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="44,10" />
     <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-launch /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.2" />
+      </Transitions>
+    </Setter>
   </Style>
   <Style Selector="Button.uf-launch:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="{StaticResource UfLaunchHoverGradient}" />
@@ -103,26 +119,43 @@
     </Style.Animations>
   </Style>
 
-  <!-- Tertiary outline button ("Создать аккаунт" etc). -->
+  <!-- Tertiary outline button ("Создать аккаунт" etc): quiet graphite with
+       a soft mint tint on hover instead of a neon frame. -->
   <Style Selector="Button.uf-outline">
-    <Setter Property="Foreground" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource UfTextDimBrush}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="16,10" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
+  <Style Selector="Button.uf-outline /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
   <Style Selector="Button.uf-outline:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="#0E2A22" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfCyanBrush}" />
+    <Setter Property="Background" Value="#22242B" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderHiBrush}" />
+    <Setter Property="TextBlock.Foreground" Value="{StaticResource UfTextBrush}" />
   </Style>
   <Style Selector="Button.uf-outline:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="#14352B" />
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="RenderTransform" Value="scale(0.98)" />
   </Style>
+  <Style Selector="Button.uf-outline:disabled /template/ ContentPresenter">
+    <Setter Property="BorderBrush" Value="#2E2C34" />
+    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+    <Setter Property="Opacity" Value="0.6" />
+  </Style>
 
-  <!-- Subtle ghost button (window chrome, icon buttons). -->
+  <!-- Subtle ghost button (window chrome, icon buttons). Background
+       cross-fades for a soft hover instead of snapping. -->
   <Style Selector="Button.uf-ghost">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
@@ -130,33 +163,51 @@
     <Setter Property="Padding" Value="8" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
+  <Style Selector="Button.uf-ghost /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
   <Style Selector="Button.uf-ghost:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="#2A2731" />
   </Style>
   <Style Selector="Button.uf-ghost:pressed /template/ ContentPresenter">
     <Setter Property="Background" Value="#35323E" />
+    <Setter Property="RenderTransform" Value="scale(0.97)" />
   </Style>
 
-  <!-- Card button (profile actions). -->
+  <!-- Card button (profile actions, dialogs): muted graphite surface,
+       mint edge only on hover. -->
   <Style Selector="Button.uf-card">
-    <Setter Property="Background" Value="{StaticResource UfRowBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfBtnBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfBorderBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="14,10" />
     <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
+  <Style Selector="Button.uf-card /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
   <Style Selector="Button.uf-card:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="#3A3743" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfBtnHiBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderHiBrush}" />
   </Style>
   <Style Selector="Button.uf-card:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="#443F50" />
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
   </Style>
 
-  <!-- Sidebar action (launcher settings + profile buttons): graphite pill
-       with mint icon tile, distinct from server cards above it. -->
+  <!-- Sidebar profile button: graphite pill. The mint tile is gone —
+       only a thin mint edge on hover keeps it alive. -->
   <Style Selector="Button.uf-side">
     <Setter Property="Background" Value="#1E1C22" />
     <Setter Property="BorderThickness" Value="1" />
@@ -166,6 +217,15 @@
     <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
+  <Style Selector="Button.uf-side /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
   <Style Selector="Button.uf-side:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="#26242D" />
     <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
@@ -173,6 +233,80 @@
   <Style Selector="Button.uf-side:pressed /template/ ContentPresenter">
     <Setter Property="Background" Value="#2E2B36" />
     <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+
+  <!-- Round gear button docked into the profile card corner: graphite
+       circle, mint icon on hover. -->
+  <Style Selector="Button.uf-gear">
+    <Setter Property="Background" Value="#1E1C22" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="#2E2C34" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-gear /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.25" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.uf-gear:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#26242D" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+  </Style>
+  <Style Selector="Button.uf-gear:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#2E2B36" />
+    <Setter Property="RenderTransform" Value="scale(0.92)" />
+  </Style>
+
+  <!-- Profile dropdown chevron: points up when the menu is closed,
+       flips down while open (uf-chevron-open toggled from code-behind
+       via UiAnimations.SetClass). Same TransformOperations mechanism
+       as the settings toggle knob. -->
+  <Style Selector="Svg.uf-chevron">
+    <Setter Property="RenderTransform" Value="rotate(0deg)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Svg.uf-chevron-open">
+    <Setter Property="RenderTransform" Value="rotate(180deg)" />
+  </Style>
+
+  <!-- Dropdown menu row (profile menu): invisible until hovered, then a
+       soft graphite wash. Danger variant glows red instead. -->
+  <Style Selector="Button.uf-menu">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="10,9" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-menu /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.14" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.uf-menu:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#2A2731" />
+  </Style>
+  <Style Selector="Button.uf-menu:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#35323E" />
+  </Style>
+  <Style Selector="Button.uf-menu-danger:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfDangerBgBrush}" />
+  </Style>
+  <Style Selector="Button.uf-menu-danger:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfDangerDownBrush}" />
   </Style>
 
   <!-- Text field. -->
@@ -268,20 +402,39 @@
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
-  <!-- Discord brand button on auth page. -->
+  <!-- Discord button on the auth page: muted blurple solid with a border,
+       calm against the dark card. -->
   <Style Selector="Button.uf-discord">
-    <Setter Property="Background" Value="#5865F2" />
+    <Setter Property="Background" Value="{StaticResource UfDiscordBtnBrush}" />
     <Setter Property="Foreground" Value="White" />
-    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfDiscordBtnBorderBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="12,8" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
+  <Style Selector="Button.uf-discord /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
   <Style Selector="Button.uf-discord:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="#4752C4" />
+    <Setter Property="Background" Value="{StaticResource UfDiscordBtnHiBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfDiscordBtnBorderHiBrush}" />
   </Style>
   <Style Selector="Button.uf-discord:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="#3C45A5" />
+    <Setter Property="Background" Value="{StaticResource UfDiscordBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfDiscordBtnBorderBrush}" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+  <Style Selector="Button.uf-discord:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="#2E2C34" />
+    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+    <Setter Property="Opacity" Value="0.6" />
   </Style>
 
   <!-- Thin overlay scrollbar: transparent track, slim graphite thumb that

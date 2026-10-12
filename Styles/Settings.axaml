@@ -31,12 +31,8 @@
               <Thumb.Template>
                 <ControlTemplate>
                   <Ellipse Width="20" Height="20"
-                           Fill="{StaticResource UfAccentGradient}"
-                           Stroke="White" StrokeThickness="2">
-                    <Ellipse.Effect>
-                      <DropShadowEffect Color="#00FFA3" Opacity="0.45" BlurRadius="10" OffsetX="0" OffsetY="0"/>
-                    </Ellipse.Effect>
-                  </Ellipse>
+                           Fill="#1D4A3A"
+                           Stroke="#00FFA3" StrokeThickness="2"/>
                 </ControlTemplate>
               </Thumb.Template>
             </Thumb>
@@ -47,10 +43,12 @@
   </ControlTheme>
 
   <!--
-    UfSettingsToggle: pill switch on ToggleButton — gradient track when
+    UfSettingsToggle: pill switch on ToggleButton — muted mint track when
     on, graphite when off, knob SLIDES via TranslateTransform + Transitions
     (not Left/Right alignment swap, which snaps). Background cross-fades
-    via BrushTransition. Fully self-drawn.
+    via BrushTransition. Fully self-drawn. When the master animation
+    switch is off the knob still snaps but without transitions
+    (see PART_Track/PART_Knob Transitions toggled from code-behind).
   -->
   <ControlTheme x:Key="UfSettingsToggle" TargetType="ToggleButton">
     <Setter Property="Cursor" Value="Hand" />
@@ -82,15 +80,18 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:checked /template/ Border#PART_Track">
-      <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
-      <Setter Property="BorderBrush" Value="{StaticResource UfAccentGradient}" />
+      <Setter Property="Background" Value="#1D4A3A" />
+      <Setter Property="BorderBrush" Value="#00FFA3" />
     </Style>
     <Style Selector="^:checked /template/ Ellipse#PART_Knob">
-      <Setter Property="Fill" Value="White" />
+      <Setter Property="Fill" Value="#00FFA3" />
       <Setter Property="RenderTransform" Value="translateX(24px)" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#PART_Track">
-      <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+      <Setter Property="BorderBrush" Value="#6B6875" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#PART_Track">
+      <Setter Property="BorderBrush" Value="#5CFFC4" />
     </Style>
     <Style Selector="^:disabled /template/ Border#PART_Track">
       <Setter Property="Opacity" Value="0.45" />

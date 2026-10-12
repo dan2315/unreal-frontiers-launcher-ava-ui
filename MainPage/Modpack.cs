@@ -216,13 +216,20 @@ public class Modpack : INotifyPropertyChanged
         return new SolidColorBrush(Color.Parse(fallback));
     }
 
+    // Selected: lifted surface + mint edge. Hovered (not selected):
+    // gentle lift, neutral edge — the mint is reserved for selection so
+    // hover feels like an invitation, not a second selection.
     public IBrush CardBackground => IsSelected
         ? Brush("UfCardHiBrush", "#2A2731")
-        : Brush("UfCardBrush", "#201E24");
+        : IsHovered
+            ? new SolidColorBrush(Color.Parse("#26242D"))
+            : Brush("UfCardBrush", "#201E24");
 
     public IBrush CardBorder => IsSelected
         ? Brush("UfMintBrush", "#00FFA3")
-        : Brush("UfDividerBrush", "#2E2C34");
+        : IsHovered
+            ? new SolidColorBrush(Color.Parse("#4A4753"))
+            : Brush("UfDividerBrush", "#2E2C34");
 
     public IBrush AccentBrush => Brush("UfMintBrush", "#00FFA3");
 
@@ -261,6 +268,8 @@ public class Modpack : INotifyPropertyChanged
             {
                 _isHovered = value;
                 OnPropertyChanged(nameof(IsHovered));
+                OnPropertyChanged(nameof(CardBackground));
+                OnPropertyChanged(nameof(CardBorder));
                 OnPropertyChanged(nameof(TextColor));
             }
         }

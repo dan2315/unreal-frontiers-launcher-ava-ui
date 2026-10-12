@@ -7,8 +7,7 @@
         <Border Grid.Row="0" Background="#0C0B0E" BorderBrush="#232127" BorderThickness="0,0,0,1" Padding="16,12">
             <StackPanel Spacing="4">
                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <Border Width="32" Height="32" CornerRadius="10"
-                            Background="{StaticResource UfAccentGradient}">
+                    <Border Width="32" Height="32" CornerRadius="10" Background="#26232C">
                         <Svg Path="/Assets/Images/svg/ram.svg" Width="18" Height="18"
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>

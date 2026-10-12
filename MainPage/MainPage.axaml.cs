@@ -118,6 +118,7 @@ public partial class MainPage : UserControl
     {
         // Popup floats above the sidebar — layout never shifts.
         ProfilePopup.IsVisible = !ProfilePopup.IsVisible;
+        SetProfileChevron(ProfilePopup.IsVisible);
         if (ProfilePopup.IsVisible)
             await UiAnimations.PopInAsync(ProfilePopup);
     }
@@ -127,11 +128,21 @@ public partial class MainPage : UserControl
         // Click outside the card closes the popup; the card itself sits
         // above this catcher so its buttons stay clickable.
         ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
+    }
+
+    private void SetProfileChevron(bool open)
+    {
+        // Chevron points up toward the menu when closed, flips down while
+        // the menu is open (animated via the uf-chevron-open class).
+        if (ProfileChevron != null)
+            UiAnimations.SetClass(ProfileChevron, "uf-chevron-open", open);
     }
 
     private async void OnLogoutClicked(object? sender, RoutedEventArgs e)
     {
         ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
         var answer = await _popUpService.ShowYesNoDialogAsync("Выйти из аккаунта?", "Придётся войти заново, чтобы запускать игру.");
         if (!answer) return;
 
@@ -143,6 +154,7 @@ public partial class MainPage : UserControl
     private void OnAddPasswordClicked(object? sender, RoutedEventArgs e)
     {
         ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
         var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
         {
             var message = await _authService.SendResetPasswordEmail(email);

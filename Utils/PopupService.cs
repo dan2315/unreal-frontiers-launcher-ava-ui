@@ -271,13 +271,13 @@ namespace UnrealFrontiersLauncher
                 Padding = new Thickness(16, 8),
                 FontFamily = MontserratBold,
                 CornerRadius = new CornerRadius(10),
-                BorderThickness = new Thickness(0),
+                Background = new SolidColorBrush(Color.Parse("#242228")),
+                BorderBrush = new SolidColorBrush(Color.Parse("#3B3943")),
+                BorderThickness = new Thickness(1),
                 Cursor = new Cursor(StandardCursorType.Hand),
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Foreground = Brushes.White
             };
-            if (Application.Current?.Resources.TryGetResource("UfLaunchGradient", null, out var gradient) == true && gradient is IBrush gradientBrush)
-                closeButton.Background = gradientBrush;
             closeButton.Click += (_, _) =>
             {
                 resultCompletionSource.SetResult("OK");
