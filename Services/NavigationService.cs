@@ -83,6 +83,25 @@ public class NavigationService
 
     private async Task RunTransitionAsync(UserControl slidingPage, bool slideIn, Control pageToRemove)
     {
+        // No animation on weak hardware: swap pages instantly. Pages are
+        // singletons shared across forward/back navigation, so reset the
+        // state PageSlide would have managed: the entering page must end up
+        // visible with a clean transform, everything else detached.
+        if (!UiAnimations.ScreenTransitions)
+        {
+            _runningTransition = null;
+            foreach (var child in Host.Children.ToList())
+            {
+                if (!ReferenceEquals(child, slidingPage))
+                    Host.Children.Remove(child);
+            }
+            if (!Host.Children.Contains(slidingPage))
+                Host.Children.Add(slidingPage);
+            slidingPage.IsVisible = true;
+            slidingPage.RenderTransform = null;
+            return;
+        }
+
         var cts = new CancellationTokenSource();
         _runningTransition = cts;
 

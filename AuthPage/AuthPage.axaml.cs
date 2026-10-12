@@ -56,7 +56,12 @@ namespace UnrealFrontiersLauncher
             ((AuthPageViewModel) DataContext).InitiateDiscordAuth(null);
         }
 
-        public void ToggleView(object? sender, RoutedEventArgs  e) 
+        public void ToggleView(object? sender, RoutedEventArgs  e)
+        {
+            ((AuthPageViewModel) DataContext).ToggleView();
+        }
+
+        public void ToggleViewButton(object? sender, RoutedEventArgs e)
         {
             ((AuthPageViewModel) DataContext).ToggleView();
         }

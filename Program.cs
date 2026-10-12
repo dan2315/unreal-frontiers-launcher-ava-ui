@@ -63,7 +63,12 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<GameLauncher>();
             services.AddSingleton<InstanceManager>();
             services.AddSingleton<PlayerProfileProvider>();
-            
+#if WINDOWS
+            services.AddSingleton<Platforms.ISystemInfo, Windows.SystemInfo>();
+#elif LINUX
+            services.AddSingleton<Platforms.ISystemInfo, Linux.SystemInfo>();
+#endif
+
             services.AddSingleton<MainWindow>();
             services.AddSingleton<PopupService>(); 
 

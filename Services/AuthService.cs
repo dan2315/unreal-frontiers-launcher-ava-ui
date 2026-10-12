@@ -149,6 +149,12 @@ namespace UnrealFrontiersLauncher
             return _accessToken.Length > 0 ? _accessToken : null;
         }
 
+        public void Logout()
+        {
+            _tokenStorage.DeleteTokens();
+            SetAccessToken("");
+        }
+
         private void ApplyTokens(string accessToken, string refreshToken)
         {
             _tokenStorage.SaveTokens(accessToken, refreshToken);
@@ -206,23 +212,31 @@ namespace UnrealFrontiersLauncher
 
         public async Task<string> SendResetPasswordEmail(string email)
         {
-            var payload = new { email };
-            
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/auth/send_reset_password_email", content);
+            try
+            {
+                var payload = new { email };
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var responseObject = JsonSerializer.Deserialize<JsonElement>(responseContent);
-                var message = responseObject.GetProperty("message").GetString()!;
-                
-                return message;
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("/auth/send_reset_password_email", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var responseObject = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                    var message = responseObject.GetProperty("message").GetString()!;
+
+                    return message;
+                }
+                else
+                {
+                    Console.WriteLine($"Error: {response.StatusCode}");
+                    return "Не удалось отправить письмо";
+                }
             }
-            else
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
             {
-                Console.WriteLine($"Error: {response.StatusCode}");
-                return "Не удалось отправить письмо";
+                Console.WriteLine($"Password reset request failed: {ex.Message}");
+                return "Не удалось связаться с сервером. Проверьте соединение и попробуйте позже.";
             }
         }
         

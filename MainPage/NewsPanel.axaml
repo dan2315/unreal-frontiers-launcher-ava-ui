@@ -1,0 +1,111 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UnrealFrontiersLauncher.NewsPanel">
+    <Border Classes="uf-card" Padding="0" Width="480" MaxHeight="560" ClipToBounds="True">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Title -->
+        <Border Grid.Row="0" Background="#0C0B0E" BorderBrush="#232127" BorderThickness="0,0,0,1" Padding="16,12">
+            <StackPanel Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Border Width="32" Height="32" CornerRadius="10" Background="#26232C">
+                        <Svg Path="/Assets/Images/svg/news.svg" Width="18" Height="18"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Все изменения"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="16" Foreground="White"/>
+                        <TextBlock Text="История обновлений лаунчера"
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#8E939B"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border Height="2" Width="64" CornerRadius="1" Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        Background="{StaticResource UfAccentGradient}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Entries -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="0" Margin="20,12,20,16">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,8">
+                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                            Background="{StaticResource UfMintBrush}"/>
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="Настройки сборки и лаунчера — прямо в приложении"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="14" Foreground="White" TextWrapping="Wrap"/>
+                        <TextBlock Text="Всплывающее окно с затемнением вместо отдельных окон. RAM с шагом по степеням двойки (1024…65536 МБ). Кнопка «Папка instance» переехала в настройки сборки."
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#B9BDC2" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="12 окт" Margin="12,0,0,0"
+                               FontFamily="{StaticResource MontserratRegular}"
+                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                </Grid>
+                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,8">
+                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                            Background="{StaticResource UfMintBrush}"/>
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="Редизайн в стилистике Reborn"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="14" Foreground="White" TextWrapping="Wrap"/>
+                        <TextBlock Text="Тёмная тема, mint-акцент и новый логотип. Убран лишний орбитальный декор из заголовка окна, причёсаны вкладки настроек."
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#B9BDC2" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="12 окт" Margin="12,0,0,0"
+                               FontFamily="{StaticResource MontserratRegular}"
+                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                </Grid>
+                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,8">
+                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                            Background="{StaticResource UfMintBrush}"/>
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="Динамический каталог сборок"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="14" Foreground="White" TextWrapping="Wrap"/>
+                        <TextBlock Text="Список серверов подтягивается с бэкенда, при недоступности сервера показываются кэшированные инстансы. Отдельный DEV-билд лаунчера."
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#B9BDC2" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="11 окт" Margin="12,0,0,0"
+                               FontFamily="{StaticResource MontserratRegular}"
+                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                </Grid>
+                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,8">
+                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                            Background="{StaticResource UfMintBrush}"/>
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="Первый публичный релиз"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="14" Foreground="White" TextWrapping="Wrap"/>
+                        <TextBlock Text="Каталог сборок, установка и запуск игры, окно логов, автодетект сервера."
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#B9BDC2" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="10 окт" Margin="12,0,0,0"
+                               FontFamily="{StaticResource MontserratRegular}"
+                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Close -->
+        <Border Grid.Row="2" Padding="16,12" BorderBrush="#232127" BorderThickness="0,1,0,0">
+            <Button Classes="uf-accent" Click="OnCloseClicked"
+                    HorizontalAlignment="Right" MinWidth="120"
+                    HorizontalContentAlignment="Center"
+                    Content="Закрыть"
+                    FontFamily="{StaticResource MontserratBold}" FontSize="14"/>
+        </Border>
+    </Grid>
+    </Border>
+</UserControl>

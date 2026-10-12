@@ -11,6 +11,18 @@ public class Preferences(string lastSelectedModpack)
 
     public string LastSelectedModpack { get; set; } = lastSelectedModpack;
 
+    // Global launch behaviour (applies to every modpack).
+    public bool NeedToClose { get; set; } = true;
+    public bool NeedToOpenConsole { get; set; } = false;
+
+    // UI animation switches (see Utils/UiAnimations.cs for the full list of effects).
+    // All on by default; turning them off kills running animations and skips transitions.
+    public bool UiAnimationsEnabled { get; set; } = true;
+    public bool UiButtonGlowEnabled { get; set; } = true;
+    public bool UiScreenTransitionsEnabled { get; set; } = true;
+    public bool UiOverlayFadeEnabled { get; set; } = true;
+    public bool UiBackgroundPulseEnabled { get; set; } = true;
+
     private static Preferences? _instance;
     public static Preferences Get()
     {

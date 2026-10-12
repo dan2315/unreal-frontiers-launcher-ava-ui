@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Settings-tab themes: self-drawn ControlThemes so the look does not
+    depend on SimpleTheme template internals.
+
+    UfRamSlider: transparent track (the page paints base + fill
+    borders underneath and sizes the fill from code-behind), dark
+    thumb with a violet ring matching the Play button. Drag/wheel/
+    keyboard all work — Track + Thumb are the stock primitives,
+    only painted ours.
+  -->
+  <ControlTheme x:Key="UfRamSlider" TargetType="Slider">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid VerticalAlignment="Center" Height="28" Background="Transparent">
+          <Track Name="PART_Track"
+                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                 Orientation="Horizontal"
+                 Minimum="{TemplateBinding Minimum}"
+                 Maximum="{TemplateBinding Maximum}"
+                 Value="{TemplateBinding Value, Mode=TwoWay}">
+            <Track.DecreaseButton>
+              <RepeatButton Name="PART_DecreaseButton" Opacity="0" Focusable="False"/>
+            </Track.DecreaseButton>
+            <Track.IncreaseButton>
+              <RepeatButton Name="PART_IncreaseButton" Opacity="0" Focusable="False"/>
+            </Track.IncreaseButton>
+            <Thumb Name="thumb" MinWidth="24" MinHeight="24">
+              <Thumb.Template>
+                <ControlTemplate>
+                  <Ellipse Width="20" Height="20"
+                           Fill="#262040"
+                           Stroke="#8A58BB" StrokeThickness="2"/>
+                </ControlTemplate>
+              </Thumb.Template>
+            </Thumb>
+          </Track>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!--
+    UfSettingsToggle: pill switch on ToggleButton — muted mint track when
+    on, graphite when off, knob SLIDES via TranslateTransform + Transitions
+    (not Left/Right alignment swap, which snaps). Background cross-fades
+    via BrushTransition. Fully self-drawn. When the master animation
+    switch is off the knob still snaps but without transitions
+    (see PART_Track/PART_Knob Transitions toggled from code-behind).
+  -->
+  <ControlTheme x:Key="UfSettingsToggle" TargetType="ToggleButton">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Track" Width="52" Height="28" CornerRadius="14"
+                Background="#333036" BorderBrush="#4A4753" BorderThickness="1">
+          <Border.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="0:0:0.18"/>
+              <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+            </Transitions>
+          </Border.Transitions>
+          <Ellipse x:Name="PART_Knob" Width="20" Height="20"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"
+                   Fill="#8E939B"
+                   RenderTransform="translateX(0px)">
+            <Ellipse.Transitions>
+              <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                <BrushTransition Property="Fill" Duration="0:0:0.18"/>
+              </Transitions>
+            </Ellipse.Transitions>
+          </Ellipse>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked /template/ Border#PART_Track">
+      <Setter Property="Background" Value="#1D4A3A" />
+      <Setter Property="BorderBrush" Value="#00FFA3" />
+    </Style>
+    <Style Selector="^:checked /template/ Ellipse#PART_Knob">
+      <Setter Property="Fill" Value="#00FFA3" />
+      <Setter Property="RenderTransform" Value="translateX(24px)" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#PART_Track">
+      <Setter Property="BorderBrush" Value="#6B6875" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#PART_Track">
+      <Setter Property="BorderBrush" Value="#5CFFC4" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#PART_Track">
+      <Setter Property="Opacity" Value="0.45" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -100,6 +100,34 @@ namespace UnrealFrontiersLauncher
             }
         }
 
+        // Materializes a working instance from catalog data alone (offline path:
+        // the entry carries everything needed for settings/launch config).
+        public MinecraftInstance EnsureOfflineInstance(CatalogEntry entry)
+        {
+            if (minecraftInstances.TryGetValue(entry.Id, out var existing))
+            {
+                selectedInstance = existing;
+                return existing;
+            }
+
+            var instance = new MinecraftInstance(
+                entry.Id,
+                entry.Name,
+                entry.MinecraftVersion,
+                "",
+                entry.ServerAddress,
+                MinecraftInstance.DefaultRamMb,
+                entry.Loader,
+                entry.Version
+            );
+            instance.LoadLaunchConfiguration();
+            instance.SaveToFile();
+            minecraftInstances[entry.Id] = instance;
+            selectedInstance = instance;
+            Console.WriteLine($"Created offline instance from catalog: {instance.Name}");
+            return instance;
+        }
+
         public MinecraftInstance CreateMinecraftInstance(string instanceId, VersionInfo versionInfo)
         {
             var instance = new MinecraftInstance(

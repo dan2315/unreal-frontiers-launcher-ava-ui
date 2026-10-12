@@ -1,605 +1,409 @@
 <UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="using:UnrealFrontiersLauncher.ViewModels"
-        xmlns:converters="using:UnrealFrontiersLauncher.Converters"
         x:Class="UnrealFrontiersLauncher.MainPage"
         x:DataType="local:MainPageViewModel">
 
-    <UserControl.Resources>
-        <converters:MultiConditionColorConverter x:Key="MultiConditionColorConverter" />
-    </UserControl.Resources>
+    <UserControl.Styles>
+        <!-- Server cards -->
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </UserControl.Styles>
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <!-- Background Image -->
+    <Grid ColumnDefinitions="320,*">
+        <!-- Full-bleed background with readability overlay -->
         <Image Source="/Assets/Images/background_image.png"
-           Stretch="UniformToFill"
-           Grid.ColumnSpan="2" />
-
-        
-        <!-- Left Side Panel -->
-        <StackPanel Grid.Column="0"
-                    Width="280">
-            <StackPanel.Background>
-                <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
-                    <GradientStop Color="#100F12" Offset="0.0"></GradientStop>
-                    <GradientStop Color="#2A272F" Offset="0.5"></GradientStop>
-                    <GradientStop Color="#100F12" Offset="1.0"></GradientStop>
+               Stretch="UniformToFill"
+               Grid.ColumnSpan="2" />
+        <Border Grid.ColumnSpan="2" Opacity="0.72">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#0C0B0E" Offset="0.0" />
+                    <GradientStop Color="#14121A" Offset="0.45" />
+                    <GradientStop Color="#0C0B0E" Offset="1.0" />
                 </LinearGradientBrush>
-            </StackPanel.Background>
-            <Grid Margin="0,15,0,10">
-                <TextBlock Text="Servers"
-                           TextAlignment="Center"
-                           FontSize="34"
-                           Foreground="White"
-                           FontFamily="{StaticResource MontserratBold}" />
-                <Button HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Margin="0,0,12,0"
-                        Padding="6"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Click="OnRefreshModpacksClicked"
-                        ToolTip.Tip="Refresh the modpack list">
-                    <Svg Path="/Assets/Images/svg/refresh.svg" Width="20" Height="20"/>
-                </Button>
-            </Grid>
-            <TextBlock Text="{Binding CatalogMessage}"
-                       IsVisible="{Binding HasCatalogMessage}"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center"
-                       FontSize="12"
-                       Foreground="#E8B83A"
-                       Margin="14,0,14,10"
-                       FontFamily="{StaticResource MontserratLight}" />
+            </Border.Background>
+        </Border>
 
-            <!-- Modpack Collection -->
-            <ListBox x:Name="ModpackCollectionView"
-                              ItemsSource="{Binding Modpacks}"
-                              SelectedItem="{Binding SelectedModpack}"
-                              SelectionChanged="OnInstanceSelected" Background="Transparent"
-                              BorderBrush="Transparent">
-                
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical"/>
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
+        <!-- ============ Left: servers + global settings + profile ============ -->
+        <Grid Grid.Column="0">
+            <Border BorderBrush="#26242C" BorderThickness="0,0,1,0">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
+                        <GradientStop Color="#121116" Offset="0.0" />
+                        <GradientStop Color="#1C1A21" Offset="0.5" />
+                        <GradientStop Color="#121116" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+                <!-- Servers header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,12,4">
+                    <TextBlock Grid.Column="0" Text="Servers"
+                               FontSize="22"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               FontFamily="{StaticResource MontserratBold}" />
+                    <Button Grid.Column="1"
+                            Classes="uf-ghost"
+                            Width="34" Height="34"
+                            Click="OnRefreshModpacksClicked"
+                            ToolTip.Tip="Refresh the modpack list">
+                        <Svg Path="/Assets/Images/svg/refresh.svg" Width="18" Height="18"/>
+                    </Button>
+                </Grid>
 
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Background="Transparent">
-                            <Border Background="{Binding BackgroundColor}"
-                                    Margin="0,10,0,10"
-                                    Padding="5"
-                                    CornerRadius="10"
-                                    PointerEntered="Modpack_OnPointerEntered"
-                                    PointerExited="Modpack_OnPointerExited"
-                                    MinHeight="95"
-                                    MaxWidth="250">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Image Source="{Binding Icon}"
-                                               Width="30"
-                                               Height="30"
-                                               Margin="0,0,10,0"/>
-                                        <TextBlock Text="{Binding Name}"
-                                                   FontSize="16" VerticalAlignment="Center"
-                                                   Foreground="{Binding TextColor}"
-                                                   FontFamily="{StaticResource MontserratLight}"
-                                                   MaxWidth="250">
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <Grid Margin="0,6,0,0" MaxWidth="200">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Subtitle}"
-                                                   FontSize="11"
-                                                   Foreground="#B8B8B8"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   FontFamily="{StaticResource MontserratLight}"/>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding StatusText}"
-                                                   Margin="8,0,0,0"
-                                                   FontSize="11"
-                                                   Foreground="{Binding StatusColor}"
-                                                   FontFamily="{StaticResource MontserratBold}"/>
-                                    </Grid>
-                                    <!-- Player Count -->
-                                    <StackPanel Margin="0,8,0,0" MaxWidth="200">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding PlayerCount}"
-                                                       FontSize="12"
-                                                       Foreground="#D0D0D0"
-                                                       FontFamily="{StaticResource MontserratLight}"/>
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding MaxPlayers}"
-                                                       FontSize="12"
-                                                       Foreground="#D0D0D0"
-                                                       FontFamily="{StaticResource MontserratLight}"/>
-                                        </Grid>
-                                        <ProgressBar Value="{Binding PlayerCountProgress}"
-                                                     MinHeight="4"
-                                                     MinWidth="130"
-                                                     Background="#404040"
-                                                     Foreground="#22AA22">
-                                            <!-- <ProgressBar.></ProgressBar.> -->
-                                        </ProgressBar>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-            
-                            <!-- Divider Line -->
-                            <Rectangle Height="1"
-                                       Fill="#404040"
-                                       HorizontalAlignment="Stretch"
-                                       IsVisible="{Binding IsLastItem}"
-                                       MaxWidth="200"/>
-                        </StackPanel>
-                    </DataTemplate>
-            
-                </ListBox.ItemTemplate>
-            
-                <ListBox.Styles>
-                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                        <Setter Property="Foreground" Value="White"></Setter>
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Opacity" Value="75"></Setter>
-                    </Style>
-            
-                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                        <Setter Property="Foreground" Value="White"></Setter>
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="VerticalAlignment" Value="Bottom"></Setter>
-                    </Style>
-                </ListBox.Styles>
-            </ListBox>
-
-                
-        </StackPanel>
-
-        <!-- Right Side Panel --> 
-        <DockPanel Grid.Column="1">
-            <Grid ColumnDefinitions="*, 250" RowDefinitions="*, Auto" DockPanel.Dock="Top">
-                <!-- Tab Content -->
-                <StackPanel Grid.Column="0"
-                            VerticalAlignment="Stretch"
-                            Orientation="Horizontal">
-                    <TabControl Margin="10 -10 10 0">
-                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125" HorizontalContentAlignment="Center">
-                            
-                            <TabItem.Header>
-                                <StackPanel HorizontalAlignment="Center">
-                                    <Svg Path="/Assets/Images/svg/tab_play.svg" Width="30" Height="30" HorizontalAlignment="Center"/>
-                                    <TextBlock Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Играть!"></TextBlock>
-                                    <Rectangle Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
-                                </StackPanel>
-                            </TabItem.Header>
-                            
-                            <TabItem.Styles>
-                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#8a58bb"/>
-                                    <Setter Property="Opacity" Value="50"></Setter>
-                                </Style>
-                                
-                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
-                                                <GradientStop Color="#8a58bb" Offset="0.2" />
-                                                <GradientStop Color="#ee4aef" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                                
-                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#8a58bb"/>
-                                    <Setter Property="Opacity" Value="50"></Setter>
-                                </Style>
-                            </TabItem.Styles>
-
-                            <Grid ColumnDefinitions="*, 475" RowDefinitions="150, *">
-                                <Border Background="#201E24"
-                                        Margin="10 10 10 10"
-                                        Width="600"
-                                        CornerRadius="5"
-                                        BorderBrush="Black"
-                                        BorderThickness="1">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <StackPanel Margin="10">
-                                            <Image Source="../Assets/Images/roflanbuldiga.png" Width="70" Height="70"/>
-                                            <TextBlock TextAlignment="Center" VerticalAlignment="Center" FontFamily="{StaticResource MontserratRegular}" FontSize="13">Roflan Buldiga</TextBlock>
-                                        </StackPanel>
-                                        
-                                        <TextBlock VerticalAlignment="Center" FontFamily="{StaticResource MontserratRegular}" FontSize="16">Здесь могла быть ваша реклама, но есть только: <LineBreak/> "Продам гараж недорого, звонить -> +8(800)-555-35-35"</TextBlock>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </TabItem>
-                        
-                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125" HorizontalContentAlignment="Center">
-                            
-                            <TabItem.Styles>
-                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#8a58bb"/>
-                                    <Setter Property="Opacity" Value="50"></Setter>
-                                </Style>
-                                
-                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
-                                                <GradientStop Color="#8a58bb" Offset="0.2" />
-                                                <GradientStop Color="#ee4aef" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                                
-                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#8a58bb"/>
-                                    <Setter Property="Opacity" Value="50"></Setter>
-                                </Style>
-                            </TabItem.Styles>
-                            
-                            <TabItem.Header>
-                                <StackPanel HorizontalAlignment="Center">
-                                    <Svg Path="/Assets/Images/svg/tab_settings.svg" Width="30" Height="30" HorizontalAlignment="Center"/>
-                                    <TextBlock Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Настройки"></TextBlock>
-                                    <Rectangle Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
-                                </StackPanel>
-                            </TabItem.Header>
-                            
-                            <!-- Ебанина с настройками -->
-                            <Border Grid.Column="0"
-                                    Background="#201E24"
-                                    Margin="10"
-                                    CornerRadius="5"
-                                    BorderBrush="Black"
-                                    BorderThickness="1">
-                                <StackPanel>
-
-                                    <StackPanel>
-                                        <Border Background="#1b191f" CornerRadius="5 5 0 0">
-                                            <TextBlock Text="Настройки"
-                                                       FontSize="18"
-                                                       FontFamily="{StaticResource MontserratBold}"
-                                                       Margin="10"
-                                                       TextAlignment="Center"/>
-                                        </Border>
-                                        <Rectangle Height="1" Fill="Black"></Rectangle>
-                                    </StackPanel>
-                                    
-                                    <StackPanel Orientation="Horizontal"
-                                                Background="#2f2d36"
-                                                Spacing="15"
-                                                Margin="0 10 0 10">
-                                        <TextBlock Text="RAM:"
-                                                VerticalAlignment="Center"
-                                                FontFamily="{StaticResource MontserratBold}"
-                                                Margin="5 0 0 0"/>
-                                        <Slider x:Name="RamSlider"
-                                                Width="400"
-                                                VerticalAlignment="Center" />
-                                        <TextBox x:Name="RamEntry"
-                                                Width="140"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center"
-                                                Margin="0 0 5 0"/>
-                                    </StackPanel>
-                                    
-                                    <StackPanel Orientation="Horizontal"
-                                                Background="#2f2d36"
-                                                Spacing="15">
-                                        <TextBlock Text="Открыть консоль:"
-                                                VerticalAlignment="Center"
-                                                FontFamily="{StaticResource MontserratBold}"
-                                                Margin="5 5 0 0"/>
-                                        <CheckBox x:Name="OpenConsoleBox"
-                                                  Margin="0 5 0 0"
-                                                  CornerRadius="2"/>
-                                    </StackPanel>
-                                    
-                                    <StackPanel Orientation="Horizontal"
-                                                Background="#2f2d36"
-                                                Spacing="15">
-                                        <TextBlock Text="Закрыть лаунчер при запуске:"
-                                                VerticalAlignment="Center"
-                                                FontFamily="{StaticResource MontserratBold}" 
-                                                Margin="5 0 0 10"/>
-                                        
-                                        <CheckBox x:Name="CloseLauncherBox" 
-                                                Margin="0 0 0 8"
-                                                CornerRadius="2"/>
-                                    </StackPanel>
-                                    <Rectangle Height="1" Fill="Black"></Rectangle>
-                                </StackPanel>
-                            </Border>
-                        </TabItem>
-                        
-                        <!-- Profile Tab -->
-                        <TabItem Margin="0 0 10 0" CornerRadius="0 0 5 5" Width="125" HorizontalContentAlignment="Center">
-                            
-                            <TabItem.Styles>
-                                <Style Selector="TabItem:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#8a58bb"/>
-                                    <Setter Property="Opacity" Value="50"></Setter>
-                                </Style>
-                                
-                                <Style Selector="TabItem:selected  /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%" Opacity="75">
-                                                <GradientStop Color="#8a58bb" Offset="0.2" />
-                                                <GradientStop Color="#ee4aef" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                                
-                                <Style Selector="TabItem:selected:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#8a58bb"/>
-                                    <Setter Property="Opacity" Value="50"></Setter>
-                                </Style>
-                            </TabItem.Styles>
-                            
-                            <TabItem.Header>
-                                <StackPanel HorizontalAlignment="Center">
-                                        <Svg Path="/Assets/Images/svg/tab_profile.svg" Width="30" Height="30" HorizontalAlignment="Center"/>
-                                        <TextBlock Foreground="White" FontFamily="{StaticResource MontserratBold}" FontSize="18" Text="Профиль"></TextBlock>
-                                        <Rectangle Height="1" Fill="White" HorizontalAlignment="Stretch"></Rectangle>
-                                    </StackPanel>
-                            </TabItem.Header>
-                            
-                            <!-- Profile Content -->
-                            <Border Grid.Column="0"
-                                    Background="#201E24"
-                                    Margin="10"
-                                    CornerRadius="5"
-                                    BorderBrush="Black"
-                                    BorderThickness="1">
-                                <StackPanel>
-                                    <StackPanel>
-                                        <Border Background="#1b191f" CornerRadius="5 5 0 0">
-                                            <TextBlock Text="Профиль"
-                                                       FontSize="18"
-                                                       FontFamily="{StaticResource MontserratBold}"
-                                                       Margin="10"
-                                                       TextAlignment="Center"/>
-                                        </Border>
-                                        <Rectangle Height="1" Fill="Black"></Rectangle>
-                                    </StackPanel>
-                                    
-                                    <!-- Profile Options -->
-                                    <StackPanel Margin="20">
-                                        <!-- Add Password Button -->
-                                        <Button Foreground="White"
-                                                Classes="idle_anim"
-                                                VerticalAlignment="Bottom"
-                                                CornerRadius="5"
-                                                MaxWidth="250"
-                                                Height="40"
-                                                Margin="0 10 0 20"
-                                                Background="#6E53A1"
-                                                x:Name="AddPasswordButton">
-                                            <Button.Content>
-                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
-                                                    <Svg Path="../Assets/Images/svg/lock.svg" Height="20" Width="20"/>
-                                                    <TextBlock Grid.Column="1" 
-                                                               FontFamily="{StaticResource MontserratBold}"
-                                                               FontSize="15" 
-                                                               Text="Добавить пароль" 
-                                                               Margin="10 3 0 2"/>
-                                                </Grid>
-                                            </Button.Content>
-                                        </Button>
-                                        
-                                        <!-- Connect Discord Button -->
-                                        <Button Foreground="White"
-                                                Classes="idle_anim"
-                                                VerticalAlignment="Bottom"
-                                                CornerRadius="5"
-                                                MaxWidth="250"
-                                                Height="40"
-                                                Background="#5865F2"
-                                                x:Name="ConnectDiscordButton">
-                                            <Button.Content>
-                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
-                                                    <Svg Path="../Assets/Images/svg/discord.svg" Height="20" Width="20"/>
-                                                    <TextBlock Grid.Column="1" 
-                                                               FontFamily="{StaticResource MontserratBold}"
-                                                               FontSize="15" 
-                                                               Text="Подключить Discord" 
-                                                               Margin="10 3 0 2"/>
-                                                </Grid>
-                                            </Button.Content>
-                                        </Button>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </TabItem>
-                    </TabControl>
-                </StackPanel>
-
-                <!-- Right Side Stack -->
-                <Border Grid.Row="0" Grid.Column="1"
-                        Background="#BD201E24"
-                        Padding="4"
-                        Margin="10 60 20 60"
-                        CornerRadius="5"
-                        BorderBrush="#BD000000"
-                        BorderThickness="1">
-                    <StackPanel Spacing="10">
-                        
-                        <!-- Player Profile -->
-                        <Border Height="60" Opacity="40" CornerRadius="5" BorderBrush="Black" BorderThickness="1">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
-                                    <GradientStop Color="#201e24" Offset="0.0"></GradientStop>
-                                    <GradientStop Color="#29282C" Offset="1.0"></GradientStop>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            
-                            <StackPanel Orientation="Horizontal" Margin="10 0 0 0">
-                                <Image Source="/Assets/Images/stevehead.png"
-                                       Width="30"
-                                       Height="30" />
-                                <TextBlock Text="{Binding PlayerName}"
-                                           FontFamily="{StaticResource MontserratRegular}"
-                                           Margin="10 20 0 0"
-                                           FontSize="14"/>
-                            </StackPanel>
-                        </Border>
-                        
-                        <!-- Selected Server View -->
-                        <Border Opacity="40" CornerRadius="5" BorderBrush="Black" BorderThickness="1" Padding="10">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
-                                    <GradientStop Color="#201e24" Offset="0.0"></GradientStop>
-                                    <GradientStop Color="#29282C" Offset="1.0"></GradientStop>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            
-                            <StackPanel Spacing="10"> 
-                                <TextBlock Text="Выбранный сервер:"
-                                   FontFamily="{StaticResource MontserratBold}"
-                                   FontSize="16"/>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="5">
-                                    <Image Source="{Binding SelectedModpack.Icon}" Width="30" />
-                                    <TextBlock Text="{Binding SelectedModpack.Name}"
-                                       FontFamily="{StaticResource MontserratRegular}"
-                                       FontSize="15"/>
-                                </StackPanel>
-                                    <Button Foreground="White"
-                                        Classes="idle_anim"
-                                        VerticalAlignment="Bottom"
-                                        CornerRadius="5"
-                                        MaxWidth="210"
-                                        Height="35"
-                                        Background="#6E53A1"
-                                        Click="OnShowFolderClicked">
-                                    <Button.Content>
-                                        <Grid ColumnDefinitions="*, 150" RowDefinitions="*, Auto">
-                                            <Svg Path="/Assets/Images/svg/folder.svg" Height="20" Width="20"/>
-                                            <StackPanel Grid.Column="1" Grid.Row="0">
-                                                <TextBlock FontFamily="{StaticResource MontserratBold}"
-                                                           FontSize="15" Text="Показать папку" Margin="10 3 0 2"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Button.Content>
-
-                                    <!-- <Button.Styles> -->
-                                    <!--     <Style Selector="Button.idle_anim"> -->
-                                    <!--         <Style.Animations> -->
-                                    <!--             <Animation Duration="0:0:5" PlaybackDirection="AlternateReverse" IterationCount="INFINITE"> -->
-                                    <!--                 <KeyFrame Cue="0%" > -->
-                                    <!--                     <Setter Property="Background"> -->
-                                    <!--                         <Setter.Value> -->
-                                    <!--                             <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%"> -->
-                                    <!--                                 <GradientStop Color="#551E6E" Offset="0.2" /> -->
-                                    <!--                                 <GradientStop Color="#EA4BED" Offset="1.0" /> -->
-                                    <!--                             </LinearGradientBrush> -->
-                                    <!--                         </Setter.Value> -->
-                                    <!--                     </Setter> -->
-                                    <!--                 </KeyFrame> -->
-                                    <!--             </Animation> -->
-                                    <!--         </Style.Animations> -->
-                                    <!--     </Style> -->
-                                    <!-- </Button.Styles> -->
-                                    
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                <Border Grid.Row="1"
+                        Margin="12,4,12,0"
+                        Padding="10,8"
+                        CornerRadius="10"
+                        Background="#2A2118"
+                        BorderBrush="#E8B83A" BorderThickness="1"
+                        IsVisible="{Binding HasCatalogMessage}">
+                    <TextBlock Text="{Binding CatalogMessage}"
+                               TextWrapping="Wrap"
+                               FontSize="12"
+                               Foreground="#E8B83A"
+                               FontFamily="{StaticResource MontserratRegular}" />
                 </Border>
 
-                <!-- Bottom Launch Panel -->
-                <StackPanel Grid.Row="1"
-                            Grid.ColumnSpan="2"
-                            Grid.Column="0"
-                            Margin="10">
-                    <Grid ColumnDefinitions="*, 250">
-                        <Grid Grid.Column="0"
-                              ColumnDefinitions="*, 300"
-                              RowDefinitions="*, *, *">
-                            <TextBlock Grid.Row="1" Grid.Column="0"
+                <!-- Server cards -->
+                <ScrollViewer Grid.Row="2" Margin="8,4,8,4"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <ListBox x:Name="ModpackCollectionView"
+                             ItemsSource="{Binding Modpacks}"
+                             SelectedItem="{Binding SelectedModpack}"
+                             SelectionChanged="OnInstanceSelected"
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding CardBackground}"
+                                        BorderBrush="{Binding CardBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="12"
+                                        Padding="12,10"
+                                        Margin="4,2"
+                                        PointerEntered="Modpack_OnPointerEntered"
+                                        PointerExited="Modpack_OnPointerExited">
+                                    <!-- NB: hover fade transitions are applied at
+                                         runtime via UiAnimations.ApplyCardTransitions,
+                                         so the master switch can kill them. -->
+                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+                                        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                                Width="40" Height="40" CornerRadius="10"
+                                                ClipToBounds="True" Margin="0,0,12,0"
+                                                Background="#141218">
+                                            <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
+                                        </Border>
+                                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                                   Text="{Binding Name}"
+                                                   FontSize="14" TextTrimming="CharacterEllipsis"
+                                                   Foreground="{Binding TextColor}"
+                                                   FontFamily="{StaticResource MontserratBold}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                                   Text="{Binding Subtitle}"
+                                                   FontSize="11" TextTrimming="CharacterEllipsis"
+                                                   Foreground="#8E939B"
+                                                   FontFamily="{StaticResource MontserratRegular}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+
+                <!-- Profile button with the launcher-settings gear docked into
+                     its top-right corner, pinned at the bottom -->
+                <Grid Grid.Row="3" Grid.RowSpan="2" Margin="12,4,12,12">
+                    <Button x:Name="ProfileButton" Classes="uf-side"
+                            Click="OnProfileClicked"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Border Grid.Column="0" Width="32" Height="32" CornerRadius="8" ClipToBounds="True" Background="#141218">
+                                <Image Source="/Assets/Images/stevehead.png" Stretch="UniformToFill"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                                <TextBlock Text="PLAYER" Classes="uf-caption"
+                                           FontFamily="{StaticResource MontserratRegular}"/>
+                                <TextBlock Text="{Binding PlayerName}"
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="14" Foreground="White"/>
+                            </StackPanel>
+                            <Svg Grid.Column="2" x:Name="ProfileChevron" Classes="uf-chevron" Path="/Assets/Images/svg/chevron_up.svg"
+                                 Width="14" Height="14" VerticalAlignment="Center" Margin="8,0,4,0"
+                                 Opacity="0.6" RenderTransformOrigin="50%,50%"/>
+                        </Grid>
+                    </Button>
+                    <!-- Launcher settings: compact round gear in the profile
+                         card's top-right corner, half-outside the card edge. -->
+                    <Button Classes="uf-gear" Width="32" Height="32"
+                            Click="OnGlobalSettingsClicked"
+                            ToolTip.Tip="Настройки лаунчера"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,-8,-8,0">
+                        <Svg Path="/Assets/Images/svg/gear.svg" Width="16" Height="16"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+                </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Profile dropdown: compact account menu floating above the
+                 profile card, never shifts layout. Transparent catcher
+                 closes it on outside click. -->
+            <Grid x:Name="ProfilePopup" IsVisible="False">
+                <Border Background="Transparent" PointerPressed="OnProfileOverlayPressed"/>
+                <Border Margin="12,0,12,88" Padding="6"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                        Background="#17161B" BorderBrush="#2E2C34" BorderThickness="1"
+                        CornerRadius="12">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="20" OffsetX="0" OffsetY="4"/>
+                    </Border.Effect>
+                    <StackPanel Spacing="2">
+                        <Grid ColumnDefinitions="Auto,*" Margin="6,6,6,4">
+                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="9" ClipToBounds="True" Background="#141218">
+                                <Image Source="/Assets/Images/stevehead.png" Stretch="UniformToFill"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1" Margin="10,0,0,0">
+                                <TextBlock Text="{Binding PlayerName}"
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="14" Foreground="White"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <Ellipse Width="7" Height="7" Fill="#4CC24C" VerticalAlignment="Center"/>
+                                    <TextBlock Text="В сети" Classes="uf-caption"
+                                               FontFamily="{StaticResource MontserratRegular}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                        <Border Height="1" Background="#2E2C34" Margin="8,4"/>
+                        <Button Classes="uf-menu" Click="OnAddPasswordClicked"
+                                HorizontalAlignment="Stretch">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Svg Grid.Column="0" Path="/Assets/Images/svg/lock.svg" Height="15" Width="15"
+                                     VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Margin="10,0,0,0"
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="13" Foreground="White" VerticalAlignment="Center"
+                                           Text="Добавить пароль"/>
+                            </Grid>
+                        </Button>
+                        <Button Classes="uf-menu" Click="OnConnectDiscordClicked"
+                                HorizontalAlignment="Stretch">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Svg Grid.Column="0" Path="/Assets/Images/svg/discord.svg" Height="15" Width="15"
+                                     VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="0" VerticalAlignment="Center">
+                                    <TextBlock FontFamily="{StaticResource MontserratBold}"
+                                               FontSize="13" Foreground="White"
+                                               Text="Подключить Discord"/>
+                                    <TextBlock FontFamily="{StaticResource MontserratRegular}"
+                                               FontSize="11" Foreground="#7C828A"
+                                               Text="Синхронизация ника"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                        <Border Height="1" Background="#2E2C34" Margin="8,4"/>
+                        <Button Classes="uf-menu uf-menu-danger" Click="OnLogoutClicked"
+                                HorizontalAlignment="Stretch">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Svg Grid.Column="0" Path="/Assets/Images/svg/logout_red.svg" Height="15" Width="15"
+                                     VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Margin="10,0,0,0"
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="13" Foreground="#E5484D" VerticalAlignment="Center"
+                                           Text="Выйти из аккаунта"/>
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ============ Right: modpack hero + RAM panel + news + launch ============ -->
+        <Grid Grid.Column="1" RowDefinitions="*,Auto" Margin="20,12,20,12">
+            <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14" Margin="0,2,0,0">
+                    <!-- Single modpack hero card -->
+                    <Border Classes="uf-card" Padding="0" ClipToBounds="True">
+                        <StackPanel>
+                            <Image Source="{StaticResource UfLogoBanner}"
+                                   Stretch="Uniform" HorizontalAlignment="Center"
+                                   MaxHeight="110" Margin="24,16,24,0"/>
+                            <Border Height="1" Background="#2E2C34" Margin="20,12,20,0"/>
+                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="20,12,20,16">
+                                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
+                                        ClipToBounds="True" Background="#141218" Margin="0,0,12,0">
+                                    <Image Source="{Binding SelectedModpack.Icon}" Stretch="UniformToFill"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="{Binding SelectedModpack.Name}"
+                                               FontFamily="{StaticResource MontserratBold}"
+                                               FontSize="22" Foreground="White"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <Ellipse Width="8" Height="8"
+                                                 Fill="{Binding SelectedModpack.StatusColor}"
+                                                 VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SelectedModpack.StatusText}"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="12" Foreground="{Binding SelectedModpack.StatusColor}"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="·" FontSize="12" Foreground="#5E6068" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Онлайн:" FontSize="12" Foreground="#8E939B"
+                                                   FontFamily="{StaticResource MontserratRegular}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SelectedModpack.PlayerCount}"
+                                                   FontFamily="{StaticResource MontserratBold}"
+                                                   FontSize="12" Foreground="{Binding SelectedModpack.PlayerCountColor}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="·" FontSize="12" Foreground="#5E6068" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SelectedModpack.Subtitle}"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="12" Foreground="#5E6068"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    <ProgressBar Classes="uf-thin" Value="{Binding SelectedModpack.PlayerCountProgress}"
+                                                 Margin="0,6,0,0"/>
+                                </StackPanel>
+                                <Button Grid.Column="2" Classes="uf-ghost" Click="OnModpackSettingsClicked"
+                                        Width="40" Height="40" VerticalAlignment="Center"
+                                        ToolTip.Tip="Настройки сборки">
+                                    <Svg Path="/Assets/Images/svg/gear.svg" Width="20" Height="20"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- News -->
+                    <Border Classes="uf-card" Padding="0" ClipToBounds="True">
+                        <StackPanel>
+                            <Grid ColumnDefinitions="*,Auto" Margin="20,16,20,0">
+                                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="Новости проекта" FontFamily="{StaticResource MontserratBold}" FontSize="16" Foreground="White"/>
+                                    <Border Height="2" Width="64" CornerRadius="1"
+                                            HorizontalAlignment="Left"
+                                            Background="{StaticResource UfAccentGradient}"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="uf-ghost" Click="OnShowFullChangelogClicked"
+                                        Padding="10,6" VerticalAlignment="Center" Margin="12,0,0,0">
+                                    <TextBlock Text="Все изменения" FontFamily="{StaticResource MontserratBold}"
+                                               FontSize="12" Foreground="{StaticResource UfMintBrush}"/>
+                                </Button>
+                            </Grid>
+                            <StackPanel Spacing="0" Margin="20,12,20,18">
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6">
+                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                                            Background="{StaticResource UfMintBrush}"/>
+                                    <StackPanel Grid.Column="1" Spacing="2">
+                                        <TextBlock Text="Настройки сборки и лаунчера — прямо в приложении"
+                                                   FontFamily="{StaticResource MontserratBold}"
+                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Всплывающее окно с затемнением, RAM с шагом по степеням двойки"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="12 окт" Margin="12,0,0,0"
+                                               FontFamily="{StaticResource MontserratRegular}"
+                                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                                </Grid>
+                                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6">
+                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                                            Background="{StaticResource UfMintBrush}"/>
+                                    <StackPanel Grid.Column="1" Spacing="2">
+                                        <TextBlock Text="Редизайн в стилистике Reborn"
+                                                   FontFamily="{StaticResource MontserratBold}"
+                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Тёмная тема, mint-акцент, новый логотип"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="12 окт" Margin="12,0,0,0"
+                                               FontFamily="{StaticResource MontserratRegular}"
+                                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                                </Grid>
+                                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6">
+                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                                            Background="{StaticResource UfMintBrush}"/>
+                                    <StackPanel Grid.Column="1" Spacing="2">
+                                        <TextBlock Text="Динамический каталог сборок"
+                                                   FontFamily="{StaticResource MontserratBold}"
+                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Список серверов с бэкенда, кэш при недоступности"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="11 окт" Margin="12,0,0,0"
+                                               FontFamily="{StaticResource MontserratRegular}"
+                                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Height="8" Opacity="0"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Bottom launch panel -->
+            <Border Grid.Row="1" Classes="uf-card" Padding="16,12" Margin="0,12,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0"
                                        x:Name="TaskName"
                                        Text="Чего смотришь, иди игру играть..."
-                                       FontFamily="{StaticResource MontserratLight}" />
-                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="DownloadSpeed"
-                                       HorizontalAlignment="Right"
-                                       Text="zzz..."
-                                       FontFamily="{StaticResource MontserratLight}" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="DownloadProgress"
-                                       HorizontalAlignment="Right"
-                                       Text="zzz..."
-                                       FontFamily="{StaticResource MontserratLight}" />
-                            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" CornerRadius="0" ClipToBounds="True">
-                                <ProgressBar x:Name="LaunchProgressBar" Value="0" Margin="0 10 0 0">
-                                    <ProgressBar.Foreground>
-                                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
-                                            <GradientStop Color="#8a58bb" Offset="0.2" />
-                                            <GradientStop Color="#ee4aef" Offset="1.0" />
-                                        </LinearGradientBrush>
-                                    </ProgressBar.Foreground>
-                                </ProgressBar>
-                            </Border>
+                                       FontFamily="{StaticResource MontserratRegular}"
+                                       FontSize="13" Foreground="#B9BDC2"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="12,0,0,0">
+                                <TextBlock x:Name="DownloadSpeed"
+                                           Text="—"
+                                           FontFamily="{StaticResource MontserratRegular}"
+                                           FontSize="12" Foreground="#8E939B"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock x:Name="DownloadProgress"
+                                           Text=""
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="12" Foreground="{StaticResource UfMintBrush}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
                         </Grid>
-                        
-                        <Button x:Name="LaunchButton" Margin="12 0 0 0" CornerRadius="5"
-                                Grid.Column="1" Click="OnLaunchButtonClicked" Content="Играть!"
-                                Foreground="White" FontFamily="{StaticResource MontserratBold}"
-                                FontSize="22" Classes="idle_anim">
-                            <Button.Background>
-                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
-                                    <GradientStop Color="#8a58bb" Offset="0.2" />
-                                    <GradientStop Color="#ee4aef" Offset="1.0" />
-                                </LinearGradientBrush>
-                            </Button.Background>
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
-                                                <GradientStop Color="#7252A4" Offset="0.2" />
-                                                <GradientStop Color="#904991" Offset="1.0" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                                
-                                <Style Selector="Button.idle_anim">
-                                    <Style.Animations>
-                                        <Animation Duration="0:0:5" PlaybackDirection="AlternateReverse" IterationCount="INFINITE">
-                                            <KeyFrame Cue="0%" >
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,50%">
-                                                            <GradientStop Color="#551E6E" Offset="0.2" />
-                                                            <GradientStop Color="#EA4BED" Offset="1.0" />
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </KeyFrame>
-                                        </Animation>
-                                    </Style.Animations>
-                                </Style>
-                            </Button.Styles>
-                        </Button>
-                    </Grid>
-                </StackPanel>
-            </Grid>
-        </DockPanel>
+                        <ProgressBar x:Name="LaunchProgressBar" Classes="uf-bar" Value="0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" x:Name="LaunchButton"
+                            Classes="uf-launch" Click="OnLaunchButtonClicked"
+                            Content="Играть!"
+                            FontFamily="{StaticResource MontserratBold}"
+                            FontSize="22" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                    <!-- NB: breathing animation + mint glow are applied at
+                         runtime via UiAnimations.ApplyLaunchStyle, so the
+                         "Свечение кнопки" switch can kill them. -->
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+
+        <!-- Settings overlay: dimmed backdrop + centered panel.
+             Starts transparent; code-behind fades it in as one piece so the
+             open never flashes (see ShowSettingsOverlay). -->
+        <Grid x:Name="SettingsOverlay" IsVisible="False" Opacity="0">
+            <Border x:Name="SettingsOverlayBackdrop" Background="#B3000000" PointerPressed="OnOverlayBackdropPressed"/>
+            <ContentControl x:Name="SettingsOverlayContent"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
     </Grid>
 </UserControl>

@@ -22,7 +22,16 @@ public partial class MainWindow : Window
             TitleText.Foreground = new SolidColorBrush(Color.Parse("#FFB347"));
         }
 
-        PointerPressed += (s, e) => BeginMoveDrag(e);
+    }
+
+    private void OnTitleBarPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            OnMaximizeClick(sender, e);
+            return;
+        }
+        BeginMoveDrag(e);
     }
 
     public void Init(NavigationService navigationService) 
@@ -50,14 +59,4 @@ public partial class MainWindow : Window
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
-
-    private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
-    {
-        ((Button) sender).Background = new SolidColorBrush(Color.Parse("#212121"));
-    }
-
-    private void InputElement_OnPointerExited(object? sender, PointerEventArgs e)
-    {
-        ((Button) sender).Background = new SolidColorBrush(Color.Parse("#000000"));
-    }
 }
