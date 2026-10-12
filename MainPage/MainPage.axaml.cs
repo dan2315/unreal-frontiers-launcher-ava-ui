@@ -208,7 +208,11 @@ public partial class MainPage : UserControl
     private void SetLaunchEnabled(bool enabled)
     {
         // Selection events can fire while the XAML is still being loaded.
-        if (LaunchButton != null) LaunchButton.IsEnabled = enabled;
+        if (LaunchButton == null) return;
+        LaunchButton.IsEnabled = enabled;
+        // Re-apply the glow: breathing must stop while the button is gray
+        // (disabled) and resume once it is clickable again.
+        UiAnimations.ApplyLaunchStyle(LaunchButton);
     }
 
     private async void OnLaunchFailed(string message)

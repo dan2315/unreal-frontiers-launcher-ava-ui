@@ -65,11 +65,15 @@ namespace UnrealFrontiersLauncher
         /// Applies the launch-button look: breathing gradient class + mint glow
         /// when enabled, plain static gradient otherwise. Called on page load
         /// and on every <see cref="Changed"/>.
+        /// Breathing never runs on a disabled button: the animated gradient
+        /// would paint over the gray disabled state and the button would
+        /// drift back to violet while it must stay gray.
         /// </summary>
         public static void ApplyLaunchStyle(Button button)
         {
             if (button == null) return;
-            bool glow = ButtonGlow;
+            // Disabled wins over glow — re-applied from SetLaunchEnabled.
+            bool glow = ButtonGlow && button.IsEnabled;
             SetClass(button, "uf-launch-animated", glow);
             button.Effect = glow
                 ? new DropShadowEffect { Color = Color.Parse("#00FFA3"), Opacity = 0.25, BlurRadius = 18 }

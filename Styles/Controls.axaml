@@ -84,13 +84,11 @@
     <Setter Property="Padding" Value="44,10" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
-  <Style Selector="Button.uf-launch /template/ ContentPresenter">
-    <Setter Property="Transitions">
-      <Transitions>
-        <BrushTransition Property="Background" Duration="0:0:0.2" />
-      </Transitions>
-    </Setter>
-  </Style>
+  <!-- NB: deliberately NO BrushTransition here. The breathing animation
+       below rewrites Background every frame; a transition on the same
+       property chases the animated value and the button gets stuck in a
+       muddy mid-blend until hover pins a static color. States swap
+       instantly, like before the redesign. -->
   <Style Selector="Button.uf-launch:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="{StaticResource UfLaunchHoverGradient}" />
   </Style>
