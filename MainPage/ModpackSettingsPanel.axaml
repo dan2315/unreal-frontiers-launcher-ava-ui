@@ -54,7 +54,7 @@
                     <Border x:Name="RamBase" Height="8" CornerRadius="4" Background="#333036" VerticalAlignment="Center"/>
                     <Border x:Name="RamFill" Height="8" CornerRadius="4"
                             HorizontalAlignment="Left" VerticalAlignment="Center" Width="0"
-                            Background="{StaticResource UfAccentGradient}"/>
+                            Background="#8A58BB"/>
                     <Slider x:Name="RamSlider"
                             Theme="{StaticResource UfRamSlider}"
                             VerticalAlignment="Center" />
