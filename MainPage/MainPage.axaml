@@ -314,64 +314,128 @@
                         </StackPanel>
                     </TabItem.Header>
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                        <Border Classes="uf-card" Margin="0,14,0,0" Padding="0">
-                            <StackPanel>
-                                <TextBlock Text="Настройки запуска"
-                                           FontSize="16"
-                                           FontFamily="{StaticResource MontserratBold}"
-                                           Foreground="White"
-                                           Margin="20,16,20,4"/>
-                                <TextBlock Text="Применяются к выбранному серверу"
-                                           FontSize="12"
-                                           FontFamily="{StaticResource MontserratRegular}"
-                                           Foreground="#8E939B"
-                                           Margin="20,0,20,12"/>
-                                <Border Height="1" Background="#2E2C34"/>
+                        <StackPanel Spacing="14" Margin="0,14,0,0">
+                            <!-- Memory allocation hero card -->
+                            <Border Classes="uf-card" Padding="20,18">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                        <Border Width="40" Height="40" CornerRadius="12"
+                                                VerticalAlignment="Center"
+                                                Background="{StaticResource UfAccentGradient}">
+                                            <Svg Path="/Assets/Images/svg/ram.svg" Width="22" Height="22"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Spacing="0" VerticalAlignment="Center">
+                                            <TextBlock Text="Память для игры"
+                                                       FontSize="16"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       Foreground="White"/>
+                                            <TextBlock Text="Сколько RAM получит выбранный сервер"
+                                                       FontSize="12"
+                                                       FontFamily="{StaticResource MontserratRegular}"
+                                                       Foreground="#8E939B"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="20,16,20,8">
-                                    <TextBlock Grid.Column="0" Text="RAM"
-                                               VerticalAlignment="Center"
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock x:Name="RamValueLabel" Text="—"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       FontSize="34" Foreground="White"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="MB"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       FontSize="15" Foreground="{StaticResource UfMintBrush}"
+                                                       VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="Указать вручную:"
+                                                       VerticalAlignment="Center"
+                                                       FontFamily="{StaticResource MontserratRegular}"
+                                                       FontSize="12" Foreground="#8E939B"/>
+                                            <TextBox x:Name="RamEntry" Classes="uf-field"
+                                                     Width="100" Padding="8,6" FontSize="13"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid Height="28" VerticalAlignment="Center">
+                                        <Border x:Name="RamBase" Height="8" CornerRadius="4" Background="#333036" VerticalAlignment="Center"/>
+                                        <Border x:Name="RamFill" Height="8" CornerRadius="4"
+                                                HorizontalAlignment="Left" VerticalAlignment="Center" Width="0"
+                                                Background="{StaticResource UfAccentGradient}"/>
+                                        <Slider x:Name="RamSlider"
+                                                Theme="{StaticResource UfRamSlider}"
+                                                VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <TextBlock Grid.Column="0" Text="1 ГБ"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="11" Foreground="#5E6068"/>
+                                        <TextBlock Grid.Column="1" x:Name="RamMaxLabel" Text="—"
+                                                   HorizontalAlignment="Right"
+                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                   FontSize="11" Foreground="#5E6068"/>
+                                    </Grid>
+
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Behaviour toggles -->
+                            <Border Classes="uf-card" Padding="0">
+                                <StackPanel>
+                                    <TextBlock Text="Поведение запуска"
+                                               FontSize="16"
                                                FontFamily="{StaticResource MontserratBold}"
-                                               Foreground="White" FontSize="14" MinWidth="60"/>
-                                    <Slider Grid.Column="1" x:Name="RamSlider"
-                                            Classes="uf-slider"
-                                            VerticalAlignment="Center" />
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <TextBox x:Name="RamEntry" Classes="uf-field"
-                                                 Width="90" Padding="8,6" FontSize="13"/>
-                                        <TextBlock Text="MB" VerticalAlignment="Center"
-                                                   FontFamily="{StaticResource MontserratRegular}"
-                                                   FontSize="12" Foreground="#8E939B"/>
-                                    </StackPanel>
-                                </Grid>
+                                               Foreground="White"
+                                               Margin="20,16,20,4"/>
+                                    <TextBlock Text="Мелочи, которые делают запуск удобнее"
+                                               FontSize="12"
+                                               FontFamily="{StaticResource MontserratRegular}"
+                                               Foreground="#8E939B"
+                                               Margin="20,0,20,12"/>
+                                    <Border Height="1" Background="#2E2C34"/>
 
-                                <Border Height="1" Background="#2E2C34" Margin="20,8,20,0"/>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="20,12,20,8">
+                                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="12"
+                                                VerticalAlignment="Center" Background="#26232C" Margin="0,0,12,0">
+                                            <Svg Path="/Assets/Images/svg/console.svg" Width="22" Height="22"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="Открыть консоль"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       Foreground="White" FontSize="14"/>
+                                            <TextBlock Text="Показывать окно логов игры при запуске"
+                                                       FontFamily="{StaticResource MontserratRegular}"
+                                                       Foreground="#8E939B" FontSize="12"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="2" x:Name="OpenConsoleBox"
+                                                      Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
+                                    </Grid>
 
-                                <Grid ColumnDefinitions="*,Auto" Margin="20,12,20,8">
-                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="Открыть консоль"
-                                                   FontFamily="{StaticResource MontserratBold}"
-                                                   Foreground="White" FontSize="14"/>
-                                        <TextBlock Text="Показывать окно логов игры при запуске"
-                                                   FontFamily="{StaticResource MontserratRegular}"
-                                                   Foreground="#8E939B" FontSize="12"/>
-                                    </StackPanel>
-                                    <CheckBox Grid.Column="1" x:Name="OpenConsoleBox" VerticalAlignment="Center"/>
-                                </Grid>
+                                    <Border Height="1" Background="#2E2C34" Margin="20,8,20,0"/>
 
-                                <Grid ColumnDefinitions="*,Auto" Margin="20,8,20,16">
-                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="Закрыть лаунчер при запуске"
-                                                   FontFamily="{StaticResource MontserratBold}"
-                                                   Foreground="White" FontSize="14"/>
-                                        <TextBlock Text="Освобождает память во время игры"
-                                                   FontFamily="{StaticResource MontserratRegular}"
-                                                   Foreground="#8E939B" FontSize="12"/>
-                                    </StackPanel>
-                                    <CheckBox Grid.Column="1" x:Name="CloseLauncherBox" VerticalAlignment="Center"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="20,12,20,16">
+                                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="12"
+                                                VerticalAlignment="Center" Background="#26232C" Margin="0,0,12,0">
+                                            <Svg Path="/Assets/Images/svg/power.svg" Width="22" Height="22"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="Закрыть лаунчер при запуске"
+                                                       FontFamily="{StaticResource MontserratBold}"
+                                                       Foreground="White" FontSize="14"/>
+                                            <TextBlock Text="Освобождает память во время игры"
+                                                       FontFamily="{StaticResource MontserratRegular}"
+                                                       Foreground="#8E939B" FontSize="12"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="2" x:Name="CloseLauncherBox"
+                                                      Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </ScrollViewer>
                 </TabItem>
 

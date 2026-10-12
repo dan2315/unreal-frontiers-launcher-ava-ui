@@ -11,6 +11,7 @@
                 <ResourceDictionary>
                     <ResourceDictionary.MergedDictionaries>
                         <ResourceInclude Source="/Styles/Brushes.axaml"/>
+                        <ResourceInclude Source="/Styles/Settings.axaml"/>
                     </ResourceDictionary.MergedDictionaries>
                 </ResourceDictionary>
             </Styles.Resources>
@@ -26,6 +27,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="/Styles/Brushes.axaml"/>
+                <ResourceInclude Source="/Styles/Settings.axaml"/>
             </ResourceDictionary.MergedDictionaries>
 
         <FontFamily x:Key="MontserratRegular">/Assets/Fonts/Montserrat-Regular.ttf#Montserrat</FontFamily>

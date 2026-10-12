@@ -119,9 +119,15 @@
     <Setter Property="CornerRadius" Value="3" />
   </Style>
 
-  <!-- Settings slider. -->
+  <!-- Settings slider + toggles ship as full ControlThemes below
+       (see Styles.Resources): plain /template/ selectors from a loose
+       Style do not reach SimpleTheme template parts in this setup. -->
   <Style Selector="Slider.uf-slider">
-    <Setter Property="Foreground" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="ToggleSwitch.uf-toggle">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
   <!-- Discord brand button on auth page. -->

@@ -63,6 +63,11 @@ public partial class MainPage : UserControl
         _settingsPanelInitialized = true;
 
         RamSlider.ValueChanged += UpdateRamThroughSlider;
+        RamBase.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Avalonia.Visual.BoundsProperty && int.TryParse(RamValueLabel?.Text, out var v))
+                SetRamDisplay(v);
+        };
         RamEntry.TextChanged += UpdateRamThroughEntry;
         RamEntry.LostFocus += (_, _) => NormalizeRamEntry();
         CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
@@ -71,22 +76,58 @@ public partial class MainPage : UserControl
 
     public void UpdateSettingsPanel()
     {
-        if (SelectedInstance == null) return;
-        var configuration = SelectedInstance.GetLaunchConfiguration();
+        // Server may be unreachable (no cached instance yet) — still show
+        // lively defaults so the tab never looks dead.
+        var configuration = SelectedInstance?.GetLaunchConfiguration();
+        var ram = configuration?.Ram ?? MinecraftInstance.DefaultRamMb;
+        var needClose = configuration?.NeedToClose ?? true;
+        var needConsole = configuration?.NeedToOpenConsole ?? false;
         var systemRamMb = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
 
         RamSlider.Minimum = MinecraftInstance.MinRamMb;
-        RamSlider.Maximum = Math.Max(systemRamMb, MinecraftInstance.MinRamMb);
-        RamSlider.Value = configuration.Ram;
-        RamEntry.Text = configuration.Ram.ToString();
-        CloseLauncherBox.IsChecked = configuration.NeedToClose;
-        OpenConsoleBox.IsChecked = configuration.NeedToOpenConsole;
+        RamSlider.Maximum = Math.Max(Math.Max(systemRamMb, MinecraftInstance.MinRamMb), ram);
+        RamSlider.Value = Math.Clamp(ram, RamSlider.Minimum, RamSlider.Maximum);
+        RamEntry.Text = ((int)RamSlider.Value).ToString();
+        RamValueLabel.Text = ((int)RamSlider.Value).ToString();
+        if (RamMaxLabel != null)
+            RamMaxLabel.Text = $"{(int)(RamSlider.Maximum / 1024)} ГБ";
+        SetRamDisplay((int)RamSlider.Value);
+        CloseLauncherBox.IsChecked = needClose;
+        OpenConsoleBox.IsChecked = needConsole;
     }
 
     private void UpdateRamThroughSlider(object? sender, RangeBaseValueChangedEventArgs args)
     {
-        RamEntry.Text = ((int)args.NewValue).ToString();
-        SelectedInstance?.ApplyNewRamValue((int)args.NewValue);
+        var value = (int)args.NewValue;
+        RamEntry.Text = value.ToString();
+        SetRamDisplay(value);
+        SelectedInstance?.ApplyNewRamValue(value);
+    }
+
+    private void SetRamDisplay(int value)
+    {
+        if (RamValueLabel != null) RamValueLabel.Text = value.ToString();
+        if (RamFill != null && RamBase != null && RamSlider.Maximum > RamSlider.Minimum)
+        {
+            // Fill lives in the same grid cell as the base track: anchor it to
+            // the base width so both follow the resize identically.
+            if (RamBase.Bounds.Width <= 0)
+            {
+                RamBase.LayoutUpdated += UpdateRamFillOnce;
+                return;
+            }
+            var ratio = (value - RamSlider.Minimum) / (RamSlider.Maximum - RamSlider.Minimum);
+            // Fill starts at x=0; thumb center travels 12..W-12 (half-thumb
+            // insets), so the fill must end exactly under the thumb center.
+            var track = Math.Max(0, RamBase.Bounds.Width - 24);
+            RamFill.Width = Math.Max(0, Math.Min(RamBase.Bounds.Width, 12 + track * ratio));
+        }
+    }
+
+    private void UpdateRamFillOnce(object? sender, EventArgs e)
+    {
+        RamBase.LayoutUpdated -= UpdateRamFillOnce;
+        if (int.TryParse(RamValueLabel?.Text, out var value)) SetRamDisplay(value);
     }
 
     private void UpdateRamThroughEntry(object? sender, TextChangedEventArgs args)
@@ -110,6 +151,7 @@ public partial class MainPage : UserControl
         if (value < MinecraftInstance.MinRamMb) return;
 
         RamSlider.Value = value;
+        RamValueLabel.Text = value.ToString();
         SelectedInstance?.ApplyNewRamValue(value);
     }
 
@@ -121,17 +163,17 @@ public partial class MainPage : UserControl
 
     private void UpdateCloseLauncher(object? sender, RoutedEventArgs args)
     {
-        if (sender is CheckBox checkBox)
+        if (sender is ToggleButton toggle)
         {
-            SelectedInstance?.ApplyNewShouldCloseValue(checkBox.IsChecked == true);
+            SelectedInstance?.ApplyNewShouldCloseValue(toggle.IsChecked == true);
         }
     }
 
     private void UpdateOpenConsole(object? sender, RoutedEventArgs args)
     {
-        if (sender is CheckBox checkBox)
+        if (sender is ToggleButton toggle)
         {
-            SelectedInstance?.ApplyNewShouldOpenConsoleValue(checkBox.IsChecked == true);
+            SelectedInstance?.ApplyNewShouldOpenConsoleValue(toggle.IsChecked == true);
         }
     }
 

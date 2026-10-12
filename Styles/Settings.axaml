@@ -1,0 +1,81 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Settings-tab themes: self-drawn ControlThemes so the look does not
+    depend on SimpleTheme template internals.
+
+    UfRamSlider: transparent track (the page paints base + fill
+    borders underneath and sizes the fill from code-behind), glowing
+    white-ringed gradient thumb. Drag/wheel/keyboard all work —
+    Track + Thumb are the stock primitives, only painted ours.
+  -->
+  <ControlTheme x:Key="UfRamSlider" TargetType="Slider">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid VerticalAlignment="Center" Height="28" Background="Transparent">
+          <Track Name="PART_Track"
+                 IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                 Orientation="Horizontal"
+                 Minimum="{TemplateBinding Minimum}"
+                 Maximum="{TemplateBinding Maximum}"
+                 Value="{TemplateBinding Value, Mode=TwoWay}">
+            <Track.DecreaseButton>
+              <RepeatButton Name="PART_DecreaseButton" Opacity="0" Focusable="False"/>
+            </Track.DecreaseButton>
+            <Track.IncreaseButton>
+              <RepeatButton Name="PART_IncreaseButton" Opacity="0" Focusable="False"/>
+            </Track.IncreaseButton>
+            <Thumb Name="thumb" MinWidth="24" MinHeight="24">
+              <Thumb.Template>
+                <ControlTemplate>
+                  <Ellipse Width="20" Height="20"
+                           Fill="{StaticResource UfAccentGradient}"
+                           Stroke="White" StrokeThickness="2">
+                    <Ellipse.Effect>
+                      <DropShadowEffect Color="#00FFA3" Opacity="0.45" BlurRadius="10" OffsetX="0" OffsetY="0"/>
+                    </Ellipse.Effect>
+                  </Ellipse>
+                </ControlTemplate>
+              </Thumb.Template>
+            </Thumb>
+          </Track>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!--
+    UfSettingsToggle: pill switch on ToggleButton — gradient track when
+    on, graphite when off, knob slides left/right. Fully self-drawn.
+  -->
+  <ControlTheme x:Key="UfSettingsToggle" TargetType="ToggleButton">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Track" Width="52" Height="28" CornerRadius="14"
+                Background="#333036" BorderBrush="#4A4753" BorderThickness="1">
+          <Ellipse x:Name="PART_Knob" Width="20" Height="20"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"
+                   Fill="#8E939B"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked /template/ Border#PART_Track">
+      <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
+      <Setter Property="BorderBrush" Value="{StaticResource UfAccentGradient}" />
+    </Style>
+    <Style Selector="^:checked /template/ Ellipse#PART_Knob">
+      <Setter Property="Fill" Value="White" />
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="Margin" Value="0,0,4,0" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#PART_Track">
+      <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

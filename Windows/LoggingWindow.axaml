@@ -28,7 +28,7 @@
                                TextWrapping="Wrap"
                                FontFamily="Consolas,Menlo,monospace"
                                FontSize="12"
-                               Foreground="#C9CFd6"
+                               Foreground="#C9CFD6"
                                Padding="2,1"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>

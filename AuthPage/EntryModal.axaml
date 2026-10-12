@@ -3,38 +3,53 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="UnrealFrontiersLauncher.EntryModal">
     <Grid>
-        <Grid MaxWidth="480" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24">
-            <Border Classes="uf-card" Padding="28,24">
-                <StackPanel Spacing="14">
-                    <TextBlock x:Name="InfoLabel"
-                               Text="Enter your input"
-                               FontSize="17"
-                               FontFamily="{StaticResource MontserratBold}"
-                               Foreground="White"
-                               TextWrapping="Wrap"
-                               HorizontalAlignment="Center"
-                               TextAlignment="Center" />
-                    <TextBox x:Name="UserInput"
-                             Watermark="Type here..."
-                             Classes="uf-field"
-                             Height="42" />
-                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,4,0,0">
-                        <Button Content="Submit"
-                                Classes="uf-primary"
-                                FontFamily="{StaticResource MontserratBold}"
-                                Padding="28,8"
-                                FontSize="15"
-                                Name="SubmitButton" />
-                        <Button Content="Cancel"
-                                Classes="uf-ghost"
-                                FontFamily="{StaticResource MontserratBold}"
-                                Padding="28,8"
-                                FontSize="15"
-                                Foreground="#B9BDC2"
-                                Name="CancelButton" />
+        <Grid.Background>
+            <ImageBrush Stretch="UniformToFill" Source="/Assets/Images/backgorund2.png" />
+        </Grid.Background>
+        <Border Opacity="0.78">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#0B0A0E" Offset="0.0" />
+                    <GradientStop Color="#121420" Offset="0.55" />
+                    <GradientStop Color="#0A1F18" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <Grid MaxWidth="480" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24">
+                <Border Classes="uf-card" Padding="28,24">
+                    <StackPanel Spacing="14">
+                        <TextBlock x:Name="InfoLabel"
+                                   Text="Enter your input"
+                                   FontSize="17"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center" />
+                        <TextBox x:Name="UserInput"
+                                 Watermark="Type here..."
+                                 Classes="uf-field"
+                                 Height="42" />
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,4,0,0">
+                            <Button Content="Submit"
+                                    Classes="uf-primary"
+                                    FontFamily="{StaticResource MontserratBold}"
+                                    Padding="28,8"
+                                    FontSize="15"
+                                    Name="SubmitButton" />
+                            <Button Content="Cancel"
+                                    Classes="uf-ghost"
+                                    FontFamily="{StaticResource MontserratBold}"
+                                    Padding="28,8"
+                                    FontSize="15"
+                                    Foreground="#B9BDC2"
+                                    Name="CancelButton" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </Border>
-        </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>

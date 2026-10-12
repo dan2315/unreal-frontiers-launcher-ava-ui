@@ -25,7 +25,8 @@
                             Click="GetToAuthPage" ToolTip.Tip="Back">
                         <Svg Path="/Assets/Images/svg/arrow_left.svg" Width="16" Height="16"/>
                     </Button>
-                    <Image Source="{StaticResource UfLogoBadge}" Height="30" Stretch="Uniform"/>
+                    <Border Width="3" Height="30" CornerRadius="2" VerticalAlignment="Center"
+                            Background="{StaticResource UfAccentGradient}"/>
                     <StackPanel VerticalAlignment="Center" Spacing="0">
                         <TextBlock x:Name="TitleText" Text="Unreal Frontiers" FontFamily="{StaticResource MontserratBold}" FontSize="14" Foreground="White" LineHeight="16"/>
                         <TextBlock Text="L A U N C H E R" FontFamily="{StaticResource MontserratRegular}" FontSize="9" Foreground="#7C828A" LineHeight="12" LetterSpacing="2"/>
