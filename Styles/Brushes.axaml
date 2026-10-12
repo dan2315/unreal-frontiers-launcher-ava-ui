@@ -65,6 +65,19 @@
     <GradientStop Color="#F066F2" Offset="1.0" />
   </LinearGradientBrush>
 
+  <!-- Deep violet for the sign-in action on the auth page. -->
+  <LinearGradientBrush x:Key="UfAuthGradient" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Color="#3D1561" Offset="0.0" />
+    <GradientStop Color="#7B3FBF" Offset="0.5" />
+    <GradientStop Color="#C93BD8" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="UfAuthHoverGradient" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Color="#4C1D78" Offset="0.0" />
+    <GradientStop Color="#9350DE" Offset="0.5" />
+    <GradientStop Color="#DE52E8" Offset="1.0" />
+  </LinearGradientBrush>
+
   <!-- Geometry -->
   <CornerRadius x:Key="UfRadiusS">6</CornerRadius>
   <CornerRadius x:Key="UfRadiusM">10</CornerRadius>

@@ -59,6 +59,8 @@ namespace UnrealFrontiersLauncher
                 var versionName = await InstallLoaderAsync(launcher, minecraftInstance, byteProgress, fileProgress);
 
                 var launchConfiguration = minecraftInstance.GetLaunchConfiguration();
+                // Console/close behaviour is global (Preferences), RAM stays per-instance.
+                var globalBehaviour = Preferences.Preferences.Get();
                 var accessToken = await _authService.GetFreshAccessTokenAsync();
                 var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
                 {
@@ -77,7 +79,7 @@ namespace UnrealFrontiersLauncher
                 Console.WriteLine(process.StartInfo.FileName + " " + process.StartInfo.Arguments);
 
                 LoggingWindow? loggingWindow = null;
-                if (launchConfiguration.NeedToOpenConsole)
+                if (globalBehaviour.NeedToOpenConsole)
                 {
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
@@ -94,7 +96,7 @@ namespace UnrealFrontiersLauncher
                 };
                 processUtil.StartWithEvents();
 
-                if (launchConfiguration.NeedToClose)
+                if (globalBehaviour.NeedToClose)
                 {
                     await Dispatcher.UIThread.InvokeAsync(mainWindow.Close);
                 }

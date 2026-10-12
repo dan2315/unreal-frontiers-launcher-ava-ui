@@ -1,8 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using UnrealFrontiersLauncher.Platforms;
@@ -16,21 +14,18 @@ public partial class MainPage : UserControl
     private readonly InstanceManager _instanceManager;
     private readonly GameLauncher _gameLauncher;
     private readonly PlayerProfileProvider _playerProfileProvider;
+    private readonly AuthService _authService;
+    private readonly NavigationService _navigationService;
     private readonly MainPageViewModel _viewModel;
     private readonly MainWindow _mainWindow;
     private readonly ServerService _serverService;
-    private bool _settingsPanelInitialized;
-#if WINDOWS
-    private readonly ISystemInfo _systemInfo = new Windows.SystemInfo();
-#elif LINUX
-    private readonly ISystemInfo _systemInfo = new Linux.SystemInfo();
-#endif
+    private readonly ISystemInfo _systemInfo;
     public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
     private MinecraftInstance? SelectedInstance => _instanceManager.selectedInstance;
 
     public MainPage() {}
-    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow)
+    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow, AuthService authService, NavigationService navigationService, ISystemInfo systemInfo)
     {
         _playerProfileProvider = playerProfileProvider;
         _popUpService = popUpService;
@@ -38,6 +33,9 @@ public partial class MainPage : UserControl
         _instanceManager = instanceManager;
         _serverService = serverService;
         _mainWindow = mainWindow;
+        _authService = authService;
+        _navigationService = navigationService;
+        _systemInfo = systemInfo;
         _viewModel = new MainPageViewModel(this, _serverService, _instanceManager);
         DataContext = _viewModel;
 
@@ -46,136 +44,120 @@ public partial class MainPage : UserControl
         _playerProfileProvider.OnProfileUpdate(() =>
         {
             _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName));
-            _viewModel.OnPropertyChanged(nameof(_viewModel.PlayText));
         });
 
         Loaded += (_, _) =>
         {
-            InitSettingsPanel();
-            UpdateSettingsPanel();
+            UiAnimations.ApplyLaunchStyle(LaunchButton);
             _ = _viewModel.RefreshCatalogAsync();
         };
+        UiAnimations.Changed += OnAnimationsChanged;
     }
 
-    public void InitSettingsPanel()
-    {
-        if (_settingsPanelInitialized) return;
-        _settingsPanelInitialized = true;
+    private void OnAnimationsChanged() => UiAnimations.ApplyLaunchStyle(LaunchButton);
 
-        RamSlider.ValueChanged += UpdateRamThroughSlider;
-        RamBase.PropertyChanged += (_, e) =>
+    // ---- Settings overlay (in-app dimmed panel) ----
+
+    private async void ShowSettingsOverlay(UserControl panel)
+    {
+        // Set content first while the grid is still hidden, then fade the
+        // whole overlay (backdrop + panel) as one piece — no flash of an
+        // empty dim frame. No-op fade when effects are off in settings.
+        SettingsOverlayContent.Content = panel;
+        SettingsOverlay.Opacity = UiAnimations.OverlayFade ? 0 : 1;
+        SettingsOverlay.IsVisible = true;
+        await UiAnimations.FadeInAsync(SettingsOverlay);
+    }
+
+    private void CloseSettingsOverlay()
+    {
+        SettingsOverlay.IsVisible = false;
+        SettingsOverlay.Opacity = 0;
+        SettingsOverlayContent.Content = null;
+    }
+
+    private void OnOverlayBackdropPressed(object? sender, PointerPressedEventArgs e)
+    {
+        CloseSettingsOverlay();
+    }
+
+    private void OnModpackSettingsClicked(object? sender, RoutedEventArgs e)
+    {
+        var modpack = _viewModel.SelectedModpack;
+        if (modpack == null) return;
+
+        // Offline-safe: materialize a working instance from catalog data so
+        // RAM/folder settings always open, even with no backend and no cache.
+        var instance = SelectedInstance?.Id == modpack.Value
+            ? SelectedInstance
+            : _instanceManager.EnsureOfflineInstance(modpack.Entry);
+        var panel = new ModpackSettingsPanel(instance, _systemInfo);
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
+    }
+
+    private void OnGlobalSettingsClicked(object? sender, RoutedEventArgs e)
+    {
+        var panel = new GlobalSettingsPanel();
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
+    }
+
+    // ---- News ----
+
+    private void OnShowFullChangelogClicked(object? sender, RoutedEventArgs e)
+    {
+        var panel = new NewsPanel();
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
+    }
+
+    // ---- Profile panel ----
+
+    private async void OnProfileClicked(object? sender, RoutedEventArgs e)
+    {
+        // Popup floats above the sidebar — layout never shifts.
+        ProfilePopup.IsVisible = !ProfilePopup.IsVisible;
+        if (ProfilePopup.IsVisible)
+            await UiAnimations.PopInAsync(ProfilePopup);
+    }
+
+    private void OnProfileOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Click outside the card closes the popup; the card itself sits
+        // above this catcher so its buttons stay clickable.
+        ProfilePopup.IsVisible = false;
+    }
+
+    private async void OnLogoutClicked(object? sender, RoutedEventArgs e)
+    {
+        ProfilePopup.IsVisible = false;
+        var answer = await _popUpService.ShowYesNoDialogAsync("Выйти из аккаунта?", "Придётся войти заново, чтобы запускать игру.");
+        if (!answer) return;
+
+        _authService.Logout();
+        _playerProfileProvider.SetProfile(PlayerProfile.Default);
+        _navigationService.NavigateTo<AuthPage>();
+    }
+
+    private void OnAddPasswordClicked(object? sender, RoutedEventArgs e)
+    {
+        ProfilePopup.IsVisible = false;
+        var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
         {
-            if (e.Property == Avalonia.Visual.BoundsProperty && int.TryParse(RamValueLabel?.Text, out var v))
-                SetRamDisplay(v);
-        };
-        RamEntry.TextChanged += UpdateRamThroughEntry;
-        RamEntry.LostFocus += (_, _) => NormalizeRamEntry();
-        CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
-        OpenConsoleBox.IsCheckedChanged += UpdateOpenConsole;
+            var message = await _authService.SendResetPasswordEmail(email);
+            await _popUpService.ShowOkDialogAsync("Восстановление пароля", message);
+            _navigationService.GetBack();
+        });
+        _navigationService.NavigateTo(entryModal);
     }
 
-    public void UpdateSettingsPanel()
+    private async void OnConnectDiscordClicked(object? sender, RoutedEventArgs e)
     {
-        // Server may be unreachable (no cached instance yet) — still show
-        // lively defaults so the tab never looks dead.
-        var configuration = SelectedInstance?.GetLaunchConfiguration();
-        var ram = configuration?.Ram ?? MinecraftInstance.DefaultRamMb;
-        var needClose = configuration?.NeedToClose ?? true;
-        var needConsole = configuration?.NeedToOpenConsole ?? false;
-        var systemRamMb = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
-
-        RamSlider.Minimum = MinecraftInstance.MinRamMb;
-        RamSlider.Maximum = Math.Max(Math.Max(systemRamMb, MinecraftInstance.MinRamMb), ram);
-        RamSlider.Value = Math.Clamp(ram, RamSlider.Minimum, RamSlider.Maximum);
-        RamEntry.Text = ((int)RamSlider.Value).ToString();
-        RamValueLabel.Text = ((int)RamSlider.Value).ToString();
-        if (RamMaxLabel != null)
-            RamMaxLabel.Text = $"{(int)(RamSlider.Maximum / 1024)} ГБ";
-        SetRamDisplay((int)RamSlider.Value);
-        CloseLauncherBox.IsChecked = needClose;
-        OpenConsoleBox.IsChecked = needConsole;
+        await _authService.DiscordAuth(PlayerProfile?.Nickname);
     }
 
-    private void UpdateRamThroughSlider(object? sender, RangeBaseValueChangedEventArgs args)
-    {
-        var value = (int)args.NewValue;
-        RamEntry.Text = value.ToString();
-        SetRamDisplay(value);
-        SelectedInstance?.ApplyNewRamValue(value);
-    }
-
-    private void SetRamDisplay(int value)
-    {
-        if (RamValueLabel != null) RamValueLabel.Text = value.ToString();
-        if (RamFill != null && RamBase != null && RamSlider.Maximum > RamSlider.Minimum)
-        {
-            // Fill lives in the same grid cell as the base track: anchor it to
-            // the base width so both follow the resize identically.
-            if (RamBase.Bounds.Width <= 0)
-            {
-                RamBase.LayoutUpdated += UpdateRamFillOnce;
-                return;
-            }
-            var ratio = (value - RamSlider.Minimum) / (RamSlider.Maximum - RamSlider.Minimum);
-            // Fill starts at x=0; thumb center travels 12..W-12 (half-thumb
-            // insets), so the fill must end exactly under the thumb center.
-            var track = Math.Max(0, RamBase.Bounds.Width - 24);
-            RamFill.Width = Math.Max(0, Math.Min(RamBase.Bounds.Width, 12 + track * ratio));
-        }
-    }
-
-    private void UpdateRamFillOnce(object? sender, EventArgs e)
-    {
-        RamBase.LayoutUpdated -= UpdateRamFillOnce;
-        if (int.TryParse(RamValueLabel?.Text, out var value)) SetRamDisplay(value);
-    }
-
-    private void UpdateRamThroughEntry(object? sender, TextChangedEventArgs args)
-    {
-        if (sender is not TextBox entry) return;
-
-        var digits = string.Concat((entry.Text ?? "").Where(char.IsDigit));
-        if (entry.Text != digits)
-        {
-            entry.Text = digits;
-            return;
-        }
-
-        if (!int.TryParse(digits, out var value) || value > RamSlider.Maximum)
-        {
-            value = (int)RamSlider.Maximum;
-            entry.Text = value.ToString();
-            return;
-        }
-
-        if (value < MinecraftInstance.MinRamMb) return;
-
-        RamSlider.Value = value;
-        RamValueLabel.Text = value.ToString();
-        SelectedInstance?.ApplyNewRamValue(value);
-    }
-
-    private void NormalizeRamEntry()
-    {
-        if (int.TryParse(RamEntry.Text, out var value) && value >= MinecraftInstance.MinRamMb) return;
-        RamEntry.Text = MinecraftInstance.MinRamMb.ToString();
-    }
-
-    private void UpdateCloseLauncher(object? sender, RoutedEventArgs args)
-    {
-        if (sender is ToggleButton toggle)
-        {
-            SelectedInstance?.ApplyNewShouldCloseValue(toggle.IsChecked == true);
-        }
-    }
-
-    private void UpdateOpenConsole(object? sender, RoutedEventArgs args)
-    {
-        if (sender is ToggleButton toggle)
-        {
-            SelectedInstance?.ApplyNewShouldOpenConsoleValue(toggle.IsChecked == true);
-        }
-    }
+    // ---- Launch ----
 
     private async void OnLaunchButtonClicked(object sender, RoutedEventArgs e)
     {
@@ -185,11 +167,11 @@ public partial class MainPage : UserControl
         var profile = PlayerProfile;
         if (profile == null)
         {
-            await _popUpService.ShowOkDialogAsync("Not signed in", "Log in to your account before launching the game.");
+            await _popUpService.ShowOkDialogAsync("Нет входа", "Войдите в аккаунт перед запуском игры.");
             return;
         }
 
-        bool answer = await _popUpService.ShowYesNoDialogAsync("Launching...", "Вы намерены запустить майнкрафт?");
+        bool answer = await _popUpService.ShowYesNoDialogAsync("Запуск игры", "Запустить Minecraft с выбранной сборкой?");
         if (!answer) return;
 
         SetLaunchEnabled(false);
@@ -220,7 +202,7 @@ public partial class MainPage : UserControl
     private async void OnLaunchFailed(string message)
     {
         SetLaunchEnabled(true);
-        await _popUpService.ShowOkDialogAsync("Launch failed", message);
+        await _popUpService.ShowOkDialogAsync("Не удалось запустить", message);
     }
 
     private void OnDownloadSpeedChanged(string speedText)
@@ -258,7 +240,6 @@ public partial class MainPage : UserControl
         if (_viewModel.SelectedModpack != currentModpack) return;
 
         SetLaunchEnabled(loaded);
-        UpdateSettingsPanel();
 
         if (!loaded && TaskName != null)
         {
@@ -277,30 +258,20 @@ public partial class MainPage : UserControl
         TaskName.Text = file;
     }
 
-    private void OnShowFolderClicked(object sender, RoutedEventArgs e)
-    {
-        if (SelectedInstance == null) return;
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = GameLauncher.EnsurePathExists(SelectedInstance.GetResourcePath()),
-            UseShellExecute = true,
-            Verb = "open"
-        });
-    }
-
     private void Modpack_OnPointerEntered(object? sender, PointerEventArgs e)
     {
-        if (sender is Border { DataContext: Modpack modpack })
+        if (sender is Border card && card.DataContext is Modpack modpack)
         {
+            UiAnimations.ApplyCardTransitions(card);
             modpack.IsHovered = true;
         }
     }
 
     private void Modpack_OnPointerExited(object? sender, PointerEventArgs e)
     {
-        if (sender is Border { DataContext: Modpack modpack })
+        if (sender is Border card && card.DataContext is Modpack modpack)
         {
+            UiAnimations.ApplyCardTransitions(card);
             modpack.IsHovered = false;
         }
     }

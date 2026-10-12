@@ -48,7 +48,9 @@
 
   <!--
     UfSettingsToggle: pill switch on ToggleButton — gradient track when
-    on, graphite when off, knob slides left/right. Fully self-drawn.
+    on, graphite when off, knob SLIDES via TranslateTransform + Transitions
+    (not Left/Right alignment swap, which snaps). Background cross-fades
+    via BrushTransition. Fully self-drawn.
   -->
   <ControlTheme x:Key="UfSettingsToggle" TargetType="ToggleButton">
     <Setter Property="Cursor" Value="Hand" />
@@ -59,9 +61,23 @@
       <ControlTemplate>
         <Border x:Name="PART_Track" Width="52" Height="28" CornerRadius="14"
                 Background="#333036" BorderBrush="#4A4753" BorderThickness="1">
+          <Border.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="0:0:0.18"/>
+              <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+            </Transitions>
+          </Border.Transitions>
           <Ellipse x:Name="PART_Knob" Width="20" Height="20"
                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"
-                   Fill="#8E939B"/>
+                   Fill="#8E939B"
+                   RenderTransform="translateX(0px)">
+            <Ellipse.Transitions>
+              <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+                <BrushTransition Property="Fill" Duration="0:0:0.18"/>
+              </Transitions>
+            </Ellipse.Transitions>
+          </Ellipse>
         </Border>
       </ControlTemplate>
     </Setter>
@@ -71,11 +87,13 @@
     </Style>
     <Style Selector="^:checked /template/ Ellipse#PART_Knob">
       <Setter Property="Fill" Value="White" />
-      <Setter Property="HorizontalAlignment" Value="Right" />
-      <Setter Property="Margin" Value="0,0,4,0" />
+      <Setter Property="RenderTransform" Value="translateX(24px)" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#PART_Track">
       <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#PART_Track">
+      <Setter Property="Opacity" Value="0.45" />
     </Style>
   </ControlTheme>
 </ResourceDictionary>

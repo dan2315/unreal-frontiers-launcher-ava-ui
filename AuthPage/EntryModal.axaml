@@ -34,7 +34,7 @@
                                  Height="42" />
                         <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,4,0,0">
                             <Button Content="Submit"
-                                    Classes="uf-primary"
+                                    Classes="uf-accent"
                                     FontFamily="{StaticResource MontserratBold}"
                                     Padding="28,8"
                                     FontSize="15"

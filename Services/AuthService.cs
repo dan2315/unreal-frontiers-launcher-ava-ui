@@ -149,6 +149,12 @@ namespace UnrealFrontiersLauncher
             return _accessToken.Length > 0 ? _accessToken : null;
         }
 
+        public void Logout()
+        {
+            _tokenStorage.DeleteTokens();
+            SetAccessToken("");
+        }
+
         private void ApplyTokens(string accessToken, string refreshToken)
         {
             _tokenStorage.SaveTokens(accessToken, refreshToken);

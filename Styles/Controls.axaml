@@ -23,6 +23,105 @@
     <Setter Property="TextBlock.Foreground" Value="#7C828A" />
   </Style>
 
+  <!-- Mint-to-cyan confirm button ("Готово", "Submit", changelog close). -->
+  <Style Selector="Button.uf-accent">
+    <Setter Property="Foreground" Value="#06281C" />
+    <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-accent:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
+    <Setter Property="Opacity" Value="0.88" />
+  </Style>
+  <Style Selector="Button.uf-accent:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfAccentGradient}" />
+    <Setter Property="Opacity" Value="0.75" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+
+  <!-- Deep-violet sign-in button on the auth page. -->
+  <Style Selector="Button.uf-auth">
+    <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfAuthGradient}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-auth:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfAuthHoverGradient}" />
+  </Style>
+  <Style Selector="Button.uf-auth:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfAuthGradient}" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+  <Style Selector="Button.uf-auth:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="#3A3842" />
+    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+  </Style>
+
+  <!-- Launch button: static violet gradient. The breathing animation lives
+       in uf-launch-animated (added by UiAnimations.ApplyLaunchStyle only
+       when glow effects are enabled); static glow is a DropShadowEffect
+       applied from code for the same reason. -->
+  <Style Selector="Button.uf-launch">
+    <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="44,10" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-launch:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfLaunchHoverGradient}" />
+  </Style>
+  <Style Selector="Button.uf-launch:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+  <Style Selector="Button.uf-launch:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="#3A3842" />
+    <Setter Property="TextBlock.Foreground" Value="#7C828A" />
+  </Style>
+
+  <!-- Animated variant of the launch button: breathing violet gradient.
+       Added/removed at runtime via UiAnimations.ApplyLaunchStyle so users
+       can kill it on weak hardware (see UiGlowBox in global settings). -->
+  <Style Selector="Button.uf-launch-animated">
+    <Style.Animations>
+      <Animation Duration="0:0:2.4" PlaybackDirection="Alternate" IterationCount="INFINITE">
+        <KeyFrame Cue="0%">
+          <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="Background" Value="{StaticResource UfLaunchHoverGradient}" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- Tertiary outline button ("Создать аккаунт" etc). -->
+  <Style Selector="Button.uf-outline">
+    <Setter Property="Foreground" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-outline:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#0E2A22" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfCyanBrush}" />
+  </Style>
+  <Style Selector="Button.uf-outline:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#14352B" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+
   <!-- Subtle ghost button (window chrome, icon buttons). -->
   <Style Selector="Button.uf-ghost">
     <Setter Property="Background" Value="Transparent" />
@@ -56,6 +155,26 @@
     <Setter Property="Background" Value="#443F50" />
   </Style>
 
+  <!-- Sidebar action (launcher settings + profile buttons): graphite pill
+       with mint icon tile, distinct from server cards above it. -->
+  <Style Selector="Button.uf-side">
+    <Setter Property="Background" Value="#1E1C22" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="#2E2C34" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="10" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.uf-side:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#26242D" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+  </Style>
+  <Style Selector="Button.uf-side:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#2E2B36" />
+    <Setter Property="RenderTransform" Value="scale(0.98)" />
+  </Style>
+
   <!-- Text field. -->
   <Style Selector="TextBox.uf-field">
     <Setter Property="Background" Value="#16141A" />
@@ -74,6 +193,25 @@
   </Style>
   <Style Selector="TextBox.uf-field:focus /template/ Border#PART_BorderElement">
     <Setter Property="BorderBrush" Value="{StaticResource UfMintBrush}" />
+  </Style>
+
+  <!-- Loading pulse (autoupdate "Булдыга собирает чанки…").
+       Toggled at runtime via UiAnimations.BackgroundPulse so weak
+       hardware can run a static row instead. -->
+  <Style Selector="StackPanel.uf-pulse">
+    <Style.Animations>
+      <Animation Duration="0:0:6" IterationCount="INFINITE">
+        <KeyFrame Cue="0%">
+          <Setter Property="Opacity" Value="0.55"/>
+        </KeyFrame>
+        <KeyFrame Cue="50%">
+          <Setter Property="Opacity" Value="1.0"/>
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="Opacity" Value="0.55"/>
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
   </Style>
 
   <!-- Section caption. -->
@@ -144,5 +282,30 @@
   </Style>
   <Style Selector="Button.uf-discord:pressed /template/ ContentPresenter">
     <Setter Property="Background" Value="#3C45A5" />
+  </Style>
+
+  <!-- Thin overlay scrollbar: transparent track, slim graphite thumb that
+       lights mint on hover. Applies app-wide to every vertical ScrollBar
+       (settings panels, server list, changelog) — no per-page opt-in. -->
+  <Style Selector="ScrollBar:vertical">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Width" Value="8" />
+    <Setter Property="MinWidth" Value="8" />
+    <Setter Property="Padding" Value="2,4" />
+  </Style>
+  <Style Selector="ScrollBar:vertical /template/ Thumb">
+    <Setter Property="Background" Value="#3A3842" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="MinHeight" Value="32" />
+  </Style>
+  <Style Selector="ScrollBar:vertical:pointerover /template/ Thumb">
+    <Setter Property="Background" Value="{StaticResource UfMintBrush}" />
+  </Style>
+  <Style Selector="ScrollBar:vertical /template/ RepeatButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Opacity" Value="0" />
   </Style>
 </Styles>

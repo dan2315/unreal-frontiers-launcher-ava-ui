@@ -117,7 +117,7 @@
                         <Button x:Name="ActionButton"
                                 Content="{Binding ActionButtonText}"
                                 Click="AuthAction"
-                                Classes="uf-primary"
+                                Classes="uf-auth"
                                 FontFamily="{StaticResource MontserratBold}"
                                 FontSize="16"
                                 Height="44" Margin="0,8,0,0"
@@ -129,6 +129,7 @@
                             <Button Grid.Column="0" x:Name="StartDiscordAuthButton"
                                     Click="InitiateDiscordAuth"
                                     Classes="uf-discord"
+                                    Margin="0,0,5,0"
                                     Height="40">
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                     <Svg Path="/Assets/Images/svg/discord_icon.svg" Height="20" Width="20"/>
@@ -139,6 +140,7 @@
                             <Button Grid.Column="1"
                                     Content="Google (WIP)"
                                     IsEnabled="False"
+                                    Margin="5,0,0,0"
                                     Height="40"
                                     Background="#26232C"
                                     Foreground="#7C828A"
@@ -148,26 +150,22 @@
                                     CornerRadius="10"/>
                         </Grid>
 
-                        <Grid ColumnDefinitions="*,*" Margin="0,8,0,0">
-                            <TextBlock Text="{Binding ToggleMessage}"
-                                       Grid.Column="0"
-                                       Foreground="#B9BDC2"
-                                       TextDecorations="Underline"
-                                       HorizontalAlignment="Center"
-                                       FontFamily="{StaticResource MontserratBold}"
-                                       FontSize="14"
-                                       Cursor="Hand"
-                                       PointerPressed="ToggleView"/>
-                            <TextBlock Text="Забыли пароль?"
-                                       Grid.Column="1"
-                                       Foreground="#B9BDC2"
-                                       TextDecorations="Underline"
-                                       HorizontalAlignment="Center"
-                                       FontFamily="{StaticResource MontserratBold}"
-                                       FontSize="14"
-                                       Cursor="Hand"
-                                       PointerPressed="InitiatePasswordRecovery"/>
-                        </Grid>
+                        <Button Content="{Binding ToggleMessage}"
+                                Click="ToggleViewButton"
+                                Classes="uf-outline"
+                                FontFamily="{StaticResource MontserratBold}"
+                                FontSize="14"
+                                Height="42" Margin="0,8,0,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                        <TextBlock Text="Забыли пароль?"
+                                   Foreground="#B9BDC2"
+                                   TextDecorations="Underline"
+                                   HorizontalAlignment="Center"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="14"
+                                   Cursor="Hand"
+                                   PointerPressed="InitiatePasswordRecovery"/>
                     </StackPanel>
                 </Border>
             </StackPanel>

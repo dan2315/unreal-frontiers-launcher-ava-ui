@@ -77,8 +77,12 @@ public class Modpack : INotifyPropertyChanged
         }
     }
 
+    // Raw catalog data, kept so an offline instance can be materialized on demand.
+    public CatalogEntry Entry { get; private set; }
+
     public void Apply(CatalogEntry entry, bool nameIsAmbiguous)
     {
+        Entry = entry;
         Name = nameIsAmbiguous ? $"{entry.Name} ({entry.Id})" : entry.Name;
         Subtitle = BuildSubtitle(entry);
         StatusText = StatusLabel(entry.Status);
@@ -178,7 +182,14 @@ public class Modpack : INotifyPropertyChanged
 
     private bool _hasPlayerData;
     private bool _playerDataUnavailable;
-    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : _playerDataUnavailable ? "Unavailable" : "Loading...";
+    // "—" while loading or when the server is unreachable, so the row
+    // and the online bar below it never shift or disappear.
+    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : "—";
+
+    // Mint when live, muted gray while loading or unavailable.
+    public IBrush PlayerCountColor => _hasPlayerData
+        ? Brush("UfMintBrush", "#00FFA3")
+        : new SolidColorBrush(Color.Parse("#8E939B"));
     public double PlayerCountProgress => MaxPlayers > 0 ? ((double)CurrentPlayers / MaxPlayers) * 100 : 0;
 
     private bool _isSelected;
@@ -230,11 +241,13 @@ public class Modpack : INotifyPropertyChanged
             CurrentPlayers = currentPlayers;
             MaxPlayers = maxPlayers;
             OnPropertyChanged(nameof(PlayerCount));
+            OnPropertyChanged(nameof(PlayerCountColor));
         }
         else if (!_hasPlayerData)
         {
             _playerDataUnavailable = true;
             OnPropertyChanged(nameof(PlayerCount));
+            OnPropertyChanged(nameof(PlayerCountColor));
         }
     }
     
