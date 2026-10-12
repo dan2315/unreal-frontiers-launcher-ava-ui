@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="UnrealFrontiersLauncher.GlobalSettingsPanel">
-    <Border Classes="uf-card" Padding="0" Width="440" MaxHeight="520" ClipToBounds="True">
+    <Border Classes="uf-card" Padding="0" Width="500" MaxHeight="520" ClipToBounds="True">
     <Grid RowDefinitions="Auto,*,Auto">
         <!-- Title -->
         <Border Grid.Row="0" Background="#0C0B0E" BorderBrush="#232127" BorderThickness="0,0,0,1" Padding="16,12">
@@ -35,13 +35,13 @@
                         <Svg Path="/Assets/Images/svg/console.svg" Width="22" Height="22"
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Открыть консоль"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Показывать окно логов игры при запуске"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="OpenConsoleBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
@@ -55,13 +55,13 @@
                         <Svg Path="/Assets/Images/svg/power.svg" Width="22" Height="22"
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Закрыть лаунчер при запуске"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Освобождает память во время игры"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="CloseLauncherBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
@@ -76,13 +76,13 @@
                         <Svg Path="/Assets/Images/svg/sparkles.svg" Width="22" Height="22"
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Анимации интерфейса"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Выключает все эффекты ниже разом, экономит батарею"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="UiAnimationsBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
@@ -104,13 +104,13 @@
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Background="#8A58BB"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Свечение кнопки «Играть!»"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Дыхание градиента и mint-подсветка"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="UiGlowBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
@@ -124,13 +124,13 @@
                         <Svg Path="/Assets/Images/svg/arrow_left.svg" Width="22" Height="22"
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Переходы между экранами"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Слайд-анимация входа, главной и обновления"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="UiTransitionsBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
@@ -144,13 +144,13 @@
                         <Svg Path="/Assets/Images/svg/gear.svg" Width="22" Height="22"
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Появление настроек"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Затемнение фона и всплытие панели"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="UiOverlayFadeBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>
@@ -165,13 +165,13 @@
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Background="#00FFA3" Opacity="0.7"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Пульсация загрузки"
                                    FontFamily="{StaticResource MontserratBold}"
-                                   Foreground="White" FontSize="14"/>
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
                         <TextBlock Text="Мигание «Булдыга собирает чанки…»"
                                    FontFamily="{StaticResource MontserratRegular}"
-                                   Foreground="#8E939B" FontSize="12"/>
+                                   Foreground="#8E939B" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="2" x:Name="UiPulseBox"
                                   Theme="{StaticResource UfSettingsToggle}" VerticalAlignment="Center"/>

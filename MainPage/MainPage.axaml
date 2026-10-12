@@ -164,7 +164,7 @@
                  closes it on outside click. -->
             <Grid x:Name="ProfilePopup" IsVisible="False">
                 <Border Background="Transparent" PointerPressed="OnProfileOverlayPressed"/>
-                <Border Margin="12,0,12,64" Padding="6"
+                <Border Margin="12,0,12,88" Padding="6"
                         HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                         Background="#17161B" BorderBrush="#2E2C34" BorderThickness="1"
                         CornerRadius="12">
