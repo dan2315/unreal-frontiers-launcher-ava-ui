@@ -2,17 +2,16 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!--
     Unreal Frontiers launcher design tokens.
-    Brand accents: mint #00FFA3 / cyan #00E5FF (from the Reborn logo),
-    legacy violet kept for gradients and the launch button.
+    Palette follows the Reborn logo: dark green-graphite surfaces,
+    one brand accent gradient (mint #00FFA3 / cyan #00E5FF / blue
+    #2979FF). No violet, no magenta, no blurple — everything calm
+    lives on graphite, only "Играть" wears the bright gradient.
   -->
 
   <!-- Brand -->
   <Color x:Key="UfMint">#00FFA3</Color>
   <Color x:Key="UfCyan">#00E5FF</Color>
   <Color x:Key="UfBlue">#2979FF</Color>
-  <Color x:Key="UfViolet">#8A58BB</Color>
-  <Color x:Key="UfMagenta">#EE4AEF</Color>
-  <Color x:Key="UfDeepPurple">#551E6E</Color>
 
   <!-- Surfaces -->
   <Color x:Key="UfInk">#0A1F18</Color>
@@ -32,17 +31,14 @@
   <Color x:Key="UfBtnBorder">#3B3943</Color>
   <Color x:Key="UfBtnBorderHi">#57545F</Color>
 
-  <!-- Muted tinted solids for special actions (auth, discord). -->
-  <Color x:Key="UfAuthBtn">#262040</Color>
-  <Color x:Key="UfAuthBtnHi">#332A54</Color>
-  <Color x:Key="UfAuthBtnDown">#1C1732</Color>
-  <Color x:Key="UfAuthBtnBorder">#443A6E</Color>
-  <Color x:Key="UfAuthBtnBorderHi">#7B3FBF</Color>
-  <Color x:Key="UfDiscordBtn">#3E44A0</Color>
-  <Color x:Key="UfDiscordBtnHi">#4C53B8</Color>
-  <Color x:Key="UfDiscordBtnDown">#33387F</Color>
-  <Color x:Key="UfDiscordBtnBorder">#565CD6</Color>
-  <Color x:Key="UfDiscordBtnBorderHi">#6B71E0</Color>
+  <!-- Deep-green tinted solids for the sign-in button — graphite with
+       the logo's dark-green soul (#0A1F18), not violet. Discord wears
+       plain graphite now (see uf-discord): no blurple in this palette. -->
+  <Color x:Key="UfAuthBtn">#122B21</Color>
+  <Color x:Key="UfAuthBtnHi">#1A3D30</Color>
+  <Color x:Key="UfAuthBtnDown">#0C1F19</Color>
+  <Color x:Key="UfAuthBtnBorder">#245C47</Color>
+  <Color x:Key="UfAuthBtnBorderHi">#00FFA3</Color>
 
   <!-- Dropdown menu + danger row. -->
   <Color x:Key="UfMenu">#17161B</Color>
@@ -81,11 +77,6 @@
   <SolidColorBrush x:Key="UfAuthBtnDownBrush" Color="{StaticResource UfAuthBtnDown}" />
   <SolidColorBrush x:Key="UfAuthBtnBorderBrush" Color="{StaticResource UfAuthBtnBorder}" />
   <SolidColorBrush x:Key="UfAuthBtnBorderHiBrush" Color="{StaticResource UfAuthBtnBorderHi}" />
-  <SolidColorBrush x:Key="UfDiscordBtnBrush" Color="{StaticResource UfDiscordBtn}" />
-  <SolidColorBrush x:Key="UfDiscordBtnHiBrush" Color="{StaticResource UfDiscordBtnHi}" />
-  <SolidColorBrush x:Key="UfDiscordBtnDownBrush" Color="{StaticResource UfDiscordBtnDown}" />
-  <SolidColorBrush x:Key="UfDiscordBtnBorderBrush" Color="{StaticResource UfDiscordBtnBorder}" />
-  <SolidColorBrush x:Key="UfDiscordBtnBorderHiBrush" Color="{StaticResource UfDiscordBtnBorderHi}" />
   <SolidColorBrush x:Key="UfMenuBrush" Color="{StaticResource UfMenu}" />
   <SolidColorBrush x:Key="UfDangerBgBrush" Color="{StaticResource UfDangerBg}" />
   <SolidColorBrush x:Key="UfDangerDownBrush" Color="{StaticResource UfDangerDown}" />
@@ -97,16 +88,19 @@
     <GradientStop Color="{StaticResource UfBlue}" Offset="1.0" />
   </LinearGradientBrush>
 
+  <!-- Launch button: the logo's orbit gradient (mint -> cyan -> blue).
+       Hover is the same ramp brightened, so breathing stays inside
+       the brand palette instead of drifting into violet. -->
   <LinearGradientBrush x:Key="UfLaunchGradient" StartPoint="0%,0%" EndPoint="100%,60%">
-    <GradientStop Color="#551E6E" Offset="0.0" />
-    <GradientStop Color="#8A58BB" Offset="0.45" />
-    <GradientStop Color="#EA4BED" Offset="1.0" />
+    <GradientStop Color="#00B377" Offset="0.0" />
+    <GradientStop Color="#00C8E5" Offset="0.5" />
+    <GradientStop Color="#2979FF" Offset="1.0" />
   </LinearGradientBrush>
 
   <LinearGradientBrush x:Key="UfLaunchHoverGradient" StartPoint="0%,0%" EndPoint="100%,60%">
-    <GradientStop Color="#6A2A86" Offset="0.0" />
-    <GradientStop Color="#A06BD6" Offset="0.45" />
-    <GradientStop Color="#F066F2" Offset="1.0" />
+    <GradientStop Color="#00FFA3" Offset="0.0" />
+    <GradientStop Color="#00E5FF" Offset="0.5" />
+    <GradientStop Color="#4D94FF" Offset="1.0" />
   </LinearGradientBrush>
 
   <!-- Geometry -->

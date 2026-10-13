@@ -37,7 +37,7 @@
     <Setter Property="Opacity" Value="0.6" />
   </Style>
 
-  <!-- Sign-in button on the auth page: muted deep violet, calm next
+  <!-- Sign-in button on the auth page: deep logo-green, calm next
        to the dark card. -->
   <Style Selector="Button.uf-auth">
     <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
@@ -72,10 +72,11 @@
     <Setter Property="Opacity" Value="0.6" />
   </Style>
 
-  <!-- Launch button: static violet gradient. The breathing animation lives
-       in uf-launch-animated (added by UiAnimations.ApplyLaunchStyle only
-       when glow effects are enabled); static glow is a DropShadowEffect
-       applied from code for the same reason. -->
+  <!-- Launch button: static brand gradient (mint -> cyan -> blue, the
+       logo's orbit). The breathing animation lives in uf-launch-animated
+       (added by UiAnimations.ApplyLaunchStyle only when glow effects are
+       enabled); static glow is a DropShadowEffect applied from code for
+       the same reason. -->
   <Style Selector="Button.uf-launch">
     <Setter Property="Foreground" Value="{StaticResource UfTextBrush}" />
     <Setter Property="Background" Value="{StaticResource UfLaunchGradient}" />
@@ -101,7 +102,7 @@
     <Setter Property="TextBlock.Foreground" Value="#7C828A" />
   </Style>
 
-  <!-- Animated variant of the launch button: breathing violet gradient.
+  <!-- Animated variant of the launch button: breathing brand gradient.
        Added/removed at runtime via UiAnimations.ApplyLaunchStyle so users
        can kill it on weak hardware (see UiGlowBox in global settings). -->
   <Style Selector="Button.uf-launch-animated">
@@ -400,13 +401,14 @@
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
-  <!-- Discord button on the auth page: muted blurple solid with a border,
-       calm against the dark card. -->
+  <!-- Discord button on the auth page: plain graphite with a border,
+       calm against the dark card. No blurple in this palette — the icon
+       carries the brand, the button stays quiet. -->
   <Style Selector="Button.uf-discord">
-    <Setter Property="Background" Value="{StaticResource UfDiscordBtnBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfBtnBrush}" />
     <Setter Property="Foreground" Value="White" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfDiscordBtnBorderBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource UfRadiusM}" />
     <Setter Property="Padding" Value="12,8" />
     <Setter Property="Cursor" Value="Hand" />
@@ -420,12 +422,12 @@
     </Setter>
   </Style>
   <Style Selector="Button.uf-discord:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfDiscordBtnHiBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfDiscordBtnBorderHiBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfBtnHiBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderHiBrush}" />
   </Style>
   <Style Selector="Button.uf-discord:pressed /template/ ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource UfDiscordBtnDownBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource UfDiscordBtnBorderBrush}" />
+    <Setter Property="Background" Value="{StaticResource UfBtnDownBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource UfBtnBorderBrush}" />
     <Setter Property="RenderTransform" Value="scale(0.98)" />
   </Style>
   <Style Selector="Button.uf-discord:disabled /template/ ContentPresenter">

@@ -6,9 +6,8 @@
 
     UfRamSlider: transparent track (the page paints base + fill
     borders underneath and sizes the fill from code-behind), dark
-    thumb with a violet ring matching the Play button. Drag/wheel/
-    keyboard all work — Track + Thumb are the stock primitives,
-    only painted ours.
+    thumb with a mint ring. Drag/wheel/keyboard all work — Track +
+    Thumb are the stock primitives, only painted ours.
   -->
   <ControlTheme x:Key="UfRamSlider" TargetType="Slider">
     <Setter Property="Cursor" Value="Hand" />
@@ -32,8 +31,8 @@
               <Thumb.Template>
                 <ControlTemplate>
                   <Ellipse Width="20" Height="20"
-                           Fill="#262040"
-                           Stroke="#8A58BB" StrokeThickness="2"/>
+                           Fill="#122B21"
+                           Stroke="#00FFA3" StrokeThickness="2"/>
                 </ControlTemplate>
               </Thumb.Template>
             </Thumb>

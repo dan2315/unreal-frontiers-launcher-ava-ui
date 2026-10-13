@@ -102,7 +102,7 @@
                             VerticalAlignment="Center" Background="#26232C" Margin="0,0,12,0">
                         <Border Width="16" Height="16" CornerRadius="8"
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Background="#8A58BB"/>
+                                Background="{StaticResource UfAccentGradient}"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                         <TextBlock Text="Свечение кнопки «Играть!»"
