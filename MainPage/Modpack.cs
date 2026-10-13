@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -76,8 +77,12 @@ public class Modpack : INotifyPropertyChanged
         }
     }
 
+    // Raw catalog data, kept so an offline instance can be materialized on demand.
+    public CatalogEntry Entry { get; private set; }
+
     public void Apply(CatalogEntry entry, bool nameIsAmbiguous)
     {
+        Entry = entry;
         Name = nameIsAmbiguous ? $"{entry.Name} ({entry.Id})" : entry.Name;
         Subtitle = BuildSubtitle(entry);
         StatusText = StatusLabel(entry.Status);
@@ -117,7 +122,7 @@ public class Modpack : INotifyPropertyChanged
     private static Bitmap LoadIcon(string id)
     {
         var iconUri = new Uri($"{AssetRoot}ModpackIcons/{id}_icon.png");
-        var uri = AssetLoader.Exists(iconUri) ? iconUri : new Uri(AssetRoot + "logo_unrealfrontiers.png");
+        var uri = AssetLoader.Exists(iconUri) ? iconUri : new Uri(AssetRoot + "logo_badge.png");
         return new Bitmap(AssetLoader.Open(uri));
     }
 
@@ -177,7 +182,14 @@ public class Modpack : INotifyPropertyChanged
 
     private bool _hasPlayerData;
     private bool _playerDataUnavailable;
-    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : _playerDataUnavailable ? "Unavailable" : "Loading...";
+    // "—" while loading or when the server is unreachable, so the row
+    // and the online bar below it never shift or disappear.
+    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : "—";
+
+    // Mint when live, muted gray while loading or unavailable.
+    public IBrush PlayerCountColor => _hasPlayerData
+        ? Brush("UfMintBrush", "#00FFA3")
+        : new SolidColorBrush(Color.Parse("#8E939B"));
     public double PlayerCountProgress => MaxPlayers > 0 ? ((double)CurrentPlayers / MaxPlayers) * 100 : 0;
 
     private bool _isSelected;
@@ -191,13 +203,41 @@ public class Modpack : INotifyPropertyChanged
                 _isSelected = value;
                 OnPropertyChanged(nameof(IsSelected));
                 OnPropertyChanged(nameof(BackgroundColor));
+                OnPropertyChanged(nameof(CardBackground));
+                OnPropertyChanged(nameof(CardBorder));
                 OnPropertyChanged(nameof(TextColor));
             }
         }
     }
-    public IBrush BackgroundColor => !IsEnabled ?  new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22)) : IsSelected ? 
-    new SolidColorBrush(Color.FromRgb(0x6D, 0x20, 0x8F)) : 
-    new SolidColorBrush(Color.Parse("Transparent"));
+    private static IBrush Brush(string key, string fallback)
+    {
+        if (Application.Current?.Resources.TryGetResource(key, null, out var value) == true && value is IBrush brush)
+            return brush;
+        return new SolidColorBrush(Color.Parse(fallback));
+    }
+
+    // Selected: lifted surface + mint edge. Hovered (not selected):
+    // gentle lift, neutral edge — the mint is reserved for selection so
+    // hover feels like an invitation, not a second selection.
+    public IBrush CardBackground => IsSelected
+        ? Brush("UfCardHiBrush", "#2A2731")
+        : IsHovered
+            ? new SolidColorBrush(Color.Parse("#26242D"))
+            : Brush("UfCardBrush", "#201E24");
+
+    public IBrush CardBorder => IsSelected
+        ? Brush("UfMintBrush", "#00FFA3")
+        : IsHovered
+            ? new SolidColorBrush(Color.Parse("#4A4753"))
+            : Brush("UfDividerBrush", "#2E2C34");
+
+    public IBrush AccentBrush => Brush("UfMintBrush", "#00FFA3");
+
+    public IBrush BackgroundColor => !IsEnabled
+        ? new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22))
+        : IsSelected
+            ? new SolidColorBrush(Color.FromRgb(0x2A, 0x27, 0x31))
+            : new SolidColorBrush(Color.Parse("Transparent"));
 
     public async Task UpdatePlayerCount(ServerService server)
     {
@@ -208,11 +248,13 @@ public class Modpack : INotifyPropertyChanged
             CurrentPlayers = currentPlayers;
             MaxPlayers = maxPlayers;
             OnPropertyChanged(nameof(PlayerCount));
+            OnPropertyChanged(nameof(PlayerCountColor));
         }
         else if (!_hasPlayerData)
         {
             _playerDataUnavailable = true;
             OnPropertyChanged(nameof(PlayerCount));
+            OnPropertyChanged(nameof(PlayerCountColor));
         }
     }
     
@@ -226,6 +268,8 @@ public class Modpack : INotifyPropertyChanged
             {
                 _isHovered = value;
                 OnPropertyChanged(nameof(IsHovered));
+                OnPropertyChanged(nameof(CardBackground));
+                OnPropertyChanged(nameof(CardBorder));
                 OnPropertyChanged(nameof(TextColor));
             }
         }
@@ -235,11 +279,11 @@ public class Modpack : INotifyPropertyChanged
     {
         get
         {
-            if ((IsSelected || IsHovered) && _isEnabled )
+            if ((IsSelected || IsHovered) && _isEnabled)
             {
                 return new SolidColorBrush(Color.Parse("#ffffff"));
             }
-            return new SolidColorBrush(Color.Parse("#606060"));
+            return new SolidColorBrush(Color.Parse("#B9BDC2"));
         }
     }
 

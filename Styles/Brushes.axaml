@@ -1,0 +1,117 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    Unreal Frontiers launcher design tokens.
+    Brand accents: mint #00FFA3 / cyan #00E5FF (from the Reborn logo),
+    legacy violet kept for gradients and the launch button.
+  -->
+
+  <!-- Brand -->
+  <Color x:Key="UfMint">#00FFA3</Color>
+  <Color x:Key="UfCyan">#00E5FF</Color>
+  <Color x:Key="UfBlue">#2979FF</Color>
+  <Color x:Key="UfViolet">#8A58BB</Color>
+  <Color x:Key="UfMagenta">#EE4AEF</Color>
+  <Color x:Key="UfDeepPurple">#551E6E</Color>
+
+  <!-- Surfaces -->
+  <Color x:Key="UfInk">#0A1F18</Color>
+  <Color x:Key="UfWindow">#100F12</Color>
+  <Color x:Key="UfCard">#201E24</Color>
+  <Color x:Key="UfCardHi">#2A2731</Color>
+  <Color x:Key="UfPanel">#1B191F</Color>
+  <Color x:Key="UfRow">#2F2D36</Color>
+  <Color x:Key="UfBorder">#3A3842</Color>
+  <Color x:Key="UfDivider">#2E2C34</Color>
+
+  <!-- Muted button surfaces. Neon gradients stay reserved for the
+       launch button; every other button lives on these graphites. -->
+  <Color x:Key="UfBtn">#242228</Color>
+  <Color x:Key="UfBtnHi">#302D38</Color>
+  <Color x:Key="UfBtnDown">#1B191E</Color>
+  <Color x:Key="UfBtnBorder">#3B3943</Color>
+  <Color x:Key="UfBtnBorderHi">#57545F</Color>
+
+  <!-- Muted tinted solids for special actions (auth, discord). -->
+  <Color x:Key="UfAuthBtn">#262040</Color>
+  <Color x:Key="UfAuthBtnHi">#332A54</Color>
+  <Color x:Key="UfAuthBtnDown">#1C1732</Color>
+  <Color x:Key="UfAuthBtnBorder">#443A6E</Color>
+  <Color x:Key="UfAuthBtnBorderHi">#7B3FBF</Color>
+  <Color x:Key="UfDiscordBtn">#3E44A0</Color>
+  <Color x:Key="UfDiscordBtnHi">#4C53B8</Color>
+  <Color x:Key="UfDiscordBtnDown">#33387F</Color>
+  <Color x:Key="UfDiscordBtnBorder">#565CD6</Color>
+  <Color x:Key="UfDiscordBtnBorderHi">#6B71E0</Color>
+
+  <!-- Dropdown menu + danger row. -->
+  <Color x:Key="UfMenu">#17161B</Color>
+  <Color x:Key="UfDangerBg">#2A1C1F</Color>
+  <Color x:Key="UfDangerDown">#3A2227</Color>
+
+  <!-- Text -->
+  <Color x:Key="UfText">#F2F5F3</Color>
+  <Color x:Key="UfTextDim">#B9BDC2</Color>
+  <Color x:Key="UfTextMute">#7C828A</Color>
+
+  <!-- Status -->
+  <Color x:Key="UfOk">#4CC24C</Color>
+  <Color x:Key="UfWarn">#E8B83A</Color>
+  <Color x:Key="UfErr">#E5484D</Color>
+
+  <!-- Brushes -->
+  <SolidColorBrush x:Key="UfMintBrush" Color="{StaticResource UfMint}" />
+  <SolidColorBrush x:Key="UfCyanBrush" Color="{StaticResource UfCyan}" />
+  <SolidColorBrush x:Key="UfTextBrush" Color="{StaticResource UfText}" />
+  <SolidColorBrush x:Key="UfTextDimBrush" Color="{StaticResource UfTextDim}" />
+  <SolidColorBrush x:Key="UfTextMuteBrush" Color="{StaticResource UfTextMute}" />
+  <SolidColorBrush x:Key="UfCardBrush" Color="{StaticResource UfCard}" />
+  <SolidColorBrush x:Key="UfCardHiBrush" Color="{StaticResource UfCardHi}" />
+  <SolidColorBrush x:Key="UfPanelBrush" Color="{StaticResource UfPanel}" />
+  <SolidColorBrush x:Key="UfRowBrush" Color="{StaticResource UfRow}" />
+  <SolidColorBrush x:Key="UfBorderBrush" Color="{StaticResource UfBorder}" />
+  <SolidColorBrush x:Key="UfDividerBrush" Color="{StaticResource UfDivider}" />
+  <SolidColorBrush x:Key="UfBtnBrush" Color="{StaticResource UfBtn}" />
+  <SolidColorBrush x:Key="UfBtnHiBrush" Color="{StaticResource UfBtnHi}" />
+  <SolidColorBrush x:Key="UfBtnDownBrush" Color="{StaticResource UfBtnDown}" />
+  <SolidColorBrush x:Key="UfBtnBorderBrush" Color="{StaticResource UfBtnBorder}" />
+  <SolidColorBrush x:Key="UfBtnBorderHiBrush" Color="{StaticResource UfBtnBorderHi}" />
+  <SolidColorBrush x:Key="UfAuthBtnBrush" Color="{StaticResource UfAuthBtn}" />
+  <SolidColorBrush x:Key="UfAuthBtnHiBrush" Color="{StaticResource UfAuthBtnHi}" />
+  <SolidColorBrush x:Key="UfAuthBtnDownBrush" Color="{StaticResource UfAuthBtnDown}" />
+  <SolidColorBrush x:Key="UfAuthBtnBorderBrush" Color="{StaticResource UfAuthBtnBorder}" />
+  <SolidColorBrush x:Key="UfAuthBtnBorderHiBrush" Color="{StaticResource UfAuthBtnBorderHi}" />
+  <SolidColorBrush x:Key="UfDiscordBtnBrush" Color="{StaticResource UfDiscordBtn}" />
+  <SolidColorBrush x:Key="UfDiscordBtnHiBrush" Color="{StaticResource UfDiscordBtnHi}" />
+  <SolidColorBrush x:Key="UfDiscordBtnDownBrush" Color="{StaticResource UfDiscordBtnDown}" />
+  <SolidColorBrush x:Key="UfDiscordBtnBorderBrush" Color="{StaticResource UfDiscordBtnBorder}" />
+  <SolidColorBrush x:Key="UfDiscordBtnBorderHiBrush" Color="{StaticResource UfDiscordBtnBorderHi}" />
+  <SolidColorBrush x:Key="UfMenuBrush" Color="{StaticResource UfMenu}" />
+  <SolidColorBrush x:Key="UfDangerBgBrush" Color="{StaticResource UfDangerBg}" />
+  <SolidColorBrush x:Key="UfDangerDownBrush" Color="{StaticResource UfDangerDown}" />
+  <SolidColorBrush x:Key="UfDangerBrush" Color="{StaticResource UfErr}" />
+
+  <LinearGradientBrush x:Key="UfAccentGradient" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Color="{StaticResource UfMint}" Offset="0.0" />
+    <GradientStop Color="{StaticResource UfCyan}" Offset="0.55" />
+    <GradientStop Color="{StaticResource UfBlue}" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="UfLaunchGradient" StartPoint="0%,0%" EndPoint="100%,60%">
+    <GradientStop Color="#551E6E" Offset="0.0" />
+    <GradientStop Color="#8A58BB" Offset="0.45" />
+    <GradientStop Color="#EA4BED" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="UfLaunchHoverGradient" StartPoint="0%,0%" EndPoint="100%,60%">
+    <GradientStop Color="#6A2A86" Offset="0.0" />
+    <GradientStop Color="#A06BD6" Offset="0.45" />
+    <GradientStop Color="#F066F2" Offset="1.0" />
+  </LinearGradientBrush>
+
+  <!-- Geometry -->
+  <CornerRadius x:Key="UfRadiusS">6</CornerRadius>
+  <CornerRadius x:Key="UfRadiusM">10</CornerRadius>
+  <CornerRadius x:Key="UfRadiusL">16</CornerRadius>
+  <CornerRadius x:Key="UfRadiusXl">24</CornerRadius>
+</ResourceDictionary>

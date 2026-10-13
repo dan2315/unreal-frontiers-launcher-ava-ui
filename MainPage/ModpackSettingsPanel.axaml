@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UnrealFrontiersLauncher.ModpackSettingsPanel">
+    <Border Classes="uf-card" Padding="0" Width="480" MaxHeight="560" ClipToBounds="True">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Title -->
+        <Border Grid.Row="0" Background="#0C0B0E" BorderBrush="#232127" BorderThickness="0,0,0,1" Padding="16,12">
+            <StackPanel Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Border Width="32" Height="32" CornerRadius="10" Background="#26232C">
+                        <Svg Path="/Assets/Images/svg/ram.svg" Width="18" Height="18"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="TitleLabel" Text="Настройки сборки"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="16" Foreground="White"/>
+                        <TextBlock Text="Сколько RAM получит выбранный сервер"
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#8E939B"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border Height="2" Width="64" CornerRadius="1" Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        Background="{StaticResource UfAccentGradient}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- RAM controls -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12" Margin="20,16">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock x:Name="RamValueLabel" Text="—"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="34" Foreground="White"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="MB"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="15" Foreground="{StaticResource UfMintBrush}"
+                                   VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Вручную:"
+                                   VerticalAlignment="Center"
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#8E939B"/>
+                        <TextBox x:Name="RamEntry" Classes="uf-field"
+                                 Width="100" Padding="8,6" FontSize="13"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Height="28" VerticalAlignment="Center">
+                    <Border x:Name="RamBase" Height="8" CornerRadius="4" Background="#333036" VerticalAlignment="Center"/>
+                    <Border x:Name="RamFill" Height="8" CornerRadius="4"
+                            HorizontalAlignment="Left" VerticalAlignment="Center" Width="0"
+                            Background="#8A58BB"/>
+                    <Slider x:Name="RamSlider"
+                            Theme="{StaticResource UfRamSlider}"
+                            VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*">
+                    <TextBlock Grid.Column="0" x:Name="RamMinLabel" Text="512 МБ"
+                               FontFamily="{StaticResource MontserratRegular}"
+                               FontSize="11" Foreground="#5E6068"/>
+                    <TextBlock Grid.Column="1" x:Name="RamMaxLabel" Text="—"
+                               HorizontalAlignment="Right"
+                               FontFamily="{StaticResource MontserratRegular}"
+                               FontSize="11" Foreground="#5E6068"/>
+                </Grid>
+
+                <Button Classes="uf-card" Click="OnShowFolderClicked"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Svg Path="/Assets/Images/svg/folder.svg" Height="18" Width="18"/>
+                        <StackPanel Spacing="0">
+                            <TextBlock FontFamily="{StaticResource MontserratBold}"
+                                       FontSize="13" Foreground="White"
+                                       Text="Папка instance"/>
+                            <TextBlock FontFamily="{StaticResource MontserratRegular}"
+                                       FontSize="11" Foreground="#8E939B"
+                                       Text="Моды, конфиги и сейвы этой сборки"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Close -->
+        <Border Grid.Row="2" Padding="16,12" BorderBrush="#232127" BorderThickness="0,1,0,0">
+            <Button Classes="uf-accent" Click="OnCloseClicked"
+                    HorizontalAlignment="Right" MinWidth="120"
+                    HorizontalContentAlignment="Center"
+                    Content="Готово"
+                    FontFamily="{StaticResource MontserratBold}" FontSize="14"/>
+        </Border>
+    </Grid>
+    </Border>
+</UserControl>

@@ -1,8 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using UnrealFrontiersLauncher.Platforms;
@@ -16,21 +14,18 @@ public partial class MainPage : UserControl
     private readonly InstanceManager _instanceManager;
     private readonly GameLauncher _gameLauncher;
     private readonly PlayerProfileProvider _playerProfileProvider;
+    private readonly AuthService _authService;
+    private readonly NavigationService _navigationService;
     private readonly MainPageViewModel _viewModel;
     private readonly MainWindow _mainWindow;
     private readonly ServerService _serverService;
-    private bool _settingsPanelInitialized;
-#if WINDOWS
-    private readonly ISystemInfo _systemInfo = new Windows.SystemInfo();
-#elif LINUX
-    private readonly ISystemInfo _systemInfo = new Linux.SystemInfo();
-#endif
+    private readonly ISystemInfo _systemInfo;
     public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
     private MinecraftInstance? SelectedInstance => _instanceManager.selectedInstance;
 
     public MainPage() {}
-    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow)
+    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow, AuthService authService, NavigationService navigationService, ISystemInfo systemInfo)
     {
         _playerProfileProvider = playerProfileProvider;
         _popUpService = popUpService;
@@ -38,6 +33,9 @@ public partial class MainPage : UserControl
         _instanceManager = instanceManager;
         _serverService = serverService;
         _mainWindow = mainWindow;
+        _authService = authService;
+        _navigationService = navigationService;
+        _systemInfo = systemInfo;
         _viewModel = new MainPageViewModel(this, _serverService, _instanceManager);
         DataContext = _viewModel;
 
@@ -46,94 +44,132 @@ public partial class MainPage : UserControl
         _playerProfileProvider.OnProfileUpdate(() =>
         {
             _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName));
-            _viewModel.OnPropertyChanged(nameof(_viewModel.PlayText));
         });
 
         Loaded += (_, _) =>
         {
-            InitSettingsPanel();
-            UpdateSettingsPanel();
+            UiAnimations.ApplyLaunchStyle(LaunchButton);
             _ = _viewModel.RefreshCatalogAsync();
         };
+        UiAnimations.Changed += OnAnimationsChanged;
     }
 
-    public void InitSettingsPanel()
-    {
-        if (_settingsPanelInitialized) return;
-        _settingsPanelInitialized = true;
+    private void OnAnimationsChanged() => UiAnimations.ApplyLaunchStyle(LaunchButton);
 
-        RamSlider.ValueChanged += UpdateRamThroughSlider;
-        RamEntry.TextChanged += UpdateRamThroughEntry;
-        RamEntry.LostFocus += (_, _) => NormalizeRamEntry();
-        CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
-        OpenConsoleBox.IsCheckedChanged += UpdateOpenConsole;
+    // ---- Settings overlay (in-app dimmed panel) ----
+
+    private async void ShowSettingsOverlay(UserControl panel)
+    {
+        // Set content first while the grid is still hidden, then fade the
+        // whole overlay (backdrop + panel) as one piece — no flash of an
+        // empty dim frame. No-op fade when effects are off in settings.
+        SettingsOverlayContent.Content = panel;
+        SettingsOverlay.Opacity = UiAnimations.OverlayFade ? 0 : 1;
+        SettingsOverlay.IsVisible = true;
+        await UiAnimations.FadeInAsync(SettingsOverlay);
     }
 
-    public void UpdateSettingsPanel()
+    private void CloseSettingsOverlay()
     {
-        if (SelectedInstance == null) return;
-        var configuration = SelectedInstance.GetLaunchConfiguration();
-        var systemRamMb = (double)_systemInfo.GetRamInfo().value / 1024 / 1024;
-
-        RamSlider.Minimum = MinecraftInstance.MinRamMb;
-        RamSlider.Maximum = Math.Max(systemRamMb, MinecraftInstance.MinRamMb);
-        RamSlider.Value = configuration.Ram;
-        RamEntry.Text = configuration.Ram.ToString();
-        CloseLauncherBox.IsChecked = configuration.NeedToClose;
-        OpenConsoleBox.IsChecked = configuration.NeedToOpenConsole;
+        SettingsOverlay.IsVisible = false;
+        SettingsOverlay.Opacity = 0;
+        SettingsOverlayContent.Content = null;
     }
 
-    private void UpdateRamThroughSlider(object? sender, RangeBaseValueChangedEventArgs args)
+    private void OnOverlayBackdropPressed(object? sender, PointerPressedEventArgs e)
     {
-        RamEntry.Text = ((int)args.NewValue).ToString();
-        SelectedInstance?.ApplyNewRamValue((int)args.NewValue);
+        CloseSettingsOverlay();
     }
 
-    private void UpdateRamThroughEntry(object? sender, TextChangedEventArgs args)
+    private void OnModpackSettingsClicked(object? sender, RoutedEventArgs e)
     {
-        if (sender is not TextBox entry) return;
+        var modpack = _viewModel.SelectedModpack;
+        if (modpack == null) return;
 
-        var digits = string.Concat((entry.Text ?? "").Where(char.IsDigit));
-        if (entry.Text != digits)
+        // Offline-safe: materialize a working instance from catalog data so
+        // RAM/folder settings always open, even with no backend and no cache.
+        var instance = SelectedInstance?.Id == modpack.Value
+            ? SelectedInstance
+            : _instanceManager.EnsureOfflineInstance(modpack.Entry);
+        var panel = new ModpackSettingsPanel(instance, _systemInfo);
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
+    }
+
+    private void OnGlobalSettingsClicked(object? sender, RoutedEventArgs e)
+    {
+        var panel = new GlobalSettingsPanel();
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
+    }
+
+    // ---- News ----
+
+    private void OnShowFullChangelogClicked(object? sender, RoutedEventArgs e)
+    {
+        var panel = new NewsPanel();
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
+    }
+
+    // ---- Profile panel ----
+
+    private async void OnProfileClicked(object? sender, RoutedEventArgs e)
+    {
+        // Popup floats above the sidebar — layout never shifts.
+        ProfilePopup.IsVisible = !ProfilePopup.IsVisible;
+        SetProfileChevron(ProfilePopup.IsVisible);
+        if (ProfilePopup.IsVisible)
+            await UiAnimations.PopInAsync(ProfilePopup);
+    }
+
+    private void OnProfileOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        // Click outside the card closes the popup; the card itself sits
+        // above this catcher so its buttons stay clickable.
+        ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
+    }
+
+    private void SetProfileChevron(bool open)
+    {
+        // Chevron points up toward the menu when closed, flips down while
+        // the menu is open (animated via the uf-chevron-open class).
+        if (ProfileChevron != null)
+            UiAnimations.SetClass(ProfileChevron, "uf-chevron-open", open);
+    }
+
+    private async void OnLogoutClicked(object? sender, RoutedEventArgs e)
+    {
+        ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
+        var answer = await _popUpService.ShowYesNoDialogAsync("Выйти из аккаунта?", "Придётся войти заново, чтобы запускать игру.");
+        if (!answer) return;
+
+        _authService.Logout();
+        _playerProfileProvider.SetProfile(PlayerProfile.Default);
+        _navigationService.NavigateTo<AuthPage>();
+    }
+
+    private void OnAddPasswordClicked(object? sender, RoutedEventArgs e)
+    {
+        ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
+        var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
         {
-            entry.Text = digits;
-            return;
-        }
-
-        if (!int.TryParse(digits, out var value) || value > RamSlider.Maximum)
-        {
-            value = (int)RamSlider.Maximum;
-            entry.Text = value.ToString();
-            return;
-        }
-
-        if (value < MinecraftInstance.MinRamMb) return;
-
-        RamSlider.Value = value;
-        SelectedInstance?.ApplyNewRamValue(value);
+            var message = await _authService.SendResetPasswordEmail(email);
+            await _popUpService.ShowOkDialogAsync("Восстановление пароля", message);
+            _navigationService.GetBack();
+        });
+        _navigationService.NavigateTo(entryModal);
     }
 
-    private void NormalizeRamEntry()
+    private async void OnConnectDiscordClicked(object? sender, RoutedEventArgs e)
     {
-        if (int.TryParse(RamEntry.Text, out var value) && value >= MinecraftInstance.MinRamMb) return;
-        RamEntry.Text = MinecraftInstance.MinRamMb.ToString();
+        await _authService.DiscordAuth(PlayerProfile?.Nickname);
     }
 
-    private void UpdateCloseLauncher(object? sender, RoutedEventArgs args)
-    {
-        if (sender is CheckBox checkBox)
-        {
-            SelectedInstance?.ApplyNewShouldCloseValue(checkBox.IsChecked == true);
-        }
-    }
-
-    private void UpdateOpenConsole(object? sender, RoutedEventArgs args)
-    {
-        if (sender is CheckBox checkBox)
-        {
-            SelectedInstance?.ApplyNewShouldOpenConsoleValue(checkBox.IsChecked == true);
-        }
-    }
+    // ---- Launch ----
 
     private async void OnLaunchButtonClicked(object sender, RoutedEventArgs e)
     {
@@ -143,11 +179,11 @@ public partial class MainPage : UserControl
         var profile = PlayerProfile;
         if (profile == null)
         {
-            await _popUpService.ShowOkDialogAsync("Not signed in", "Log in to your account before launching the game.");
+            await _popUpService.ShowOkDialogAsync("Нет входа", "Войдите в аккаунт перед запуском игры.");
             return;
         }
 
-        bool answer = await _popUpService.ShowYesNoDialogAsync("Launching...", "Вы намерены запустить майнкрафт?");
+        bool answer = await _popUpService.ShowYesNoDialogAsync("Запуск игры", "Запустить Minecraft с выбранной сборкой?");
         if (!answer) return;
 
         SetLaunchEnabled(false);
@@ -172,13 +208,17 @@ public partial class MainPage : UserControl
     private void SetLaunchEnabled(bool enabled)
     {
         // Selection events can fire while the XAML is still being loaded.
-        if (LaunchButton != null) LaunchButton.IsEnabled = enabled;
+        if (LaunchButton == null) return;
+        LaunchButton.IsEnabled = enabled;
+        // Re-apply the glow: breathing must stop while the button is gray
+        // (disabled) and resume once it is clickable again.
+        UiAnimations.ApplyLaunchStyle(LaunchButton);
     }
 
     private async void OnLaunchFailed(string message)
     {
         SetLaunchEnabled(true);
-        await _popUpService.ShowOkDialogAsync("Launch failed", message);
+        await _popUpService.ShowOkDialogAsync("Не удалось запустить", message);
     }
 
     private void OnDownloadSpeedChanged(string speedText)
@@ -216,7 +256,6 @@ public partial class MainPage : UserControl
         if (_viewModel.SelectedModpack != currentModpack) return;
 
         SetLaunchEnabled(loaded);
-        UpdateSettingsPanel();
 
         if (!loaded && TaskName != null)
         {
@@ -235,30 +274,20 @@ public partial class MainPage : UserControl
         TaskName.Text = file;
     }
 
-    private void OnShowFolderClicked(object sender, RoutedEventArgs e)
-    {
-        if (SelectedInstance == null) return;
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = GameLauncher.EnsurePathExists(SelectedInstance.GetResourcePath()),
-            UseShellExecute = true,
-            Verb = "open"
-        });
-    }
-
     private void Modpack_OnPointerEntered(object? sender, PointerEventArgs e)
     {
-        if (sender is Border { DataContext: Modpack modpack })
+        if (sender is Border card && card.DataContext is Modpack modpack)
         {
+            UiAnimations.ApplyCardTransitions(card);
             modpack.IsHovered = true;
         }
     }
 
     private void Modpack_OnPointerExited(object? sender, PointerEventArgs e)
     {
-        if (sender is Border { DataContext: Modpack modpack })
+        if (sender is Border card && card.DataContext is Modpack modpack)
         {
+            UiAnimations.ApplyCardTransitions(card);
             modpack.IsHovered = false;
         }
     }

@@ -36,7 +36,6 @@ public class MainPageViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(SelectedModpack));
                 OnPropertyChanged(nameof(SelectedModpackName));
                 OnPropertyChanged(nameof(SelectedModpackIcon));
-                OnPropertyChanged(nameof(PlayText));
             }
         }
     }
@@ -59,59 +58,9 @@ public class MainPageViewModel : INotifyPropertyChanged
 
     public bool HasCatalogMessage => _catalogMessage.Length > 0;
 
-    private string _hoveredTab;
-    public string? HoveredTab
-    {
-        get => _hoveredTab;
-        set
-        {
-            if (_hoveredTab != value)
-            {
-                _hoveredTab = value;
-                OnPropertyChanged(nameof(HoveredTab));
-            }
-        }
-    }
-    private string _selectedTab;
-    public string SelectedTab
-    {
-        get => _selectedTab;
-        set
-        {
-            if (_selectedTab != value)
-            {
-                _selectedTab = value;
-                OnPropertyChanged(nameof(SelectedTab));
-                OnPropertyChanged(nameof(IsSettingsPanelVisible));
-            }
-        }
-    }
-
-    public bool IsSettingsPanelVisible => SelectedTab == "settings";
-
-    public string PlayText
-    {
-        get { return $"Зайти на сервер {SelectedModpack?.Name}, как {_pageReference.PlayerProfile?.Nickname}"; }
-    }
-
     public string? PlayerName
     {
         get { return _pageReference.PlayerProfile?.Nickname; }
-    }
-
-    public void OnTabSelectedCommand(string selectedTab)
-    {
-        SelectedTab = selectedTab;
-    }
-
-    public void OnTabHoveredCommand(string hoveredTab)
-    {
-        HoveredTab = hoveredTab;
-    }
-
-    public void OnTabUnhoveredCommand()
-    {
-        HoveredTab = null;
     }
 
     public MainPageViewModel(MainPage page, ServerService serverService, InstanceManager instanceManager)
@@ -121,7 +70,6 @@ public class MainPageViewModel : INotifyPropertyChanged
         _instanceManager = instanceManager;
         Modpacks = new ObservableCollection<Modpack>();
 
-        SelectedTab = "game";
         ReconcileModpacks(ModpackCatalog.Merge(null, _instanceManager.Instances.ToList()));
 
         var preferences = Preferences.Preferences.Get();
@@ -219,18 +167,5 @@ public class MainPageViewModel : INotifyPropertyChanged
     public void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public Color GetTabBackgroundColor(string tabName)
-    {
-        if (SelectedTab == tabName)
-        {
-            return Color.Parse("#ffee4aef");
-        }
-        else if (HoveredTab == tabName)
-        {
-            return Color.FromArgb(0xff, 0xb0, 0xb0, 0xb0);
-        }
-        return Color.FromArgb(0x00, 0x00, 0x00, 0x00);
     }
 }
