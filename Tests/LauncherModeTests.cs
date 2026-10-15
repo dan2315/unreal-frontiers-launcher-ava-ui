@@ -62,6 +62,7 @@ public class LauncherServerUrlTests
     [InlineData("https://dev.example.org", "https://dev.example.org")]
     [InlineData("https://dev.unrealfrontiers.com", "https://dev.unrealfrontiers.com")]
     [InlineData("https://DEV.unrealfrontiers.com/", "https://DEV.unrealfrontiers.com")]
+    [InlineData("https://staging.unrealfrontiers.xyz", "https://staging.unrealfrontiers.xyz")]
     public void Test_AcceptsAnOverrideThatIsNotProduction(string value, string expected)
     {
         Assert.Equal(expected, LauncherModeResolver.ResolveServerUrl(LauncherMode.Test, value));
@@ -71,9 +72,6 @@ public class LauncherServerUrlTests
     [InlineData("https://unrealfrontiers.com")]
     [InlineData("https://www.unrealfrontiers.com/")]
     [InlineData("https://UnrealFrontiers.com")]
-    [InlineData("https://api.unrealfrontiers.com")]
-    [InlineData("https://x.dev.unrealfrontiers.com")]
-    [InlineData("https://api.unrealfrontiers.xyz")]
     [InlineData("http://localhost:3000")]
     [InlineData("http://127.0.0.1:3000/")]
     [InlineData("http://host.docker.internal:3000")]

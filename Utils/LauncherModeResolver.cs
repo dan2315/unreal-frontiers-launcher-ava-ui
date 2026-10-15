@@ -15,8 +15,6 @@ public static class LauncherModeResolver
     public const string ProductionUrl = "https://unrealfrontiers.com";
     public const string TestUrl = "http://localhost:3200";
 
-    // The one name under the production domain that is the dev backend (an exact match; other subdomains stay refused).
-    private const string PublicDevHost = "dev.unrealfrontiers.com";
     private static readonly string[] ProductionHosts = ["unrealfrontiers.com", "unrealfrontiers.xyz"];
     private static readonly string[] LocalHosts = ["localhost", "127.0.0.1", "::1", "[::1]", "host.docker.internal"];
     private const int ProductionLocalPort = 3000;
@@ -78,9 +76,8 @@ public static class LauncherModeResolver
     {
         var host = uri.Host.ToLowerInvariant();
 
-        if (host == PublicDevHost) return false;
-
-        if (ProductionHosts.Any(production => host == production || host.EndsWith("." + production))) return true;
+        // Only the production hosts themselves; other subdomains (dev.unrealfrontiers.com, ...) are free to use.
+        if (ProductionHosts.Any(production => host == production || host == "www." + production)) return true;
 
         return LocalHosts.Contains(host) && uri.Port == ProductionLocalPort;
     }
