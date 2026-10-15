@@ -14,11 +14,16 @@ namespace UnrealFrontiersLauncher
         [STAThread]
         public static void Main(string[] args)
         {
+#if DEV_BUILD
+            // The DEV build must not take over (or remove) the production launcher's uflauncher:// link.
+            VelopackApp.Build().Run();
+#else
             VelopackApp.Build()
                 .OnAfterInstallFastCallback(_ => UrlSchemeRegistration.Register())
                 .OnAfterUpdateFastCallback(_ => UrlSchemeRegistration.Register())
                 .OnBeforeUninstallFastCallback(_ => UrlSchemeRegistration.Unregister())
                 .Run();
+#endif
 
             try
             {

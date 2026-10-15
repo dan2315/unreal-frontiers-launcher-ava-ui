@@ -23,7 +23,15 @@ public static class AppStaticData
 
 #if DEV_BUILD
     // Only the DEV build takes the backend from the command line (--server-url), so a friend can test against a remote dev backend.
-    private static readonly string? ServerUrlArgument = LauncherModeResolver.ParseServerUrlArgument(Environment.GetCommandLineArgs());
+    // An installed copy has no arguments, so build-dev.ps1 -ServerUrl also leaves the URL in server-url.txt beside the exe.
+    private static readonly string? ServerUrlArgument = LauncherModeResolver.ParseServerUrlArgument(Environment.GetCommandLineArgs())
+        ?? ReadServerUrlFile();
+
+    private static string? ReadServerUrlFile()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "server-url.txt");
+        return File.Exists(path) ? File.ReadAllText(path).Trim() : null;
+    }
 #else
     private static readonly string? ServerUrlArgument = null;
 #endif
