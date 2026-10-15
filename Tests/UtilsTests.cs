@@ -131,7 +131,7 @@ public class GameEnvironmentTests
         GameLauncher.ApplyGameEnvironment(process, "access-token");
 
         Assert.Equal("access-token", process.StartInfo.EnvironmentVariables["UF_ACCESS_TOKEN"]);
-        Assert.Equal(AppStaticData.ServerURL, process.StartInfo.EnvironmentVariables["UF_BACKEND_URL"]);
+        Assert.Equal(LauncherModeResolver.ForGame(AppStaticData.ServerURL), process.StartInfo.EnvironmentVariables["UF_BACKEND_URL"]);
     }
 
     [Fact]
