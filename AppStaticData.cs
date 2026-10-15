@@ -21,8 +21,15 @@ public static class AppStaticData
     public static readonly string InstanceSuffix = IsTestMode ? ".Test" : "";
     public static readonly string DataFolderName = "UnrealFrontiers" + InstanceSuffix;
 
+#if DEV_BUILD
+    // Only the DEV build takes the backend from the command line (--server-url), so a friend can test against a remote dev backend.
+    private static readonly string? ServerUrlArgument = LauncherModeResolver.ParseServerUrlArgument(Environment.GetCommandLineArgs());
+#else
+    private static readonly string? ServerUrlArgument = null;
+#endif
+
     public static readonly string ServerURL = LauncherModeResolver.ResolveServerUrl(
-        Mode, Environment.GetEnvironmentVariable("UF_SERVER_URL"));
+        Mode, ServerUrlArgument ?? Environment.GetEnvironmentVariable("UF_SERVER_URL"));
 
     public static string TestBanner => LauncherModeResolver.DescribeTestBackend(ServerURL);
 

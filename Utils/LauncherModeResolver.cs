@@ -35,6 +35,23 @@ public static class LauncherModeResolver
         };
     }
 
+    /// <summary>The value of "--server-url &lt;url&gt;" or "--server-url=&lt;url&gt;", or null.</summary>
+    public static string? ParseServerUrlArgument(IEnumerable<string> arguments)
+    {
+        const string name = "--server-url";
+        var args = arguments.ToList();
+
+        for (var i = 0; i < args.Count; i++)
+        {
+            if (args[i].StartsWith(name + "=", StringComparison.OrdinalIgnoreCase))
+                return args[i][(name.Length + 1)..];
+            if (args[i].Equals(name, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Count)
+                return args[i + 1];
+        }
+
+        return null;
+    }
+
     public static string ResolveServerUrl(LauncherMode mode, string? overrideUrl)
     {
         if (mode == LauncherMode.Production) return ProductionUrl;

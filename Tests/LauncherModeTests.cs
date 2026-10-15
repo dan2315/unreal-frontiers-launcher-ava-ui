@@ -90,6 +90,23 @@ public class LauncherServerUrlTests
     }
 
     [Theory]
+    [InlineData("--server-url", "http://10.0.0.5:3200", "http://10.0.0.5:3200")]
+    [InlineData("--SERVER-URL=http://10.0.0.5:3200", null, "http://10.0.0.5:3200")]
+    public void ParseServerUrlArgument_ReadsBothForms(string first, string? second, string expected)
+    {
+        var args = second == null ? new[] { "app.exe", first } : new[] { "app.exe", first, second };
+
+        Assert.Equal(expected, LauncherModeResolver.ParseServerUrlArgument(args));
+    }
+
+    [Fact]
+    public void ParseServerUrlArgument_IsNullWithoutTheArgument()
+    {
+        Assert.Null(LauncherModeResolver.ParseServerUrlArgument(["app.exe", "--test"]));
+        Assert.Null(LauncherModeResolver.ParseServerUrlArgument(["app.exe", "--server-url"]));
+    }
+
+    [Theory]
     [InlineData("http://localhost:3200", "http://127.0.0.1:3200")]
     [InlineData("http://LocalHost:3200/", "http://127.0.0.1:3200")]
     [InlineData("http://192.168.1.20:3200", "http://192.168.1.20:3200")]
