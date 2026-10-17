@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -124,9 +125,16 @@ public class ModpackInstaller
                 Console.WriteLine($"Attempt {attempt}/{_maxRetries} failed: {ex.Message}");
                 if (attempt >= _maxRetries) throw;
 
-                await Task.Delay(500 * (int)Math.Pow(2, attempt - 1));
+                await Task.Delay(RetryDelay(ex, attempt));
             }
         }
+    }
+
+    // A server that answers "busy" (429/503) needs more room than a dropped connection.
+    public static TimeSpan RetryDelay(Exception error, int attempt)
+    {
+        var busy = error is HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable };
+        return TimeSpan.FromMilliseconds((busy ? 3000 : 500) * Math.Pow(2, attempt - 1));
     }
 
     private async Task InstallWithStallDetection(
