@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Unreal Frontiers app icon">
+  <defs>
+    <clipPath id="planetClip">
+      <circle cx="128" cy="128" r="64"/>
+    </clipPath>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="0.45" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="orbitGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00FFA3"/>
+      <stop offset="0.55" stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#2979FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- фон иконки -->
+  <rect width="256" height="256" rx="56" fill="#0A1F18"/>
+
+  <!-- дальняя дуга орбиты (за планетой) -->
+  <g transform="rotate(-16 128 128)">
+    <path d="M18 128 A110 30 0 0 1 238 128" fill="none" stroke="#00E5FF" stroke-width="11" stroke-linecap="round" opacity="0.55"/>
+  </g>
+
+  <!-- тело планеты -->
+  <circle cx="128" cy="128" r="64" fill="#35C98A"/>
+  <g clip-path="url(#planetClip)">
+    <rect x="64" y="64" width="128" height="128" fill="#35C98A"/>
+    <path d="M64 84 H192 V98 Q160 102 128 99 Q96 96 64 100 Z" fill="#DCEFE8"/>
+    <path d="M64 100 Q96 96 128 99 Q160 102 192 98 V114 Q160 118 128 115 Q96 112 64 116 Z" fill="#6FD3C9"/>
+    <path d="M64 148 Q96 144 128 148 Q160 152 192 148 V160 Q160 164 128 160 Q96 156 64 162 Z" fill="#2E7D5F"/>
+    <path d="M64 162 Q96 156 128 160 Q160 164 192 160 V192 H64 Z" fill="#3A7CA5"/>
+    <rect x="64" y="64" width="128" height="128" fill="url(#shade)"/>
+  </g>
+
+  <!-- ближняя дуга орбиты (перед планетой) -->
+  <g transform="rotate(-16 128 128)">
+    <path d="M18 128 A110 30 0 0 0 238 128" fill="none" stroke="url(#orbitGrad)" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>

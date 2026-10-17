@@ -38,6 +38,8 @@
         path: "dod.unrealfrontiers.launcher.desktop"
       build-commands:
         - install -Dm644 dod.unrealfrontiers.launcher.desktop /app/share/applications/dod.unrealfrontiers.launcher.desktop
+        - install -Dm644 Assets/Images/logo_app.svg /app/share/icons/hicolor/scalable/apps/dod.unrealfrontiers.launcher.svg
+        - install -Dm644 Assets/Images/logo_app.png /app/share/icons/hicolor/256x256/apps/dod.unrealfrontiers.launcher.png
         - dotnet publish unreal-frontiers-launcher.csproj -c Release --no-self-contained --source ./flatpak-builder/nuget-sources -p:DefineConstants=LINUX
         - mkdir -p ${FLATPAK_DEST}/bin
         - cp -r bin/Release/net8.0/publish/* ${FLATPAK_DEST}/bin
