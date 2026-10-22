@@ -1,15 +1,18 @@
 name: Release launcher
 
-# Push a tag like v1.4.2 (or run the workflow by hand): the Windows installer and the Velopack update packages are built here and
-# published to https://unrealfrontiers.com, where the launcher's autoupdater and the site's download button pick them up.
-# Needs the repository secret LAUNCHER_PUBLISH_KEY: the backend's LAUNCHER_PUBLISH_KEY (it can publish launcher files and nothing else).
+# Manual, master only: Actions -> Release launcher -> Run workflow, branch master, and type "release launcher".
+# Builds the Windows installer and the Velopack update packages and publishes them to https://unrealfrontiers.com, where the
+# launcher's autoupdater and the site's download button pick them up. The version is the <Version> of the csproj unless given:
+# raise it in the csproj first (a version that was already released is refused by Velopack).
+# Needs the repository secret LAUNCHER_PUBLISH_KEY: the production backend's LAUNCHER_PUBLISH_KEY.
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
     inputs:
+      confirm:
+        description: 'Type "release launcher" to confirm'
+        required: true
       version:
-        description: 'Version to release, e.g. 1.4.2 (default: the <Version> of the csproj)'
+        description: 'Version, e.g. 1.4.2 (default: the <Version> of the csproj)'
         required: false
 
 concurrency:
@@ -21,6 +24,7 @@ permissions:
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/master' && inputs.confirm == 'release launcher'
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
@@ -30,16 +34,14 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # The same version as the Velopack package the launcher references.
       - name: Install the Velopack CLI
         run: dotnet tool install --global vpk --version 1.2.161
 
-      - name: Work out the version
+      - name: Check the version
         id: version
         shell: pwsh
         run: |
           $v = '${{ github.event.inputs.version }}'
-          if (-not $v -and '${{ github.ref_type }}' -eq 'tag') { $v = '${{ github.ref_name }}'.TrimStart('v') }
           if ($v -and $v -notmatch '^\d+\.\d+\.\d+$') { throw "Version '$v' is not like 1.4.2" }
           "value=$v" >> $env:GITHUB_OUTPUT
 

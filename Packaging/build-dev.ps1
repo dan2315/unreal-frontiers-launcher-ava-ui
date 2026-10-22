@@ -7,7 +7,11 @@ param(
     [switch]$Upload,
     [string]$DevServerContainer = 'uf-dev-server-1',
     [string]$RemotePath = '/app/modpack_data/launcher',
-    [switch]$Run
+    [switch]$Run,
+    # CI: PUT the zip, the installer and the version marker to a backend (the dev one) with its LAUNCHER_PUBLISH_KEY.
+    [string]$PublishUrl,
+    [string]$PublishKey = $env:LAUNCHER_PUBLISH_KEY,
+    [string]$Version
 )
 
 # Builds the DEV launcher: UnrealFrontiersLauncherDev.exe, orange DEV icon and title, test mode by default
@@ -27,10 +31,11 @@ $ErrorActionPreference = 'Stop'
 $root = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $project = Join-Path (Split-Path -Parent $root) 'unreal-frontiers-launcher.csproj'
 if (-not $Output) { $Output = Join-Path $root 'publish\dev' }
-if ($Upload) { $Zip = $true }
+if ($Upload -or $PublishUrl) { $Zip = $true }
+if ($PublishUrl) { $Installer = $true }
 
 if (Test-Path $Output) { Remove-Item $Output -Recurse -Force }
-dotnet publish $project -c Release -r win-x64 --self-contained -p:DevBuild=true `
+dotnet publish $project -c Release -r win-x64 --self-contained -p:DevBuild=true $(if ($Version) { "-p:Version=$Version" }) `
     -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false -o $Output
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed' }
 
@@ -56,7 +61,7 @@ if ($Zip) { $uploads += $zipPath }
 
 if ($Installer) {
     # Same file names as production, so /updateclient/download_file/launcher?file=UFLauncher_installer.exe works on the dev backend.
-    $version = ([xml](Get-Content $project)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+    $version = if ($Version) { $Version } else { ([xml](Get-Content $project)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1 }
     $installerDir = Join-Path (Split-Path -Parent $Output) 'installer'
     if (Test-Path $installerDir) { Remove-Item $installerDir -Recurse -Force }
     vpk pack --packId UnrealFrontiersLauncherDev --packVersion $version --packDir $Output --mainExe UnrealFrontiersLauncherDev.exe `
@@ -85,4 +90,22 @@ if ($Upload) {
 
 if ($Run) {
     if ($arguments) { Start-Process $exe -ArgumentList $arguments } else { Start-Process $exe }
+}
+
+if ($PublishUrl) {
+    if (-not $PublishKey) { throw 'PublishKey (LAUNCHER_PUBLISH_KEY) is not set' }
+    foreach ($file in $uploads) {
+        $name = Split-Path -Leaf $file
+        Write-Host "Publishing $name ($([math]::Round((Get-Item $file).Length / 1MB, 1)) MB)"
+        # The key goes in a header file so it never shows up in a process list or a log.
+        $headers = New-TemporaryFile
+        try {
+            Set-Content -Path $headers -Value "x-api-key: $PublishKey" -Encoding ascii
+            curl.exe --silent --show-error --fail --retry 3 --retry-delay 5 -X PUT -H "@$headers" -T $file "$($PublishUrl.TrimEnd('/'))/updateclient/launcher/$name"
+            if ($LASTEXITCODE -ne 0) { throw "publishing failed for $name" }
+        }
+        finally { Remove-Item $headers -ErrorAction SilentlyContinue }
+        Write-Host ''
+    }
+    Write-Host 'Publish complete.'
 }
