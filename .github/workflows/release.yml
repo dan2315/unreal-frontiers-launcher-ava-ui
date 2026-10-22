@@ -50,8 +50,8 @@ jobs:
         env:
           LAUNCHER_PUBLISH_KEY: ${{ secrets.LAUNCHER_PUBLISH_KEY }}
         run: |
-          $releaseArgs = @('-FetchPrevious', 'https://unrealfrontiers.com', '-PublishUrl', 'https://unrealfrontiers.com')
-          if ('${{ steps.version.outputs.value }}') { $releaseArgs += @('-Version', '${{ steps.version.outputs.value }}') }
+          $releaseArgs = @{ FetchPrevious = 'https://unrealfrontiers.com'; PublishUrl = 'https://unrealfrontiers.com' }
+          if ('${{ steps.version.outputs.value }}') { $releaseArgs.Version = '${{ steps.version.outputs.value }}' }
           ./Packaging/release.ps1 @releaseArgs
 
       - name: Keep the build
