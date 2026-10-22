@@ -145,7 +145,7 @@ namespace UnrealFrontiersLauncher
 
         private static MinecraftPath CreateMinecraftPath(MinecraftInstance minecraftInstance)
         {
-            var installFolder = Path.Combine(AppStaticData.LauncherBasePath, "Install");
+            var installFolder = InstallLocation.InstallPath;
             var resourcePath = EnsurePathExists(minecraftInstance.GetResourcePath());
 
             return new MinecraftPath

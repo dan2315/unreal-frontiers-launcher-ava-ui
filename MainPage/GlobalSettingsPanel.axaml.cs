@@ -2,6 +2,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 
 namespace UnrealFrontiersLauncher;
 
@@ -22,6 +23,7 @@ public partial class GlobalSettingsPanel : UserControl
         UiOverlayFadeBox.IsChecked = preferences.UiOverlayFadeEnabled;
         UiPulseBox.IsChecked = preferences.UiBackgroundPulseEnabled;
         UpdateEffectTogglesEnabled();
+        RefreshInstallPath();
 
         CloseLauncherBox.IsCheckedChanged += UpdateCloseLauncher;
         OpenConsoleBox.IsCheckedChanged += UpdateOpenConsole;
@@ -109,4 +111,49 @@ public partial class GlobalSettingsPanel : UserControl
     }
 
     private void OnCloseClicked(object? sender, RoutedEventArgs e) => Closed?.Invoke();
+
+    // ---- install folder ----
+
+    private void RefreshInstallPath()
+    {
+        InstallPathText.Text = InstallLocation.WantedRoot;
+        string? status = null;
+        if (InstallLocation.HasPendingChange)
+            status = $"Папка изменится при следующем запуске лаунчера: сборки и файлы игры переедут из «{InstallLocation.DataRoot}». Перенос может занять несколько минут.";
+        else if (InstallLocation.LastError is { } error)
+            status = error;
+        InstallPathStatus.Text = status;
+        InstallPathStatus.IsVisible = status is not null;
+        InstallPathStatus.Foreground = Avalonia.Media.Brushes.White;
+        if (status is not null && InstallLocation.LastError is not null && !InstallLocation.HasPendingChange)
+            InstallPathStatus.Foreground = Avalonia.Media.Brush.Parse("#E5484D");
+        ResetInstallPathButton.IsEnabled = !Equals(InstallLocation.WantedRoot, AppStaticData.LauncherBasePath);
+    }
+
+    private async void OnChooseInstallPath(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is not { } top) return;
+        var folders = await top.StorageProvider.OpenFolderPickerAsync(new Avalonia.Platform.Storage.FolderPickerOpenOptions
+        {
+            Title = "Папка установки",
+            AllowMultiple = false,
+        });
+        if (folders.Count == 0 || folders[0].TryGetLocalPath() is not { } path) return;
+
+        if (InstallLocation.Validate(path) is { } problem)
+        {
+            InstallPathStatus.Text = problem;
+            InstallPathStatus.Foreground = Avalonia.Media.Brush.Parse("#E5484D");
+            InstallPathStatus.IsVisible = true;
+            return;
+        }
+        InstallLocation.Choose(path);
+        RefreshInstallPath();
+    }
+
+    private void OnResetInstallPath(object? sender, RoutedEventArgs e)
+    {
+        InstallLocation.Choose(null);
+        RefreshInstallPath();
+    }
 }

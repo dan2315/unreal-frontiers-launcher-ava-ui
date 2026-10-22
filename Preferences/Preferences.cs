@@ -15,6 +15,11 @@ public class Preferences(string lastSelectedModpack)
     public bool NeedToClose { get; set; } = true;
     public bool NeedToOpenConsole { get; set; } = false;
 
+    // Where the game folders (Instances, Install) should be; null = the default launcher folder. InstallPathApplied is where they are now:
+    // a new choice is applied at the next start (see InstallLocation).
+    public string? InstallPath { get; set; }
+    public string? InstallPathApplied { get; set; }
+
     // UI animation switches (see Utils/UiAnimations.cs for the full list of effects).
     // All on by default; turning them off kills running animations and skips transitions.
     public bool UiAnimationsEnabled { get; set; } = true;
