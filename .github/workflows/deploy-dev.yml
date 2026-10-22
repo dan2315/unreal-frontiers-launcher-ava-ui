@@ -1,0 +1,40 @@
+name: Deploy dev launcher
+
+# A push to the development branch builds the DEV launcher (UnrealFrontiersLauncherDev: orange icon, test mode, its own data folder)
+# and publishes the zip, the installer and the version marker to https://dev.unrealfrontiers.com.
+# Needs the repository secret LAUNCHER_DEV_PUBLISH_KEY: the dev backend's LAUNCHER_PUBLISH_KEY.
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-dev-launcher
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # The same version as the Velopack package the launcher references.
+      - name: Install the Velopack CLI
+        run: dotnet tool install --global vpk --version 1.2.161
+
+      - name: Build and publish
+        shell: pwsh
+        env:
+          LAUNCHER_PUBLISH_KEY: ${{ secrets.LAUNCHER_DEV_PUBLISH_KEY }}
+        run: |
+          $base = ([xml](Get-Content unreal-frontiers-launcher.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          # Velopack refuses a version it has seen: the run number makes every build new.
+          ./Packaging/build-dev.ps1 -Version "$base-dev.${{ github.run_number }}" -ServerUrl https://dev.unrealfrontiers.com -PublishUrl https://dev.unrealfrontiers.com

@@ -1,0 +1,62 @@
+name: Release launcher
+
+# Manual, master only: Actions -> Release launcher -> Run workflow, branch master, and type "release launcher".
+# Builds the Windows installer and the Velopack update packages and publishes them to https://unrealfrontiers.com, where the
+# launcher's autoupdater and the site's download button pick them up. The version is the <Version> of the csproj unless given:
+# raise it in the csproj first (a version that was already released is refused by Velopack).
+# Needs the repository secret LAUNCHER_PUBLISH_KEY: the production backend's LAUNCHER_PUBLISH_KEY.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "release launcher" to confirm'
+        required: true
+      version:
+        description: 'Version, e.g. 1.4.2 (default: the <Version> of the csproj)'
+        required: false
+
+concurrency:
+  group: release-launcher
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/master' && inputs.confirm == 'release launcher'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install the Velopack CLI
+        run: dotnet tool install --global vpk --version 1.2.161
+
+      - name: Check the version
+        id: version
+        shell: pwsh
+        run: |
+          $v = '${{ github.event.inputs.version }}'
+          if ($v -and $v -notmatch '^\d+\.\d+\.\d+$') { throw "Version '$v' is not like 1.4.2" }
+          "value=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Build and publish
+        shell: pwsh
+        env:
+          LAUNCHER_PUBLISH_KEY: ${{ secrets.LAUNCHER_PUBLISH_KEY }}
+        run: |
+          $releaseArgs = @('-FetchPrevious', 'https://unrealfrontiers.com', '-PublishUrl', 'https://unrealfrontiers.com')
+          if ('${{ steps.version.outputs.value }}') { $releaseArgs += @('-Version', '${{ steps.version.outputs.value }}') }
+          ./Packaging/release.ps1 @releaseArgs
+
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-release
+          path: Packaging/Releases/*
+          retention-days: 14

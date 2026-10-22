@@ -36,6 +36,7 @@ namespace UnrealFrontiersLauncher
 
             CrashLog.Install();
             LegacyDataMigration.MigrateFromInnoInstall();
+            InstallLocation.ApplyPendingChange();
             SentryIntegration.Initialize();
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
