@@ -103,7 +103,7 @@ public class MinecraftInstance
 
     public string GetResourcePath()
     {
-        var path = Path.Combine(AppStaticData.LauncherBasePath, "Instances", PathSafety.SanitizeFileName(_name));
+        var path = Path.Combine(InstallLocation.InstancesPath, PathSafety.SanitizeFileName(_name));
         return path;
     }
 

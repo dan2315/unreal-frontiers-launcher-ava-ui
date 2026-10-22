@@ -8,7 +8,7 @@ namespace UnrealFrontiersLauncher
 {
     public class InstanceManager
     {
-        public static string instancesPath = Path.Combine(AppStaticData.LauncherBasePath, "Instances");
+        public static string instancesPath => InstallLocation.InstancesPath;
         private readonly Dictionary<string, MinecraftInstance> minecraftInstances = new();
         public MinecraftInstance? selectedInstance;
         public IReadOnlyCollection<MinecraftInstance> Instances => minecraftInstances.Values;

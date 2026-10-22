@@ -1,0 +1,60 @@
+name: Release launcher
+
+# Push a tag like v1.4.2 (or run the workflow by hand): the Windows installer and the Velopack update packages are built here and
+# published to https://unrealfrontiers.com, where the launcher's autoupdater and the site's download button pick them up.
+# Needs the repository secret LAUNCHER_PUBLISH_KEY: the backend's LAUNCHER_PUBLISH_KEY (it can publish launcher files and nothing else).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.4.2 (default: the <Version> of the csproj)'
+        required: false
+
+concurrency:
+  group: release-launcher
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # The same version as the Velopack package the launcher references.
+      - name: Install the Velopack CLI
+        run: dotnet tool install --global vpk --version 1.2.161
+
+      - name: Work out the version
+        id: version
+        shell: pwsh
+        run: |
+          $v = '${{ github.event.inputs.version }}'
+          if (-not $v -and '${{ github.ref_type }}' -eq 'tag') { $v = '${{ github.ref_name }}'.TrimStart('v') }
+          if ($v -and $v -notmatch '^\d+\.\d+\.\d+$') { throw "Version '$v' is not like 1.4.2" }
+          "value=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Build and publish
+        shell: pwsh
+        env:
+          LAUNCHER_PUBLISH_KEY: ${{ secrets.LAUNCHER_PUBLISH_KEY }}
+        run: |
+          $releaseArgs = @('-FetchPrevious', 'https://unrealfrontiers.com', '-PublishUrl', 'https://unrealfrontiers.com')
+          if ('${{ steps.version.outputs.value }}') { $releaseArgs += @('-Version', '${{ steps.version.outputs.value }}') }
+          ./Packaging/release.ps1 @releaseArgs
+
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-release
+          path: Packaging/Releases/*
+          retention-days: 14
