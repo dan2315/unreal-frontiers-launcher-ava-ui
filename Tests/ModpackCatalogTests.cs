@@ -14,30 +14,31 @@ public class ModpackCatalogParseTests
     {
         var json = """
             [
-              {"modpackName":"Unreal Zaruba","version":"1.0.0","modpackId":"zaruba","minecraftVersion":"1.21.1","forgeVersion":"21.1.252","loader":"neoforge","serverAddress":"unrealfrontiers.com:25570","minRam":4096},
-              {"modpackName":"Create","version":"0.0.1","modpackId":"create","minecraftVersion":"1.20.1","forgeVersion":"47.4.0","imageURl":"none"}
+              {"id":"zaruba","name":"Unreal Zaruba","version":"1.0.0","game":{"minecraft":"1.21.1","loader":"neoforge","loaderVersion":"21.1.252"},"minRam":4096,"serverAddress":"unrealfrontiers.com:25570","fileCount":3,"totalSize":9,"manifestSha256":"x","updatedAt":"2026-01-01T00:00:00Z"},
+              {"id":"create","name":"Create","version":"0.0.1","game":{"minecraft":"1.20.1","loader":"forge","loaderVersion":"47.4.0"},"minRam":0,"image":"https://example.com/c.png"}
             ]
             """;
 
         var list = ModpackCatalog.Parse(json);
 
         Assert.Equal(["zaruba", "create"], list.Select(info => info.modpackId));
-        Assert.Equal("neoforge", list[0].loader);
-        Assert.Equal("", list[1].serverAddress);
-        Assert.Equal(0, list[1].minRam);
+        Assert.Equal(("neoforge", "21.1.252", "unrealfrontiers.com:25570"), (list[0].loader, list[0].forgeVersion, list[0].serverAddress));
+        Assert.Equal(("", "https://example.com/c.png", 0), (list[1].serverAddress, list[1].imageURl, list[1].minRam));
     }
 
     [Fact]
-    public void Parse_DropsEntriesWithoutAnIdAndDuplicateIds()
+    public void Parse_DropsEntriesWithoutAnIdOrGameAndDuplicateIds()
     {
-        var json = """
+        var game = """{"minecraft":"1.21.1","loader":"neoforge"}""";
+        var json = $$"""
             [
-              {"modpackName":"A","modpackId":"a","version":"1"},
-              {"modpackName":"No id","version":"1"},
+              {"id":"a","name":"A","version":"1","game":{{game}}},
+              {"name":"No id","version":"1","game":{{game}}},
               null,
-              {"modpackName":"A again","modpackId":"a","version":"2"},
-              {"modpackName":"Same name","modpackId":"b","version":"1"},
-              {"modpackName":"Same name","modpackId":"c","version":"1"}
+              {"id":"nogame","name":"No game","version":"1"},
+              {"id":"a","name":"A again","version":"2","game":{{game}}},
+              {"id":"b","name":"Same name","version":"1","game":{{game}}},
+              {"id":"c","name":"Same name","version":"1","game":{{game}}}
             ]
             """;
 
@@ -54,7 +55,7 @@ public class ModpackCatalogParseTests
     }
 
     [Theory]
-    [InlineData("{\"modpackId\":\"a\"}")]
+    [InlineData("{\"id\":\"a\"}")]
     [InlineData("<html>not json</html>")]
     [InlineData("")]
     public void Parse_RejectsAnythingButAnArray(string json)
@@ -177,7 +178,7 @@ public class ModpackCatalogFetchTests
             context.Response.Close();
         });
 
-        var result = await test($"http://localhost:{port}/updateclient/modpacks");
+        var result = await test($"http://localhost:{port}/updateclient/packs");
         listener.Stop();
         return result;
     }
@@ -185,7 +186,7 @@ public class ModpackCatalogFetchTests
     [Fact]
     public async Task FetchRemote_ReturnsTheParsedList()
     {
-        var list = await WithServer(200, """[{"modpackId":"zaruba","modpackName":"Unreal Zaruba","version":"1.0.0"}]""",
+        var list = await WithServer(200, """[{"id":"zaruba","name":"Unreal Zaruba","version":"1.0.0","game":{"minecraft":"1.21.1","loader":"neoforge"}}]""",
             url => ModpackCatalog.FetchRemoteAsync(url, new HttpClient()));
 
         Assert.Equal("zaruba", Assert.Single(list!).modpackId);
@@ -212,7 +213,7 @@ public class ModpackCatalogFetchTests
     [Fact]
     public async Task FetchRemote_ReturnsNullWhenTheServerIsUnreachable()
     {
-        var list = await ModpackCatalog.FetchRemoteAsync("http://localhost:1/updateclient/modpacks", new HttpClient());
+        var list = await ModpackCatalog.FetchRemoteAsync("http://localhost:1/updateclient/packs", new HttpClient());
 
         Assert.Null(list);
     }
