@@ -78,6 +78,47 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
 
+    private bool _isVerificationPending;
+    private string _resendMessage = "";
+    private bool _isResending;
+
+    /// <summary>The email is registered with this password but not confirmed yet: offer to send the letter again.</summary>
+    public bool IsVerificationPending
+    {
+        get => _isVerificationPending;
+        private set
+        {
+            _isVerificationPending = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsFormVisible));
+        }
+    }
+
+    public bool IsFormVisible => !_isVerificationPending;
+
+    public string ResendMessage
+    {
+        get => _resendMessage;
+        private set
+        {
+            _resendMessage = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsResending
+    {
+        get => _isResending;
+        private set
+        {
+            _isResending = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(CanResend));
+        }
+    }
+
+    public bool CanResend => !_isResending;
+
     public bool IsLoginMode => !IsRegisterMode;
     public string PageTitle => IsRegisterMode ? "Регистрация" : "Войти";
     public string ActionButtonText => IsRegisterMode ? "Создать аккаунт" : "Войти";
@@ -114,7 +155,15 @@ public class AuthPageViewModel : INotifyPropertyChanged
                 
             if(!response.Success) 
             {
-                AuthError = response.Message;
+                if (response.Code == AuthResponses.VerificationPending)
+                {
+                    AuthError = null;
+                    ResendMessage = "";
+                    IsVerificationPending = true;
+                    return;
+                }
+
+                AuthError = AuthResponses.ErrorMessage(response.Message);
                 return;
             }
 
@@ -136,6 +185,40 @@ public class AuthPageViewModel : INotifyPropertyChanged
             _authService.GrantAccess(_playerProfileProvider, new AuthPage.AccessData { nickname = response.Nickname });
             _navigationService.NavigateTo<MainPage>();
         }
+    }
+
+    public async void ResendVerification()
+    {
+        if (IsResending) return;
+
+        IsResending = true;
+        ResendMessage = "";
+        try
+        {
+            var result = await _authService.ResendVerification(EmailEntry.Value, PasswordEntry.Value);
+            ResendMessage = result.Status switch
+            {
+                ResendStatus.Sent => "Письмо отправлено. Проверьте почту.",
+                ResendStatus.TooManyRequests => "Подождите минуту перед следующей отправкой.",
+                ResendStatus.AlreadyVerified => "Почта уже подтверждена. Можно войти.",
+                ResendStatus.InvalidCredentials => "Неверный пароль. Вернитесь к форме и введите его заново.",
+                _ => "Не удалось отправить письмо. Попробуйте позже."
+            };
+        }
+        catch (System.Net.Http.HttpRequestException)
+        {
+            ResendMessage = "Нет связи с сервером. Попробуйте позже.";
+        }
+        finally
+        {
+            IsResending = false;
+        }
+    }
+
+    public void BackToForm()
+    {
+        IsVerificationPending = false;
+        ResendMessage = "";
     }
 
     public async void InitiateDiscordAuth(string? nickname)

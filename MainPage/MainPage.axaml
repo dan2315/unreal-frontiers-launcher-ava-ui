@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="using:UnrealFrontiersLauncher.ViewModels"
+        xmlns:ufl="using:UnrealFrontiersLauncher"
         x:Class="UnrealFrontiersLauncher.MainPage"
         x:DataType="local:MainPageViewModel">
 
@@ -299,58 +300,39 @@
                                 </StackPanel>
                                 <Button Grid.Column="1" Classes="uf-ghost" Click="OnShowFullChangelogClicked"
                                         Padding="10,6" VerticalAlignment="Center" Margin="12,0,0,0">
-                                    <TextBlock Text="Все изменения" FontFamily="{StaticResource MontserratBold}"
+                                    <TextBlock Text="Все новости" FontFamily="{StaticResource MontserratBold}"
                                                FontSize="12" Foreground="{StaticResource UfMintBrush}"/>
                                 </Button>
                             </Grid>
                             <StackPanel Spacing="0" Margin="20,12,20,18">
-                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6">
-                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
-                                            Background="{StaticResource UfMintBrush}"/>
-                                    <StackPanel Grid.Column="1" Spacing="2">
-                                        <TextBlock Text="Настройки сборки и лаунчера — прямо в приложении"
-                                                   FontFamily="{StaticResource MontserratBold}"
-                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
-                                        <TextBlock Text="Всплывающее окно с затемнением, RAM с шагом по степеням двойки"
-                                                   FontFamily="{StaticResource MontserratRegular}"
-                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="12 окт" Margin="12,0,0,0"
-                                               FontFamily="{StaticResource MontserratRegular}"
-                                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
-                                </Grid>
-                                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
-                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6">
-                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
-                                            Background="{StaticResource UfMintBrush}"/>
-                                    <StackPanel Grid.Column="1" Spacing="2">
-                                        <TextBlock Text="Редизайн в стилистике Reborn"
-                                                   FontFamily="{StaticResource MontserratBold}"
-                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
-                                        <TextBlock Text="Тёмная тема, mint-акцент, новый логотип"
-                                                   FontFamily="{StaticResource MontserratRegular}"
-                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="12 окт" Margin="12,0,0,0"
-                                               FontFamily="{StaticResource MontserratRegular}"
-                                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
-                                </Grid>
-                                <Border Height="1" Background="#2E2C34" Margin="8,6"/>
-                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6">
-                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
-                                            Background="{StaticResource UfMintBrush}"/>
-                                    <StackPanel Grid.Column="1" Spacing="2">
-                                        <TextBlock Text="Динамический каталог сборок"
-                                                   FontFamily="{StaticResource MontserratBold}"
-                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
-                                        <TextBlock Text="Список серверов с бэкенда, кэш при недоступности"
-                                                   FontFamily="{StaticResource MontserratRegular}"
-                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="11 окт" Margin="12,0,0,0"
-                                               FontFamily="{StaticResource MontserratRegular}"
-                                               FontSize="11" Foreground="#5E6068" VerticalAlignment="Top"/>
-                                </Grid>
+                                <TextBlock Text="{Binding NewsMessage}" IsVisible="{Binding HasNewsMessage}"
+                                           FontFamily="{StaticResource MontserratRegular}"
+                                           FontSize="12" Foreground="#8E939B" TextWrapping="Wrap" Margin="0,6"/>
+                                <ItemsControl ItemsSource="{Binding NewsPreview}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="ufl:NewsEntry">
+                                            <Border BorderBrush="#2E2C34" BorderThickness="0,0,0,1" Padding="0,8">
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4" Margin="0,5,10,0"
+                                                            Background="{StaticResource UfMintBrush}"/>
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <TextBlock Text="{Binding Title}"
+                                                                   FontFamily="{StaticResource MontserratBold}"
+                                                                   FontSize="13" Foreground="White" TextWrapping="Wrap"/>
+                                                        <TextBlock Text="{Binding Body}" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                                                   FontFamily="{StaticResource MontserratRegular}"
+                                                                   FontSize="12" Foreground="#8E939B" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Top"
+                                                               FontFamily="{StaticResource MontserratRegular}"
+                                                               FontSize="11" Foreground="#5E6068">
+                                                        <Run Text="{Binding Marker}"/><Run Text="{Binding DateText}"/>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -382,7 +364,22 @@
                                            VerticalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
-                        <ProgressBar x:Name="LaunchProgressBar" Classes="uf-bar" Value="0"/>
+                        <!-- One bar for the whole launch, split into three equal stages by ticks. -->
+                        <Grid>
+                            <ProgressBar x:Name="LaunchProgressBar" Classes="uf-bar" Value="0" Maximum="100"/>
+                            <Grid ColumnDefinitions="*,*,*" IsHitTestVisible="False">
+                                <Border Grid.Column="0" Width="2" HorizontalAlignment="Right" Background="{StaticResource UfCardBrush}"/>
+                                <Border Grid.Column="1" Width="2" HorizontalAlignment="Right" Background="{StaticResource UfCardBrush}"/>
+                            </Grid>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*,*">
+                            <TextBlock Grid.Column="0" x:Name="StageLabel0" Text="Майнкрафт" HorizontalAlignment="Center"
+                                       FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#6F747C"/>
+                            <TextBlock Grid.Column="1" x:Name="StageLabel1" Text="Модлоадер" HorizontalAlignment="Center"
+                                       FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#6F747C"/>
+                            <TextBlock Grid.Column="2" x:Name="StageLabel2" Text="Модпак" HorizontalAlignment="Center"
+                                       FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#6F747C"/>
+                        </Grid>
                     </StackPanel>
                     <Button Grid.Column="1" x:Name="LaunchButton"
                             Classes="uf-launch" Click="OnLaunchButtonClicked"
