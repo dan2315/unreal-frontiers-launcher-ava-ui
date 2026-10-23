@@ -27,8 +27,11 @@ public static class PathSafety
 
     public static string SanitizeFileName(string name)
     {
-        var invalid = Path.GetInvalidFileNameChars();
-        var cleaned = new string(name.Select(c => invalid.Contains(c) ? '_' : c).ToArray()).Trim().TrimEnd('.');
+        var cleaned = new string(name.Select(c => IsInvalidInFileName(c) ? '_' : c).ToArray()).Trim().TrimEnd('.');
         return cleaned.Length == 0 ? "_" : cleaned;
     }
+
+    // The Windows set on every system, so a folder gets the same name everywhere. On Linux ':' would be legal, but it is
+    // the Java classpath separator and breaks a game directory that contains it.
+    private static bool IsInvalidInFileName(char c) => c < ' ' || "<>:\"/\\|?*".Contains(c);
 }

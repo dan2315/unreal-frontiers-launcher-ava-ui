@@ -69,7 +69,12 @@ if ($Installer) {
     if ($LASTEXITCODE -ne 0) { throw 'vpk pack failed' }
 
     $setup = Get-ChildItem $installerDir -Filter '*-Setup.exe' | Select-Object -First 1
-    Copy-Item $setup.FullName (Join-Path $installerDir 'UFLauncher_installer.exe') -Force
+    # The installer people download asks where to install; it wraps the Velopack Setup.exe.
+    $stubOut = Join-Path $root 'publish\installer-stub-dev'
+    if (Test-Path $stubOut) { Remove-Item $stubOut -Recurse -Force }
+    dotnet build (Join-Path (Split-Path -Parent $root) 'Packaging\InstallerStub\InstallerStub.csproj') -c Release -o $stubOut -v q "-p:SetupExe=$($setup.FullName)" "-p:AppTitle=Unreal Frontiers DEV" -p:FolderName=UnrealFrontiersLauncherDev "-p:AppIcon=$(Join-Path (Split-Path -Parent $root) 'Assets\Images\logo-dev.ico')" "-p:Version=$version"
+    if ($LASTEXITCODE -ne 0) { throw 'building the installer failed' }
+    Copy-Item (Join-Path $stubOut 'UFLauncher_installer.exe') (Join-Path $installerDir 'UFLauncher_installer.exe') -Force
     Set-Content -Path (Join-Path $installerDir 'version') -Value $version -NoNewline -Encoding ascii
     # Packages first, feeds and the version marker last, so an installed DEV launcher never sees a feed that points at a missing file.
     $uploads += @(Get-ChildItem $installerDir -Filter '*.nupkg' | ForEach-Object FullName)

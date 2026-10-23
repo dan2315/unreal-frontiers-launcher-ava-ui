@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <!-- The installer shell has no project reference: its path rule is plain code, tested here. -->
+    <Compile Include="..\Packaging\InstallerStub\InstallPath.cs" Link="InstallPath.cs" />
   </ItemGroup>
 
 </Project>

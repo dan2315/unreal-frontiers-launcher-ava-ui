@@ -34,6 +34,7 @@ public class PathSafetyTests
     [InlineData("Unreal Domains: Create", "Unreal Domains_ Create")]
     [InlineData("Monifactory", "Monifactory")]
     [InlineData("...", "_")]
+    [InlineData("a<b>c|d?e*f\"g/h\\i", "a_b_c_d_e_f_g_h_i")]
     public void SanitizeFileName_ReplacesInvalidCharacters(string input, string expected)
     {
         Assert.Equal(expected, PathSafety.SanitizeFileName(input));
