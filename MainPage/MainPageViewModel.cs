@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Media;
@@ -36,6 +36,7 @@ public class MainPageViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(SelectedModpack));
                 OnPropertyChanged(nameof(SelectedModpackName));
                 OnPropertyChanged(nameof(SelectedModpackIcon));
+                _ = RefreshNewsAsync();
             }
         }
     }
@@ -57,6 +58,47 @@ public class MainPageViewModel : INotifyPropertyChanged
     }
 
     public bool HasCatalogMessage => _catalogMessage.Length > 0;
+
+    // ---- News of the selected server (GET /news), refreshed whenever the selection changes ----
+
+    private const int NewsPreviewCount = 3;
+    private int _newsRequest;
+
+    public ObservableCollection<NewsEntry> NewsPreview { get; } = new();
+    public List<NewsEntry> AllNews { get; private set; } = new();
+
+    private string _newsMessage = "";
+    public string NewsMessage
+    {
+        get => _newsMessage;
+        private set
+        {
+            if (_newsMessage == value) return;
+            _newsMessage = value;
+            OnPropertyChanged(nameof(NewsMessage));
+            OnPropertyChanged(nameof(HasNewsMessage));
+        }
+    }
+
+    public bool HasNewsMessage => _newsMessage.Length > 0;
+
+    public async Task RefreshNewsAsync()
+    {
+        var request = ++_newsRequest;
+        var serverId = SelectedModpack?.Value;
+
+        NewsMessage = "Загружаем новости…";
+        var items = await NewsClient.FetchAsync(SharedHttp.Api, AppStaticData.ServerURL, serverId);
+        // The selection changed while waiting: a newer request owns the list.
+        if (request != _newsRequest) return;
+
+        var now = DateTimeOffset.Now;
+        AllNews = items?.Select(item => NewsClient.ToEntry(item, now)).ToList() ?? new();
+        NewsMessage = items == null ? "Не удалось загрузить новости." : AllNews.Count == 0 ? "Новостей пока нет." : "";
+
+        NewsPreview.Clear();
+        foreach (var entry in AllNews.Take(NewsPreviewCount)) NewsPreview.Add(entry);
+    }
 
     public string? PlayerName
     {
