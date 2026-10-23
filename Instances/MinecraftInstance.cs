@@ -69,9 +69,9 @@ public class MinecraftInstance
     [JsonIgnore]
     public bool IsInstalled => InstalledVersion != null || HasInstalledMods();
 
-    public void MarkInstalled()
+    public void MarkInstalled(string? version = null)
     {
-        InstalledVersion = _packVersion.Length > 0 ? _packVersion : "unknown";
+        InstalledVersion = !string.IsNullOrEmpty(version) ? version : _packVersion.Length > 0 ? _packVersion : "unknown";
         SaveToFile();
     }
 

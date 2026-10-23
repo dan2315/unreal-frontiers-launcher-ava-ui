@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -86,12 +87,8 @@ namespace UnrealFrontiersLauncher
         {
             try
             {
-                var json = await SharedHttp.Api.GetStringAsync(AppStaticData.GetVersionInfoURL(instanceId));
-                var versionInfo = JsonSerializer.Deserialize<VersionInfo>(json);
-
-                return versionInfo != null && !string.IsNullOrWhiteSpace(versionInfo.modpackName)
-                    ? versionInfo
-                    : null;
+                var all = await ModpackCatalog.FetchRemoteAsync(AppStaticData.GetModpackListURL(), SharedHttp.Api);
+                return all?.FirstOrDefault(info => info.modpackId == instanceId && !string.IsNullOrWhiteSpace(info.modpackName));
             }
             catch (Exception ex)
             {

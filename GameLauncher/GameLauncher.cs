@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CmlLib.Core;
@@ -11,6 +13,7 @@ using CmlLib.Core.Installer.Forge;
 using CmlLib.Core.Installer.NeoForge;
 using CmlLib.Core.Installers;
 using CmlLib.Core.ProcessBuilder;
+using UnrealFrontiersLauncher.Packs;
 
 namespace UnrealFrontiersLauncher
 {
@@ -69,9 +72,7 @@ namespace UnrealFrontiersLauncher
                 });
                 ApplyGameEnvironment(process, accessToken);
 
-                var modpackInstaller = new ModpackInstaller(SharedHttp.Transfer, 5, TimeSpan.FromSeconds(30));
-                await modpackInstaller.InstallModpackAsync(minecraftInstance, byteProgress, fileProgress);
-                minecraftInstance.MarkInstalled();
+                await InstallPackAsync(minecraftInstance, onProgressChanged, onFileChanged, reportSpeed);
 
                 new ServerListManager(minecraftInstance).EnsureCorrespondingServerEntryExist();
 
@@ -110,6 +111,38 @@ namespace UnrealFrontiersLauncher
                 CrashLog.Write($"Launching {minecraftInstance.Name} failed", e);
                 onError(e.Message);
             }
+        }
+
+        /// <summary>
+        /// Makes the instance folder match the pack's latest version. If the server cannot be reached and the pack is already
+        /// installed, the game starts as it is: being offline must not stop a player who has everything.
+        /// </summary>
+        private static async Task InstallPackAsync(
+            MinecraftInstance instance, Action<float> onProgressChanged, Action<string> onFileChanged, Action<long> reportSpeed)
+        {
+            PackManifest manifest;
+            try
+            {
+                manifest = await PackClient.FetchManifestAsync(SharedHttp.Api, AppStaticData.ServerURL, instance.Id, null);
+            }
+            catch (Exception e) when (instance.IsInstalled && (e is HttpRequestException or TaskCanceledException or PackNotFoundException))
+            {
+                Console.WriteLine($"Server unavailable or the pack is gone, launching without an update: {e.Message}");
+                return;
+            }
+
+            var progress = new Progress<PackProgress>(p =>
+            {
+                if (p.TotalBytes > 0)
+                {
+                    onProgressChanged((float)p.DoneBytes / p.TotalBytes);
+                    reportSpeed(p.DoneBytes);
+                }
+                onFileChanged($"[{p.DoneFiles}/{p.TotalFiles}] {p.File}");
+            });
+            var result = await new PackInstaller(SharedHttp.Transfer, AppStaticData.ServerURL).InstallAsync(manifest, instance.GetResourcePath(), progress, CancellationToken.None);
+            Console.WriteLine($"Pack {manifest.Pack} {manifest.Version}: {result.Downloaded} downloaded, {result.Verified} up to date, {result.Removed} removed");
+            instance.MarkInstalled(manifest.Version);
         }
 
         private static Task<string> InstallLoaderAsync(
