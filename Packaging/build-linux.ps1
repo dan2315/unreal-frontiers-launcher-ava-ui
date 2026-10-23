@@ -17,7 +17,7 @@ param(
 #   <App>-<version>-linux-full.nupkg (+ delta)   the update packages
 #   releases.linux.json, assets.linux.json, RELEASES-linux   the update feed (published last)
 #   install.sh                              downloads the AppImage, adds the menu entry and the uflauncher:// handler
-# Run it on Linux (Velopack makes AppImages only there; the Ubuntu runner also needs squashfs-tools).
+# Run it on Linux (Velopack makes AppImages only there); the Ubuntu runner needs squashfs-tools and zstd (for the deltas).
 
 $ErrorActionPreference = 'Stop'
 
@@ -30,7 +30,7 @@ if (-not $releaseVersion) { throw "No <Version> found in $project" }
 
 $packId = if ($Dev) { 'UnrealFrontiersLauncherDev' } else { 'UnrealFrontiersLauncher' }
 $packTitle = if ($Dev) { 'Unreal Frontiers DEV' } else { 'Unreal Frontiers' }
-$icon = Join-Path $repo (if ($Dev) { 'Assets/Images/logo-dev.png' } else { 'Assets/Images/logo_app.png' })
+$icon = Join-Path $repo $(if ($Dev) { 'Assets/Images/logo-dev.png' } else { 'Assets/Images/logo_app.png' })
 $publishDir = Join-Path $root 'publish/linux'
 $releasesDir = if ($OutputDir) { $OutputDir } else { Join-Path $root 'Releases-linux' }
 Write-Host "Building $packId $releaseVersion for linux-x64"
@@ -60,7 +60,7 @@ if ($FetchPrevious) {
 }
 
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
-$devArgs = if ($Dev) { @('-p:DevBuild=true') } else { @() }
+$devArgs = @(if ($Dev) { '-p:DevBuild=true' })
 dotnet publish $project -c Release -r linux-x64 --self-contained @devArgs `
     -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false -p:Version=$releaseVersion -o $publishDir
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed' }
@@ -74,7 +74,7 @@ if ($LASTEXITCODE -ne 0) { throw 'vpk pack failed' }
 
 # install.sh for this build: where to download from and which AppImage.
 $base = if ($Dev -and $ServerUrl) { $ServerUrl } elseif ($PublishUrl) { $PublishUrl } else { 'https://unrealfrontiers.com' }
-(Get-Content (Join-Path $root 'linux/install.sh') -Raw).Replace('@BASE_URL@', $base.TrimEnd('/')).Replace('@APP@', $packId).Replace('@TITLE@', $packTitle) |
+(Get-Content (Join-Path $root 'linux/install.sh') -Raw).Replace("`r`n", "`n").Replace('@BASE_URL@', $base.TrimEnd('/')).Replace('@APP@', $packId).Replace('@TITLE@', $packTitle) |
     Set-Content (Join-Path $releasesDir 'install.sh') -NoNewline -Encoding utf8NoBOM
 
 $new = Get-ChildItem $releasesDir | Where-Object { $_.Name -like "$packId-$releaseVersion-*" }

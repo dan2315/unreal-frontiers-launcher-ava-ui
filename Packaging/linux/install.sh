@@ -7,10 +7,27 @@ set -euo pipefail
 APP="@APP@"
 TITLE="@TITLE@"
 BASE_URL="@BASE_URL@"
-DIR="${XDG_DATA_HOME:-$HOME/.local/share}/$APP"
 APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
-IMAGE="$DIR/$APP.AppImage"
 DESKTOP_ID="$APP.desktop"
+
+# Where to install: --dir PATH, or UF_INSTALL_DIR, or asked in the terminal (Enter keeps the default).
+DIR="${UF_INSTALL_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/$APP}"
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --dir) DIR="${2:?--dir needs a path}"; shift 2 ;;
+        --dir=*) DIR="${1#--dir=}"; shift ;;
+        *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+done
+if [ -z "${UF_INSTALL_DIR:-}" ] && [ "$DIR" = "${XDG_DATA_HOME:-$HOME/.local/share}/$APP" ] && [ -r /dev/tty ] && [ -w /dev/tty ]; then
+    printf 'Install %s to [%s]: ' "$TITLE" "$DIR" > /dev/tty
+    read -r answer < /dev/tty || answer=""
+    [ -n "$answer" ] && DIR="$answer"
+fi
+case "$DIR" in "~"*) DIR="$HOME${DIR#\~}" ;; esac
+mkdir -p "$DIR"
+DIR="$(cd "$DIR" && pwd)"
+IMAGE="$DIR/$APP.AppImage"
 
 download() {
     local file="$1" target="$2"
@@ -24,7 +41,7 @@ download() {
     fi
 }
 
-mkdir -p "$DIR" "$APPS"
+mkdir -p "$APPS"
 
 echo "Downloading $TITLE..."
 download "$APP.AppImage" "$IMAGE.part"
@@ -33,11 +50,12 @@ chmod +x "$IMAGE"
 
 # The icon comes out of the AppImage itself.
 ICON="$DIR/icon.png"
-if "$IMAGE" --appimage-extract '*.png' >/dev/null 2>&1; then
-    found="$(find squashfs-root -maxdepth 1 -name '*.png' | head -n 1 || true)"
+WORK="$(mktemp -d)"
+if (cd "$WORK" && "$IMAGE" --appimage-extract '*.png' >/dev/null 2>&1); then
+    found="$(find "$WORK/squashfs-root" -maxdepth 1 -name '*.png' | head -n 1 || true)"
     [ -n "$found" ] && cp -f "$found" "$ICON"
-    rm -rf squashfs-root
 fi
+rm -rf "$WORK"
 
 # An AppImage needs FUSE 2. Without it the launcher still starts, but unpacks itself on every run (a little slower).
 EXEC="\"$IMAGE\" %u"

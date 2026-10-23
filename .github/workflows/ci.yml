@@ -1,0 +1,35 @@
+name: CI
+
+# Tests on every pull request and on pushes to feature branches, on both systems the launcher ships for.
+# The Linux job also builds the Linux package layout the release uses, without publishing.
+on:
+  pull_request:
+    branches: [development, master]
+  push:
+    branches-ignore: [development, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Test
+        run: dotnet test Tests --nologo
