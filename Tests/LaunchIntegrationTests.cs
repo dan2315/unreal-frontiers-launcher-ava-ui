@@ -32,12 +32,18 @@ public class LaunchIntegrationTests
             nickname = login.Nickname!;
         }
 
+        var launchProgress = new LaunchProgress();
+        using var watcher = new System.Threading.Timer(_ =>
+        {
+            launchProgress.Tick();
+            Console.WriteLine($"[launch-test] stage {LaunchProgress.StageNames[launchProgress.Stage]} {launchProgress.Overall * 100:F1}% {LaunchProgress.FormatSpeed(launchProgress.SpeedBytesPerSecond)}");
+        }, null, 0, 2000);
+
         await new GameLauncher(auth).LaunchMinecraft(
             instance,
             new PlayerProfile(nickname),
-            progress => { },
+            launchProgress,
             file => Console.WriteLine($"[launch-test] {file}"),
-            speed => { },
             () => Console.WriteLine("[launch-test] game exited"),
             message => { error = message; Console.WriteLine($"[launch-test] ERROR {message}"); },
             null!);
