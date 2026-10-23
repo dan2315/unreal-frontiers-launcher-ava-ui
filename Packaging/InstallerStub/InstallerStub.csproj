@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The installer shell: .NET Framework 4.8 is part of Windows 10/11, so nothing has to be installed first.
+       Built by release.ps1 / build-dev.ps1 with:
+         -p:SetupExe=<the Velopack *-Setup.exe>  -p:AppTitle="Unreal Frontiers"  -p:FolderName=UnrealFrontiersLauncher
+         -p:AppIcon=<.ico>  -p:Version=<version> -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>UFLauncher_installer</AssemblyName>
+    <RootNamespace>UnrealFrontiersInstaller</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon Condition="'$(AppIcon)' != ''">$(AppIcon)</ApplicationIcon>
+    <Version Condition="'$(Version)' == ''">0.0.0</Version>
+    <AppTitle Condition="'$(AppTitle)' == ''">Unreal Frontiers</AppTitle>
+    <FolderName Condition="'$(FolderName)' == ''">UnrealFrontiersLauncher</FolderName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyTitle>$(AppTitle)</AssemblyTitle>
+    <Product>$(AppTitle)</Product>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="PolySharp" Version="1.14.1" PrivateAssets="all" />
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>AppTitle</_Parameter1>
+      <_Parameter2>$(AppTitle)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>FolderName</_Parameter1>
+      <_Parameter2>$(FolderName)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SetupExe)' != ''">
+    <EmbeddedResource Include="$(SetupExe)" LogicalName="Setup.exe" />
+  </ItemGroup>
+
+  <Target Name="RequireSetupExe" BeforeTargets="CoreCompile" Condition="'$(SetupExe)' == ''">
+    <Error Text="Pass -p:SetupExe=&lt;the Velopack Setup.exe&gt;: the installer embeds it." />
+  </Target>
+</Project>

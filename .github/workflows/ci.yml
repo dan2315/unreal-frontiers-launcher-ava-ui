@@ -33,3 +33,24 @@ jobs:
 
       - name: Test
         run: dotnet test Tests --nologo
+
+      # The Windows installer shell embeds a Velopack Setup.exe; any file stands in for it to check that the shell compiles.
+      - name: Build the installer shell
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Set-Content "$env:RUNNER_TEMP/Setup.exe" 'placeholder'
+          dotnet build Packaging/InstallerStub/InstallerStub.csproj -c Release -o "$env:RUNNER_TEMP/stub" "-p:SetupExe=$env:RUNNER_TEMP/Setup.exe" -v q
+
+      - name: Install the packaging tools
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y squashfs-tools zstd
+          dotnet tool install --global vpk --version 1.2.161
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build the Linux package
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: ./Packaging/build-linux.ps1 -Dev -Version 0.0.0-ci.${{ github.run_number }} -ServerUrl https://dev.unrealfrontiers.com -OutputDir "$env:RUNNER_TEMP/linux"

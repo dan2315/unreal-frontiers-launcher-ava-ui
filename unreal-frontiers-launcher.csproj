@@ -68,5 +68,6 @@
   <ItemGroup>
     <Compile Remove="NavigationFrame\NavigationService.cs" />
     <Compile Remove="Tests\**" />
+    <Compile Remove="Packaging\**" />
   </ItemGroup>
 </Project>
