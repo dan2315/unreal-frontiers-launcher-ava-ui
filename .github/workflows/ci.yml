@@ -53,4 +53,4 @@ jobs:
       - name: Build the Linux package
         if: runner.os == 'Linux'
         shell: pwsh
-        run: ./Packaging/build-linux.ps1 -Dev -Version 0.0.0-ci.${{ github.run_number }} -ServerUrl https://dev.unrealfrontiers.com -OutputDir "$env:RUNNER_TEMP/linux"
+        run: ./Packaging/build-linux.ps1 -Dev -Version 0.0.1-ci.${{ github.run_number }} -ServerUrl https://dev.unrealfrontiers.com -OutputDir "$env:RUNNER_TEMP/linux"
