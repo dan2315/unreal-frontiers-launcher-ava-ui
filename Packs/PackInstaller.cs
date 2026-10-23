@@ -145,15 +145,20 @@ public sealed class PackInstaller(HttpClient http, string serverUrl, int concurr
             var doneFiles = 0;
             var clock = Stopwatch.StartNew();
             long lastReport = -1000;
+            var reportGate = new object();
             void Report(string? current, bool force)
             {
                 if (progress is null)
                     return;
-                var now = clock.ElapsedMilliseconds;
-                if (!force && now - Interlocked.Read(ref lastReport) < 100)
-                    return;
-                Interlocked.Exchange(ref lastReport, now);
-                progress.Report(new PackProgress(totalBytes, Interlocked.Read(ref doneBytes), toDownload.Count, Volatile.Read(ref doneFiles), current));
+                // Built and delivered under one lock: parallel downloads must not deliver an older count after a newer one.
+                lock (reportGate)
+                {
+                    var now = clock.ElapsedMilliseconds;
+                    if (!force && now - lastReport < 100)
+                        return;
+                    lastReport = now;
+                    progress.Report(new PackProgress(totalBytes, Interlocked.Read(ref doneBytes), toDownload.Count, Volatile.Read(ref doneFiles), current));
+                }
             }
 
             Report(null, true);
@@ -170,6 +175,7 @@ public sealed class PackInstaller(HttpClient http, string serverUrl, int concurr
                 Interlocked.Increment(ref doneFiles);
                 Report(file.Path, true);
             });
+            Report(null, true);
 
             return new PackInstallResult(toDownload.Count, totalBytes, removed, verified);
         }
