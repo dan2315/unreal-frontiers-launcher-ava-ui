@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -54,6 +54,16 @@ namespace UnrealFrontiersLauncher
         public void InitiateDiscordAuth(object? sender, RoutedEventArgs  e) 
         {
             ((AuthPageViewModel) DataContext).InitiateDiscordAuth(null);
+        }
+
+        public void ResendVerification(object? sender, RoutedEventArgs e)
+        {
+            ((AuthPageViewModel) DataContext).ResendVerification();
+        }
+
+        public void BackToForm(object? sender, RoutedEventArgs e)
+        {
+            ((AuthPageViewModel) DataContext).BackToForm();
         }
 
         public void ToggleView(object? sender, RoutedEventArgs  e)
