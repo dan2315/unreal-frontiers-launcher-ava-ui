@@ -45,10 +45,6 @@ public static class AppStaticData
         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DataFolderName)
         : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", DataFolderName);
 
-    public static string RemoteIndexesURI(string instanceId) => GetFileDownloadPath("indexes.json", instanceId);
-    public static string GetFileDownloadPath(string filename, string instanceId) => $"{ServerURL}{UpdateRoute}/download_file/{instanceId}?file={Uri.EscapeDataString(filename)}";
-    public static string GetModpackListURL() => $"{ServerURL}{UpdateRoute}/modpacks";
-    public static string GetVersionInfoURL(string instanceId) => $"{ServerURL}{UpdateRoute}/get_version_data/{instanceId}";
-    public static string GetInstanceIndexes(string instanceId) => $"{ServerURL}{UpdateRoute}/indexes/{instanceId}";
-    public static string GetInstanceObsoleteFiles(string instanceId) => $"{ServerURL}{UpdateRoute}/obsolete/{instanceId}";
+    public static string GetModpackListURL() => $"{ServerURL}{UpdateRoute}/packs";
+    public static string GetFileDownloadPath(string filename, string folder) => $"{ServerURL}{UpdateRoute}/download_file/{folder}?file={Uri.EscapeDataString(filename)}";
 }

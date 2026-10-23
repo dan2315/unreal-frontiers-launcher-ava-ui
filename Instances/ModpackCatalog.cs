@@ -57,13 +57,27 @@ public static class ModpackCatalog
         }
     }
 
+    private static readonly JsonSerializerOptions ListOptions = new(JsonSerializerDefaults.Web);
+
+    /// <summary>The server's list of packs (<c>GET /updateclient/packs</c>) as the launcher's own model.</summary>
     public static List<VersionInfo> Parse(string json)
     {
-        var all = JsonSerializer.Deserialize<List<VersionInfo?>>(json) ?? [];
+        var all = JsonSerializer.Deserialize<List<Packs.PackSummary?>>(json, ListOptions) ?? [];
 
         return all
-            .Where(info => info != null && !string.IsNullOrWhiteSpace(info.modpackId))
-            .Select(info => info!)
+            .Where(pack => pack != null && !string.IsNullOrWhiteSpace(pack.Id) && pack.Game != null)
+            .Select(pack => new VersionInfo
+            {
+                modpackId = pack!.Id,
+                modpackName = pack.Name ?? pack.Id,
+                version = pack.Version ?? "",
+                minecraftVersion = pack.Game.Minecraft ?? "",
+                forgeVersion = pack.Game.LoaderVersion ?? "",
+                loader = pack.Game.Loader ?? "",
+                serverAddress = pack.ServerAddress ?? "",
+                imageURl = pack.Image ?? "",
+                minRam = pack.MinRam,
+            })
             .GroupBy(info => info.modpackId, StringComparer.Ordinal)
             .Select(group => group.First())
             .ToList();
