@@ -63,7 +63,12 @@ if ($LASTEXITCODE -ne 0) { throw 'vpk pack failed' }
 
 # Launchers installed before Velopack look for "version" and run UFLauncher_installer.exe.
 $setup = Get-ChildItem $releasesDir -Filter '*-Setup.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-Copy-Item $setup.FullName (Join-Path $releasesDir 'UFLauncher_installer.exe') -Force
+# The installer people download asks where to install; it wraps the Velopack Setup.exe (which stays as *-win-Setup.exe).
+$stubOut = Join-Path $PSScriptRoot 'publish\installer-stub'
+if (Test-Path $stubOut) { Remove-Item $stubOut -Recurse -Force }
+dotnet build (Join-Path $repo 'Packaging\InstallerStub\InstallerStub.csproj') -c Release -o $stubOut -v q "-p:SetupExe=$($setup.FullName)" "-p:AppTitle=$packTitle" "-p:FolderName=$packId" "-p:AppIcon=$(Join-Path $repo 'Assets\Images\logo.ico')" "-p:Version=$releaseVersion"
+if ($LASTEXITCODE -ne 0) { throw 'building the installer failed' }
+Copy-Item (Join-Path $stubOut 'UFLauncher_installer.exe') (Join-Path $releasesDir 'UFLauncher_installer.exe') -Force
 Set-Content -Path (Join-Path $releasesDir 'version') -Value $releaseVersion -NoNewline -Encoding ascii
 
 if (-not $Upload -and -not $PublishUrl) {

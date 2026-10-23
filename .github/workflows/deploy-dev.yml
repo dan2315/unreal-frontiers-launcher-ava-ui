@@ -1,7 +1,7 @@
 name: Deploy dev launcher
 
 # A push to the development branch builds the DEV launcher (UnrealFrontiersLauncherDev: orange icon, test mode, its own data folder)
-# and publishes the zip, the installer and the version marker to https://dev.unrealfrontiers.com.
+# and publishes the zip, the installer and the version marker to https://dev.unrealfrontiers.com; a second job does the same for Linux (AppImage).
 # Needs the repository secret LAUNCHER_DEV_PUBLISH_KEY: the dev backend's LAUNCHER_PUBLISH_KEY.
 on:
   push:
@@ -38,3 +38,31 @@ jobs:
           $base = ([xml](Get-Content unreal-frontiers-launcher.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
           # Velopack refuses a version it has seen: the run number makes every build new.
           ./Packaging/build-dev.ps1 -Version "$base-dev.${{ github.run_number }}" -ServerUrl https://dev.unrealfrontiers.com -PublishUrl https://dev.unrealfrontiers.com
+
+  # The Linux DEV launcher: an AppImage that updates itself from the dev backend (releases.linux.json), plus install.sh.
+  deploy-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # Velopack builds an AppImage with squashfs-tools (and delta packages with zstd).
+      - name: Install the packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y squashfs-tools zstd
+          dotnet tool install --global vpk --version 1.2.161
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build and publish
+        shell: pwsh
+        env:
+          LAUNCHER_PUBLISH_KEY: ${{ secrets.LAUNCHER_DEV_PUBLISH_KEY }}
+        run: |
+          $base = ([xml](Get-Content unreal-frontiers-launcher.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          # The same version as the Windows DEV build of this run.
+          ./Packaging/build-linux.ps1 -Dev -Version "$base-dev.${{ github.run_number }}" -ServerUrl https://dev.unrealfrontiers.com -PublishUrl https://dev.unrealfrontiers.com
