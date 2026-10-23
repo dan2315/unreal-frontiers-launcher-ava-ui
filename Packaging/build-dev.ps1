@@ -15,7 +15,7 @@ param(
 )
 
 # Builds the DEV launcher: UnrealFrontiersLauncherDev.exe, orange DEV icon and title, test mode by default
-# (data in %LOCALAPPDATA%\UnrealFrontiers.Test). It never auto-updates and can run next to the production launcher.
+# (data in %LOCALAPPDATA%\UnrealFrontiers.Test). An installed copy updates itself from its own backend (the feed is uploaded with -Upload/-PublishUrl); it can run next to the production launcher.
 #
 #   -ServerUrl <url>  the dev backend to use, e.g. http://100.64.0.5:3200 (default http://localhost:3200).
 #                     The DEV build takes it as "--server-url <url>"; Start-Dev-Launcher.bat in the output passes it.
@@ -71,7 +71,11 @@ if ($Installer) {
     $setup = Get-ChildItem $installerDir -Filter '*-Setup.exe' | Select-Object -First 1
     Copy-Item $setup.FullName (Join-Path $installerDir 'UFLauncher_installer.exe') -Force
     Set-Content -Path (Join-Path $installerDir 'version') -Value $version -NoNewline -Encoding ascii
-    $uploads += (Join-Path $installerDir 'UFLauncher_installer.exe'), (Join-Path $installerDir 'version')
+    # Packages first, feeds and the version marker last, so an installed DEV launcher never sees a feed that points at a missing file.
+    $uploads += @(Get-ChildItem $installerDir -Filter '*.nupkg' | ForEach-Object FullName)
+    $uploads += (Join-Path $installerDir 'UFLauncher_installer.exe')
+    $uploads += @(Get-ChildItem $installerDir | Where-Object { $_.Name -like 'releases.*.json' -or $_.Name -eq 'RELEASES' } | ForEach-Object FullName)
+    $uploads += (Join-Path $installerDir 'version')
     Write-Host "Installer: $(Join-Path $installerDir 'UFLauncher_installer.exe')"
 }
 
