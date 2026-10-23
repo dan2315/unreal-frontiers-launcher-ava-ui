@@ -382,7 +382,22 @@
                                            VerticalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
-                        <ProgressBar x:Name="LaunchProgressBar" Classes="uf-bar" Value="0"/>
+                        <!-- One bar for the whole launch, split into three equal stages by ticks. -->
+                        <Grid>
+                            <ProgressBar x:Name="LaunchProgressBar" Classes="uf-bar" Value="0" Maximum="100"/>
+                            <Grid ColumnDefinitions="*,*,*" IsHitTestVisible="False">
+                                <Border Grid.Column="0" Width="2" HorizontalAlignment="Right" Background="{StaticResource UfCardBrush}"/>
+                                <Border Grid.Column="1" Width="2" HorizontalAlignment="Right" Background="{StaticResource UfCardBrush}"/>
+                            </Grid>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*,*">
+                            <TextBlock Grid.Column="0" x:Name="StageLabel0" Text="Майнкрафт" HorizontalAlignment="Center"
+                                       FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#6F747C"/>
+                            <TextBlock Grid.Column="1" x:Name="StageLabel1" Text="Модлоадер" HorizontalAlignment="Center"
+                                       FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#6F747C"/>
+                            <TextBlock Grid.Column="2" x:Name="StageLabel2" Text="Модпак" HorizontalAlignment="Center"
+                                       FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#6F747C"/>
+                        </Grid>
                     </StackPanel>
                     <Button Grid.Column="1" x:Name="LaunchButton"
                             Classes="uf-launch" Click="OnLaunchButtonClicked"

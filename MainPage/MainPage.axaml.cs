@@ -3,6 +3,8 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Threading;
 using UnrealFrontiersLauncher.Platforms;
 using UnrealFrontiersLauncher.ViewModels;
 
@@ -23,6 +25,9 @@ public partial class MainPage : UserControl
     public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
     private MinecraftInstance? SelectedInstance => _instanceManager.selectedInstance;
+
+    private readonly LaunchProgress _launchProgress = new();
+    private readonly DispatcherTimer _progressTimer = new() { Interval = TimeSpan.FromMilliseconds(50) };
 
     public MainPage() {}
     public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow, AuthService authService, NavigationService navigationService, ISystemInfo systemInfo)
@@ -52,6 +57,7 @@ public partial class MainPage : UserControl
             _ = _viewModel.RefreshCatalogAsync();
         };
         UiAnimations.Changed += OnAnimationsChanged;
+        _progressTimer.Tick += (_, _) => RenderLaunchProgress();
     }
 
     private void OnAnimationsChanged() => UiAnimations.ApplyLaunchStyle(LaunchButton);
@@ -187,15 +193,18 @@ public partial class MainPage : UserControl
         if (!answer) return;
 
         SetLaunchEnabled(false);
+        _launchProgress.Reset();
+        _progressTimer.Start();
         await _gameLauncher.LaunchMinecraft(
             instance,
             profile,
-            OnDownloadProgress,
+            _launchProgress,
             OnDownloadFileChanged,
-            OnDownloadSpeedChanged,
             () => SetLaunchEnabled(true),
             OnLaunchFailed,
             _mainWindow);
+        _progressTimer.Stop();
+        RenderLaunchProgress();
     }
 
     private async void OnRefreshModpacksClicked(object? sender, RoutedEventArgs e)
@@ -219,11 +228,6 @@ public partial class MainPage : UserControl
     {
         SetLaunchEnabled(true);
         await _popUpService.ShowOkDialogAsync("Не удалось запустить", message);
-    }
-
-    private void OnDownloadSpeedChanged(string speedText)
-    {
-        DownloadSpeed.Text = speedText;
     }
 
     private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
@@ -263,12 +267,29 @@ public partial class MainPage : UserControl
         }
     }
 
-    private void OnDownloadProgress(float progress)
-    {
-        LaunchProgressBar.Value = progress * 100;
-        DownloadProgress.Text = Math.Abs(progress - 1f) < 0.001f ? "Downloaded!" : $"{progress * 100:F2} %";
-    }
+    private static readonly IBrush StageDone = new SolidColorBrush(Color.Parse("#B9BDC2"));
+    private static readonly IBrush StageActive = new SolidColorBrush(Color.Parse("#FFFFFF"));
+    private static readonly IBrush StagePending = new SolidColorBrush(Color.Parse("#6F747C"));
 
+    private void RenderLaunchProgress()
+    {
+        _launchProgress.Tick();
+
+        var overall = _launchProgress.Overall;
+        LaunchProgressBar.Value = overall * 100;
+        DownloadProgress.Text = _launchProgress.Finished ? "Downloaded!" : $"{overall * 100:F2} %";
+        DownloadSpeed.Text = _progressTimer.IsEnabled && !_launchProgress.Finished
+            ? LaunchProgress.FormatSpeed(_launchProgress.SpeedBytesPerSecond)
+            : "â€”";
+
+        TextBlock[] labels = [StageLabel0, StageLabel1, StageLabel2];
+        for (var i = 0; i < labels.Length; i++)
+        {
+            labels[i].Foreground = _launchProgress.Finished || i < _launchProgress.Stage ? StageDone
+                : i == _launchProgress.Stage && _progressTimer.IsEnabled ? StageActive
+                : StagePending;
+        }
+    }
     private void OnDownloadFileChanged(string file)
     {
         TaskName.Text = file;

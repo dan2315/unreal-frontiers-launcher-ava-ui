@@ -19,7 +19,6 @@ namespace UnrealFrontiersLauncher
 {
     public class GameLauncher
     {
-        private static readonly TimeSpan SpeedWindow = TimeSpan.FromSeconds(5);
         private const string AccessTokenVariable = "UF_ACCESS_TOKEN";
         private const string BackendUrlVariable = "UF_BACKEND_URL";
 
@@ -33,9 +32,8 @@ namespace UnrealFrontiersLauncher
         public async Task LaunchMinecraft(
             MinecraftInstance minecraftInstance,
             PlayerProfile playerProfile,
-            Action<float> onProgressChanged,
+            LaunchProgress progress,
             Action<string> onFileChanged,
-            Action<string> onDownloadSpeedUpdated,
             Action onGameQuit,
             Action<string> onError,
             MainWindow mainWindow)
@@ -44,14 +42,12 @@ namespace UnrealFrontiersLauncher
             {
                 Console.WriteLine("Launching " + minecraftInstance.Name);
                 var minecraftPath = CreateMinecraftPath(minecraftInstance);
-                var reportSpeed = CreateSpeedReporter(onDownloadSpeedUpdated);
 
                 var launcher = new MinecraftLauncher(minecraftPath);
-                IProgress<ByteProgress> byteProgress = new Progress<ByteProgress>(progress =>
+                IProgress<ByteProgress> byteProgress = new Progress<ByteProgress>(bytes =>
                 {
-                    if (progress.TotalBytes == 0) return;
-                    onProgressChanged((float)progress.ProgressedBytes / progress.TotalBytes);
-                    reportSpeed(progress.ProgressedBytes);
+                    if (bytes.TotalBytes == 0) return;
+                    progress.Report(bytes.ProgressedBytes, bytes.TotalBytes);
                 });
                 IProgress<InstallerProgressChangedEventArgs> fileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
                     onFileChanged($"[{args.ProgressedTasks}/{args.TotalTasks}] {args.EventType}: {args.Name}"));
@@ -59,6 +55,11 @@ namespace UnrealFrontiersLauncher
                 launcher.ByteProgressChanged += (_, args) => byteProgress.Report(args);
                 launcher.FileProgressChanged += (_, args) => fileProgress.Report(args);
 
+                progress.Reset();
+                progress.BeginStage(0);
+                await launcher.InstallAsync(minecraftInstance.GameVersion);
+
+                progress.BeginStage(1);
                 var versionName = await InstallLoaderAsync(launcher, minecraftInstance, byteProgress, fileProgress);
 
                 var launchConfiguration = minecraftInstance.GetLaunchConfiguration();
@@ -72,7 +73,9 @@ namespace UnrealFrontiersLauncher
                 });
                 ApplyGameEnvironment(process, accessToken);
 
-                await InstallPackAsync(minecraftInstance, onProgressChanged, onFileChanged, reportSpeed);
+                progress.BeginStage(2);
+                await InstallPackAsync(minecraftInstance, progress, onFileChanged);
+                progress.Finish();
 
                 new ServerListManager(minecraftInstance).EnsureCorrespondingServerEntryExist();
 
@@ -118,7 +121,7 @@ namespace UnrealFrontiersLauncher
         /// installed, the game starts as it is: being offline must not stop a player who has everything.
         /// </summary>
         private static async Task InstallPackAsync(
-            MinecraftInstance instance, Action<float> onProgressChanged, Action<string> onFileChanged, Action<long> reportSpeed)
+            MinecraftInstance instance, LaunchProgress launchProgress, Action<string> onFileChanged)
         {
             PackManifest manifest;
             try
@@ -131,16 +134,12 @@ namespace UnrealFrontiersLauncher
                 return;
             }
 
-            var progress = new Progress<PackProgress>(p =>
+            var packProgress = new Progress<PackProgress>(p =>
             {
-                if (p.TotalBytes > 0)
-                {
-                    onProgressChanged((float)p.DoneBytes / p.TotalBytes);
-                    reportSpeed(p.DoneBytes);
-                }
+                if (p.TotalBytes > 0) launchProgress.Report(p.DoneBytes, p.TotalBytes);
                 onFileChanged($"[{p.DoneFiles}/{p.TotalFiles}] {p.File}");
             });
-            var result = await new PackInstaller(SharedHttp.Transfer, AppStaticData.ServerURL).InstallAsync(manifest, instance.GetResourcePath(), progress, CancellationToken.None);
+            var result = await new PackInstaller(SharedHttp.Transfer, AppStaticData.ServerURL).InstallAsync(manifest, instance.GetResourcePath(), packProgress, CancellationToken.None);
             Console.WriteLine($"Pack {manifest.Pack} {manifest.Version}: {result.Downloaded} downloaded, {result.Verified} up to date, {result.Removed} removed");
             instance.MarkInstalled(manifest.Version);
         }
@@ -189,34 +188,6 @@ namespace UnrealFrontiersLauncher
                 Library = EnsurePathExists(Path.Combine(installFolder, "libraries")),
                 Runtime = EnsurePathExists(Path.Combine(installFolder, "runtime")),
                 Assets = EnsurePathExists(Path.Combine(installFolder, "assets"))
-            };
-        }
-
-        private static Action<long> CreateSpeedReporter(Action<string> onSpeedUpdated)
-        {
-            var samples = new Queue<(DateTime Timestamp, long Bytes)>();
-
-            return progressedBytes =>
-            {
-                var now = DateTime.UtcNow;
-                samples.Enqueue((now, progressedBytes));
-
-                while (samples.Count > 0 && samples.Peek().Timestamp < now - SpeedWindow)
-                {
-                    samples.Dequeue();
-                }
-
-                if (samples.Count < 2) return;
-
-                var oldest = samples.Peek();
-                var newest = samples.Last();
-                var elapsedSeconds = (newest.Timestamp - oldest.Timestamp).TotalSeconds;
-
-                if (elapsedSeconds > 0)
-                {
-                    var bytesPerSecond = (newest.Bytes - oldest.Bytes) / elapsedSeconds;
-                    onSpeedUpdated($"{bytesPerSecond / 1024 / 1024:F2} MB/s");
-                }
             };
         }
 

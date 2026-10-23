@@ -24,7 +24,7 @@ namespace UnrealFrontiersLauncher
             SetAccessToken(tokens.accessToken);
         }
 
-        public async Task<(bool Success, string Message)> CreateAccount(string nickname, string email, string password)
+        public async Task<(bool Success, string Message, string? Code)> CreateAccount(string nickname, string email, string password)
         {
             var payload = new { nickname, email, password };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -34,12 +34,22 @@ namespace UnrealFrontiersLauncher
 
             if (response.IsSuccessStatusCode)
             {
-                return (true, "Account created successfully. Check your email to verify your account.");
+                return (true, "Account created successfully. Check your email to verify your account.", null);
             }
             else
             {
-                return (false, responseMessage);
+                return (false, responseMessage, AuthResponses.ErrorCode(responseMessage));
             }
+        }
+
+        public async Task<(ResendStatus Status, string Message)> ResendVerification(string email, string password)
+        {
+            var payload = new { email, password };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/auth/resend_verification", content);
+
+            var body = await response.Content.ReadAsStringAsync();
+            return (AuthResponses.ResendStatusOf(response.StatusCode), AuthResponses.ErrorMessage(body));
         }
 
         public async Task<(bool Success, string Message, string? AccessToken, string? RefreshToken, string? Nickname)> Login(string nicknameOrEmail, string password)

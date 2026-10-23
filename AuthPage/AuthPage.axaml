@@ -41,18 +41,59 @@
                                 HorizontalAlignment="Center"
                                 Background="{StaticResource UfAccentGradient}"/>
 
-                        <!-- Auth Error -->
-                        <Border Background="#3A1518" BorderBrush="#E5484D" BorderThickness="1"
-                                CornerRadius="10" Margin="0,8,0,0"
-                                IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}">
-                            <TextBlock Text="{Binding AuthError}"
-                                       Foreground="#FF9B9E"
+                        <!-- Auth Error. The slot keeps its height when empty, so an error does not move the form. -->
+                        <Grid MinHeight="56" Margin="0,8,0,0" IsVisible="{Binding IsFormVisible}">
+                            <Border Background="#3A1518" BorderBrush="#E5484D" BorderThickness="1"
+                                    CornerRadius="10" VerticalAlignment="Top"
+                                    IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}">
+                                <TextBlock Text="{Binding AuthError}"
+                                           Foreground="#FF9B9E"
+                                           FontSize="13"
+                                           TextAlignment="Center"
+                                           FontFamily="{StaticResource MontserratRegular}"
+                                           Padding="10,8"
+                                           TextWrapping="Wrap"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Registered, but the email is not confirmed yet. -->
+                        <StackPanel Spacing="10" IsVisible="{Binding IsVerificationPending}">
+                            <Border Background="#33290F" BorderBrush="#E8B83A" BorderThickness="1" CornerRadius="10">
+                                <TextBlock Text="Аккаунт с этим email уже зарегистрирован, но почта не подтверждена."
+                                           Foreground="#F2D58A"
+                                           FontSize="13"
+                                           TextAlignment="Center"
+                                           FontFamily="{StaticResource MontserratRegular}"
+                                           Padding="10,8"
+                                           TextWrapping="Wrap"/>
+                            </Border>
+                            <TextBlock Text="{Binding ResendMessage}"
+                                       Foreground="#B9BDC2"
                                        FontSize="13"
                                        TextAlignment="Center"
+                                       MinHeight="20"
                                        FontFamily="{StaticResource MontserratRegular}"
-                                       Padding="10,8"
                                        TextWrapping="Wrap"/>
-                        </Border>
+                            <Button Content="Отправить ещё раз"
+                                    Click="ResendVerification"
+                                    IsEnabled="{Binding CanResend}"
+                                    Classes="uf-auth"
+                                    FontFamily="{StaticResource MontserratBold}"
+                                    FontSize="16"
+                                    Height="44"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"/>
+                            <Button Content="Назад"
+                                    Click="BackToForm"
+                                    Classes="uf-outline"
+                                    FontFamily="{StaticResource MontserratBold}"
+                                    FontSize="14"
+                                    Height="42"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="10" IsVisible="{Binding IsFormVisible}">
 
                         <!-- Nickname Entry -->
                         <StackPanel Spacing="4" Margin="0,8,0,0">
@@ -166,6 +207,7 @@
                                    FontSize="14"
                                    Cursor="Hand"
                                    PointerPressed="InitiatePasswordRecovery"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>

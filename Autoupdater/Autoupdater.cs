@@ -25,7 +25,12 @@ public static class Autoupdater
         {
             var manager = new UpdateManager(new ServerUpdateSource());
 
-            if (AppStaticData.IsTestMode)
+#if DEV_BUILD
+            const bool skipInTestMode = false; // The DEV build updates itself from its own backend.
+#else
+            const bool skipInTestMode = true;
+#endif
+            if (AppStaticData.IsTestMode && skipInTestMode)
             {
                 SetStatus("Test mode, skipping update check.");
             }
