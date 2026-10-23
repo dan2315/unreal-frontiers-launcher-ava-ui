@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -113,7 +113,7 @@ public partial class MainPage : UserControl
 
     private void OnShowFullChangelogClicked(object? sender, RoutedEventArgs e)
     {
-        var panel = new NewsPanel();
+        var panel = new NewsPanel(_viewModel.SelectedModpackName, _viewModel.AllNews, _viewModel.NewsMessage);
         panel.Closed += CloseSettingsOverlay;
         ShowSettingsOverlay(panel);
     }
