@@ -1,6 +1,9 @@
 using System;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using System.Net.Mail;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -78,6 +81,27 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
 
+    private int _authErrorSeq;
+
+    /// <summary>Grows with every error shown, even the same text twice: the page restarts the flash-and-fade animation on each step.</summary>
+    public int AuthErrorSeq
+    {
+        get => _authErrorSeq;
+        private set
+        {
+            _authErrorSeq = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private void ShowError(string message)
+    {
+        _authError = message;
+        OnPropertyChanged(nameof(AuthError));
+        OnPropertyChanged(nameof(AuthErrorVisible));
+        AuthErrorSeq++;
+    }
+
     private bool _isVerificationPending;
     private string _resendMessage = "";
     private bool _isResending;
@@ -136,6 +160,8 @@ public class AuthPageViewModel : INotifyPropertyChanged
         PasswordEntry = new ValidatableEntry(ValidatePassword, this);
         RepeatPasswordEntry = new ValidatableEntry(ValidateRepeatPassword, this);
         IsRegisterMode = false;
+        SocialButtons.Add(new SocialButton(LoginFlow.Discord, "Discord", "/Assets/Images/svg/discord_icon.svg"));
+        _ = LoadSocialProvidersAsync();
     }
     
     public async void AuthAction()
@@ -163,12 +189,11 @@ public class AuthPageViewModel : INotifyPropertyChanged
                     return;
                 }
 
-                AuthError = AuthResponses.ErrorMessage(response.Message);
+                ShowError(response.Message);
                 return;
             }
 
-            _popupService.ShowOkDialogAsync("Успех",
-                "Вам на почту отправлено письмо для подтверждения аккаунта");
+            _popupService.ShowOkDialogAsync("Успех", response.Message);
         }
         else if (IsLoginMode)
         {
@@ -177,8 +202,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
             if (!response.Success)
             {
-                AuthError = response.Message;
-                Console.WriteLine(AuthError);
+                ShowError(response.Message);
                 return;
             }
 
@@ -198,11 +222,11 @@ public class AuthPageViewModel : INotifyPropertyChanged
             var result = await _authService.ResendVerification(EmailEntry.Value, PasswordEntry.Value);
             ResendMessage = result.Status switch
             {
-                ResendStatus.Sent => "Письмо отправлено. Проверьте почту.",
+                ResendStatus.Sent => "Письмо отправлено. " + AuthMessages.SpamHint,
                 ResendStatus.TooManyRequests => "Подождите минуту перед следующей отправкой.",
                 ResendStatus.AlreadyVerified => "Почта уже подтверждена. Можно войти.",
                 ResendStatus.InvalidCredentials => "Неверный пароль. Вернитесь к форме и введите его заново.",
-                _ => "Не удалось отправить письмо. Попробуйте позже."
+                _ => result.Message
             };
         }
         catch (System.Net.Http.HttpRequestException)
@@ -221,18 +245,54 @@ public class AuthPageViewModel : INotifyPropertyChanged
         ResendMessage = "";
     }
 
-    public async void InitiateDiscordAuth(string? nickname)
+    /// <summary>The sign-in buttons under the form: Discord always, then the providers the backend has switched on.</summary>
+    public ObservableCollection<SocialButton> SocialButtons { get; } = new();
+
+    private async Task LoadSocialProvidersAsync()
     {
-        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
-        if (nickname is string nicknameString)
-        {
-            await _authService.DiscordAuth(nicknameString);
-        }
-        else
+        foreach (var provider in await _authService.GetOAuthProvidersAsync())
+            SocialButtons.Add(new SocialButton(provider.Name, TitleFor(provider), IconFor(provider.Name)));
+    }
+
+    // The buttons are written in Latin like Discord ("Yandex", not "Яндекс"); an unknown provider keeps the title the backend sends.
+    private static string TitleFor(OAuthProvider provider) => provider.Name switch
+    {
+        "google" => "Google",
+        "yandex" => "Yandex",
+        _ => provider.Title
+    };
+
+    private static string? IconFor(string provider) => provider switch
+    {
+        "google" => "/Assets/Images/svg/google_icon.svg",
+        "yandex" => "/Assets/Images/svg/yandex_icon.svg",
+        _ => null
+    };
+
+    public async void StartSocial(string provider)
+    {
+        if (provider == LoginFlow.Discord)
         {
             await _authService.DiscordAuth(null);
+            return;
         }
-        PageReference.StartDiscordAuthButtonRef.IsEnabled = true;
+
+        try
+        {
+            _authService.StartOAuth(provider);
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException)
+        {
+            ShowError("Не удалось открыть браузер");
+            return;
+        }
+
+        // The browser may never come back: the sign-in was cancelled, or the email already belongs to an account.
+        LoginFlow.Begin(provider, () => Dispatcher.UIThread.Post(async () =>
+        {
+            if (LoginFlow.Provider == provider)
+                await _popupService.ShowOkDialogAsync("Вход", AuthMessages.OAuthTimeoutHint);
+        }));
     }
 
     public void ToggleView()
@@ -320,4 +380,10 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
         return (true, "");
     }
+}
+
+/// <summary>A sign-in button: the provider's name for the backend, its title, and an icon path when there is one.</summary>
+public sealed record SocialButton(string Name, string Title, string? IconPath)
+{
+    public bool HasIcon => IconPath != null;
 }

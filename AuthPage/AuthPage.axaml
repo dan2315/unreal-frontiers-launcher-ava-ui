@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:UnrealFrontiersLauncher"
              xmlns:converters="using:UnrealFrontiersLauncher.Converters"
@@ -23,35 +23,37 @@
 
         <!-- Main Layout -->
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,32,0,32">
+            <StackPanel Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,14,0,14">
                 <Image Source="{StaticResource UfLogoBanner}" Stretch="Uniform"
-                       MaxWidth="420" Margin="0,0,0,4"/>
+                       MaxWidth="420" MaxHeight="92" Margin="0,0,0,0"/>
                 <Border Background="#16141B" Opacity="0.96"
                         BorderBrush="#2E2C34" BorderThickness="1"
                         CornerRadius="24"
                         Width="420"
-                        Padding="36,28">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="{Binding PageTitle}"
-                                   FontFamily="{StaticResource MontserratBold}"
-                                   FontSize="24"
-                                   Foreground="White"
-                                   HorizontalAlignment="Center"/>
-                        <Border Height="2" Width="64" CornerRadius="1"
-                                HorizontalAlignment="Center"
-                                Background="{StaticResource UfAccentGradient}"/>
-
-                        <!-- Auth Error. The slot keeps its height when empty, so an error does not move the form. -->
-                        <Grid MinHeight="56" Margin="0,8,0,0" IsVisible="{Binding IsFormVisible}">
-                            <Border Background="#3A1518" BorderBrush="#E5484D" BorderThickness="1"
-                                    CornerRadius="10" VerticalAlignment="Top"
+                        Padding="36,20">
+                    <StackPanel Spacing="8">
+                        <!-- The title block. An error flashes over it (it takes no room of its own), so nothing moves. -->
+                        <Grid>
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{Binding PageTitle}"
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="22"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"/>
+                                <Border Height="2" Width="64" CornerRadius="1"
+                                        HorizontalAlignment="Center"
+                                        Background="{StaticResource UfAccentGradient}"/>
+                            </StackPanel>
+                            <Border x:Name="ErrorBox" Opacity="0" Background="#3A1518" BorderBrush="#E5484D" BorderThickness="1"
+                                    CornerRadius="10" VerticalAlignment="Center"
+                                    IsHitTestVisible="False"
                                     IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}">
                                 <TextBlock Text="{Binding AuthError}"
                                            Foreground="#FF9B9E"
-                                           FontSize="13"
+                                           FontSize="12"
                                            TextAlignment="Center"
                                            FontFamily="{StaticResource MontserratRegular}"
-                                           Padding="10,8"
+                                           Padding="10,5"
                                            TextWrapping="Wrap"/>
                             </Border>
                         </Grid>
@@ -59,7 +61,7 @@
                         <!-- Registered, but the email is not confirmed yet. -->
                         <StackPanel Spacing="10" IsVisible="{Binding IsVerificationPending}">
                             <Border Background="#33290F" BorderBrush="#E8B83A" BorderThickness="1" CornerRadius="10">
-                                <TextBlock Text="Аккаунт с этим email уже зарегистрирован, но почта не подтверждена."
+                                <TextBlock Text="Аккаунт с этим email уже зарегистрирован, но почта не подтверждена. Найдите письмо от нас (проверьте «Спам») или отправьте его ещё раз."
                                            Foreground="#F2D58A"
                                            FontSize="13"
                                            TextAlignment="Center"
@@ -93,16 +95,20 @@
                                     HorizontalContentAlignment="Center"/>
                         </StackPanel>
 
-                        <StackPanel Spacing="10" IsVisible="{Binding IsFormVisible}">
+                        <StackPanel Spacing="8" Margin="0,8,0,0" IsVisible="{Binding IsFormVisible}">
 
                         <!-- Nickname Entry -->
-                        <StackPanel Spacing="4" Margin="0,8,0,0">
+                        <StackPanel Spacing="4">
                             <TextBox Text="{Binding NicknameEntry.Value}"
                                      Watermark="Enter nickname"
                                      VerticalContentAlignment="Center"
                                      Classes="uf-field"
                                      Foreground="White"
-                                     Height="42"/>
+                                     Height="42">
+                                <TextBox.InnerLeftContent>
+                                    <Svg Path="/Assets/Images/svg/user.svg" Width="18" Height="18" Margin="0,0,8,0"/>
+                                </TextBox.InnerLeftContent>
+                            </TextBox>
                             <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
                                        FontFamily="{StaticResource MontserratRegular}"
                                        FontSize="12" Foreground="#FF9B9E"
@@ -117,7 +123,11 @@
                                      VerticalContentAlignment="Center"
                                      Classes="uf-field"
                                      Foreground="White"
-                                     Height="42"/>
+                                     Height="42">
+                                <TextBox.InnerLeftContent>
+                                    <Svg Path="/Assets/Images/svg/mail.svg" Width="18" Height="18" Margin="0,0,8,0"/>
+                                </TextBox.InnerLeftContent>
+                            </TextBox>
                             <TextBlock Text="{Binding EmailEntry.ValidationMessage}"
                                        FontFamily="{StaticResource MontserratRegular}"
                                        FontSize="12" Foreground="#FF9B9E"
@@ -132,7 +142,11 @@
                                      PasswordChar="•"
                                      Classes="uf-field"
                                      Foreground="White"
-                                     Height="42"/>
+                                     Height="42">
+                                <TextBox.InnerLeftContent>
+                                    <Svg Path="/Assets/Images/svg/key.svg" Width="18" Height="18" Margin="0,0,8,0"/>
+                                </TextBox.InnerLeftContent>
+                            </TextBox>
                             <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
                                        FontFamily="{StaticResource MontserratRegular}"
                                        FontSize="12" Foreground="#FF9B9E"
@@ -148,7 +162,11 @@
                                      PasswordChar="•"
                                      Classes="uf-field"
                                      Foreground="White"
-                                     Height="42"/>
+                                     Height="42">
+                                <TextBox.InnerLeftContent>
+                                    <Svg Path="/Assets/Images/svg/key_check.svg" Width="18" Height="18" Margin="0,0,8,0"/>
+                                </TextBox.InnerLeftContent>
+                            </TextBox>
                             <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
                                        FontFamily="{StaticResource MontserratRegular}"
                                        FontSize="12" Foreground="#FF9B9E"
@@ -161,42 +179,38 @@
                                 Classes="uf-auth"
                                 FontFamily="{StaticResource MontserratBold}"
                                 FontSize="16"
-                                Height="44" Margin="0,8,0,0"
+                                Height="44" Margin="0,4,0,0"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"/>
 
-                        <Grid ColumnDefinitions="*,*"
-                              IsVisible="{Binding IsLoginMode}">
-                            <Button Grid.Column="0" x:Name="StartDiscordAuthButton"
-                                    Click="InitiateDiscordAuth"
-                                    Classes="uf-discord"
-                                    Margin="0,0,5,0"
-                                    Height="40">
-                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                    <Svg Path="/Assets/Images/svg/discord_icon.svg" Height="20" Width="20"/>
-                                    <TextBlock FontFamily="{StaticResource MontserratBold}"
-                                               FontSize="13" VerticalAlignment="Center">Discord</TextBlock>
-                                </StackPanel>
-                            </Button>
-                            <Button Grid.Column="1"
-                                    Content="Google (WIP)"
-                                    IsEnabled="False"
-                                    Margin="5,0,0,0"
-                                    Height="40"
-                                    Background="#26232C"
-                                    Foreground="#7C828A"
-                                    FontFamily="{StaticResource MontserratRegular}"
-                                    FontSize="13"
-                                    BorderThickness="0"
-                                    CornerRadius="10"/>
-                        </Grid>
+                        <!-- Discord, then the providers the backend has switched on (Google, Yandex): none of those is a fixed list. -->
+                        <ItemsControl ItemsSource="{Binding SocialButtons}" IsVisible="{Binding IsLoginMode}" Margin="-3,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="local:SocialButton">
+                                    <Button Classes="uf-discord" Margin="3,0" Height="40"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                            Tag="{Binding Name}" Click="OnSocialClicked">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <Svg Path="{Binding IconPath}" IsVisible="{Binding HasIcon}" Height="20" Width="20"/>
+                                            <TextBlock Text="{Binding Title}" FontFamily="{StaticResource MontserratBold}"
+                                                       FontSize="13" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <Button Content="{Binding ToggleMessage}"
                                 Click="ToggleViewButton"
                                 Classes="uf-outline"
                                 FontFamily="{StaticResource MontserratBold}"
                                 FontSize="14"
-                                Height="42" Margin="0,8,0,0"
+                                Height="42" Margin="0,4,0,0"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"/>
                         <TextBlock Text="Забыли пароль?"
