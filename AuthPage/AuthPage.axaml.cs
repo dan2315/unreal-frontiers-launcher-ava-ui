@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -14,7 +14,7 @@ namespace UnrealFrontiersLauncher
         private readonly PlayerProfileProvider _playerProfileProvider;
         private readonly NavigationService _navigationService;
         private readonly PopupService _popupService;
-        
+
         public Button ActionButtonRef => ActionButton;
 
         public AuthPage(IServiceProvider serviceProvider)
@@ -23,11 +23,11 @@ namespace UnrealFrontiersLauncher
             _playerProfileProvider = serviceProvider.GetRequiredService<PlayerProfileProvider>();
             _navigationService = serviceProvider.GetRequiredService<NavigationService>();
             _popupService = serviceProvider.GetRequiredService<PopupService>();
-            
+
             var viewModel = new AuthPageViewModel(_authService, _playerProfileProvider, _navigationService, _popupService);
             viewModel.PageReference = this;
             DataContext = viewModel;
-            
+
             InitializeComponent();
 
             // Every new error (even the same text again) flashes and fades out; a running animation is replaced.
@@ -39,59 +39,82 @@ namespace UnrealFrontiersLauncher
                 _errorFlash = new CancellationTokenSource();
                 _ = UiAnimations.FlashFadeAsync(ErrorBox, _errorFlash.Token);
             };
+
+            PasswordEye.IsCheckedChanged += (_, _) => ShowPassword(PasswordEye.IsChecked == true);
+
+            // Enter in any field presses the main button. Tunnelling: the text box would otherwise take the key first.
+            AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         }
 
         private CancellationTokenSource? _errorFlash;
 
+        private void ShowPassword(bool show)
+        {
+            PasswordBox.RevealPassword = show;
+            EyeShown.IsVisible = !show;
+            EyeHidden.IsVisible = show;
+            ToolTip.SetTip(PasswordEye, show ? "Скрыть пароль" : "Показать пароль");
+        }
+
+        private void OnKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter || e.Source is not TextBox || !ActionButton.IsEffectivelyVisible) return;
+
+            e.Handled = true;
+            ((AuthPageViewModel) DataContext!).AuthAction();
+        }
 
         public async Task TryAutoAuth()
         {
-            (bool success, string? nickname) = await _authService.TryAuthWithTokens();
-            if (!success)
+            while (true)
             {
-                _navigationService.NavigateTo<AuthPage>();
-            }
-            else
-            {
-                _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
-                _navigationService.NavigateTo<MainPage>();
+                (bool success, string? nickname) = await _authService.TryAuthWithTokens();
+                if (success)
+                {
+                    _authService.GrantAccess(_playerProfileProvider, new() { nickname = nickname });
+                    _navigationService.NavigateTo<MainPage>();
+                    return;
+                }
+
+                if (!_authService.BackendUnreachable)
+                {
+                    _navigationService.NavigateTo<AuthPage>();
+                    return;
+                }
+
+                if (await OfflineMode.OfferAsync(_popupService))
+                {
+                    OfflineMode.Enter(_playerProfileProvider);
+                    _navigationService.NavigateTo<MainPage>();
+                    return;
+                }
             }
         }
 
-        public void AuthAction(object? sender, RoutedEventArgs  e) 
+        public void AuthAction(object? sender, RoutedEventArgs  e)
         {
-            ((AuthPageViewModel) DataContext).AuthAction();
+            ((AuthPageViewModel) DataContext!).AuthAction();
         }
 
         public void OnSocialClicked(object? sender, RoutedEventArgs e)
         {
             if (sender is Button { Tag: string provider })
-                ((AuthPageViewModel) DataContext).StartSocial(provider);
-        }
-
-        public void ResendVerification(object? sender, RoutedEventArgs e)
-        {
-            ((AuthPageViewModel) DataContext).ResendVerification();
+                ((AuthPageViewModel) DataContext!).StartSocial(provider);
         }
 
         public void BackToForm(object? sender, RoutedEventArgs e)
         {
-            ((AuthPageViewModel) DataContext).BackToForm();
+            ((AuthPageViewModel) DataContext!).BackToForm();
         }
 
-        public void ToggleView(object? sender, RoutedEventArgs  e)
+        public void OpenRegister(object? sender, RoutedEventArgs e)
         {
-            ((AuthPageViewModel) DataContext).ToggleView();
+            ((AuthPageViewModel) DataContext!).OpenRegister();
         }
 
-        public void ToggleViewButton(object? sender, RoutedEventArgs e)
+        public void OpenForgotPassword(object? sender, PointerPressedEventArgs e)
         {
-            ((AuthPageViewModel) DataContext).ToggleView();
-        }
-
-        public void InitiatePasswordRecovery(object? sender, PointerPressedEventArgs e)
-        {
-            ((AuthPageViewModel) DataContext).InitiatePasswordRecovery();
+            ((AuthPageViewModel) DataContext!).OpenForgotPassword();
         }
 
         public struct AccessData

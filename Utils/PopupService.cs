@@ -73,6 +73,29 @@ namespace UnrealFrontiersLauncher
         }
 
         /// <summary>
+        /// Displays a modal popup with two named choices (long labels, so the buttons are stacked).
+        /// </summary>
+        /// <returns>True for the first choice, false for the second.</returns>
+        public async Task<bool> ShowChoiceDialogAsync(string title, string message, string first, string second)
+        {
+            var dialog = new Window
+            {
+                Title = title,
+                Width = 430,
+                SizeToContent = SizeToContent.Height,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Content = CreateDialogContent(title, message, new[] { (first, true), (second, false) }, out var resultTask, stackButtons: true),
+                CanResize = false,
+                Background = Brushes.Transparent,
+                SystemDecorations = SystemDecorations.None,
+                CornerRadius = CornerRadius.Parse("16"),
+            };
+
+            await dialog.ShowDialog(_mainWindow);
+            return await resultTask.Task == first;
+        }
+
+        /// <summary>
         /// Displays a modal popup with a scrollable body and a single close button.
         /// Used for long content like the full changelog.
         /// </summary>
@@ -95,7 +118,7 @@ namespace UnrealFrontiersLauncher
             await resultTask.Task;
         }
 
-        private Control CreateDialogContent(string title, string message, (string Label, bool IsPrimary)[] buttons, out TaskCompletionSource<string> resultTask)
+        private Control CreateDialogContent(string title, string message, (string Label, bool IsPrimary)[] buttons, out TaskCompletionSource<string> resultTask, bool stackButtons = false)
         {
             var resultCompletionSource = new TaskCompletionSource<string>();
             resultTask = resultCompletionSource;
@@ -176,8 +199,8 @@ namespace UnrealFrontiersLauncher
             // Buttons
             var buttonPanel = new StackPanel
             {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                Orientation = stackButtons ? Avalonia.Layout.Orientation.Vertical : Avalonia.Layout.Orientation.Horizontal,
+                HorizontalAlignment = stackButtons ? Avalonia.Layout.HorizontalAlignment.Stretch : Avalonia.Layout.HorizontalAlignment.Right,
                 Spacing = 10,
                 Margin = new Thickness(0, 4, 0, 0)
             };
@@ -191,7 +214,8 @@ namespace UnrealFrontiersLauncher
                     Padding = new Thickness(16, 8),
                     FontFamily = MontserratBold,
                     Cursor = new Cursor(StandardCursorType.Hand),
-                    HorizontalContentAlignment = HorizontalAlignment.Center
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    HorizontalAlignment = stackButtons ? HorizontalAlignment.Stretch : HorizontalAlignment.Left
                 };
                 button.Classes.Add(isPrimary ? "uf-accent" : "uf-card");
                 button.Click += (_, _) =>
