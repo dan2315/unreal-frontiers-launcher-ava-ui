@@ -320,6 +320,9 @@
     <Setter Property="Padding" Value="14,10" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="FontSize" Value="15" />
+    <!-- A one-line field must not grow its own scrollbar (its thumb showed up as a grey bar at the right edge). -->
+    <Setter Property="(ScrollViewer.VerticalScrollBarVisibility)" Value="Disabled" />
+    <Setter Property="(ScrollViewer.HorizontalScrollBarVisibility)" Value="Hidden" />
   </Style>
   <Style Selector="TextBox.uf-field:pointerover /template/ Border#PART_BorderElement">
     <Setter Property="BorderBrush" Value="#55525E" />

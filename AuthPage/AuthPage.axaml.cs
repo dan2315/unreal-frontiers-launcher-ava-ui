@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -15,7 +16,6 @@ namespace UnrealFrontiersLauncher
         private readonly PopupService _popupService;
         
         public Button ActionButtonRef => ActionButton;
-        public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
 
         public AuthPage(IServiceProvider serviceProvider)
         {
@@ -29,7 +29,19 @@ namespace UnrealFrontiersLauncher
             DataContext = viewModel;
             
             InitializeComponent();
+
+            // Every new error (even the same text again) flashes and fades out; a running animation is replaced.
+            viewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName != nameof(AuthPageViewModel.AuthErrorSeq)) return;
+
+                _errorFlash?.Cancel();
+                _errorFlash = new CancellationTokenSource();
+                _ = UiAnimations.FlashFadeAsync(ErrorBox, _errorFlash.Token);
+            };
         }
+
+        private CancellationTokenSource? _errorFlash;
 
 
         public async Task TryAutoAuth()
@@ -51,9 +63,10 @@ namespace UnrealFrontiersLauncher
             ((AuthPageViewModel) DataContext).AuthAction();
         }
 
-        public void InitiateDiscordAuth(object? sender, RoutedEventArgs  e) 
+        public void OnSocialClicked(object? sender, RoutedEventArgs e)
         {
-            ((AuthPageViewModel) DataContext).InitiateDiscordAuth(null);
+            if (sender is Button { Tag: string provider })
+                ((AuthPageViewModel) DataContext).StartSocial(provider);
         }
 
         public void ResendVerification(object? sender, RoutedEventArgs e)

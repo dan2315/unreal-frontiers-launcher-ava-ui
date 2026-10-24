@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
+using System.Net;
 using System.Net.Http;
 using System;
 using System.Collections.Generic;
@@ -28,17 +29,25 @@ namespace UnrealFrontiersLauncher
         {
             var payload = new { nickname, email, password };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/auth/create_account", content);
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsync("/auth/create_account", content);
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                return (false, AuthMessages.NoConnection, null);
+            }
 
             var responseMessage = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                return (true, "Account created successfully. Check your email to verify your account.", null);
+                return (true, "Аккаунт создан. Мы отправили письмо — подтвердите email и войдите. " + AuthMessages.SpamHint, null);
             }
             else
             {
-                return (false, responseMessage, AuthResponses.ErrorCode(responseMessage));
+                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), AuthResponses.ErrorCode(responseMessage));
             }
         }
 
@@ -46,17 +55,33 @@ namespace UnrealFrontiersLauncher
         {
             var payload = new { email, password };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/auth/resend_verification", content);
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsync("/auth/resend_verification", content);
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                return (ResendStatus.Failed, AuthMessages.NoConnection);
+            }
 
             var body = await response.Content.ReadAsStringAsync();
-            return (AuthResponses.ResendStatusOf(response.StatusCode), AuthResponses.ErrorMessage(body));
+            return (AuthResponses.ResendStatusOf(response.StatusCode), AuthMessages.Describe(response.StatusCode, body));
         }
 
         public async Task<(bool Success, string Message, string? AccessToken, string? RefreshToken, string? Nickname)> Login(string nicknameOrEmail, string password)
         {
             var payload = new { nicknameOrEmail, password };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/auth/login", content);
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsync("/auth/login", content);
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                return (false, AuthMessages.NoConnection, null, null, null);
+            }
 
             var responseMessage = await response.Content.ReadAsStringAsync();
 
@@ -73,7 +98,7 @@ namespace UnrealFrontiersLauncher
             }
             else
             {
-                return (false, responseMessage, null, null, null);
+                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), null, null, null);
             }
         }
 
@@ -91,7 +116,7 @@ namespace UnrealFrontiersLauncher
             }
             else
             {
-                return (false, responseMessage, false);
+                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), false);
             }
         }
 
@@ -106,11 +131,11 @@ namespace UnrealFrontiersLauncher
 
             if (response.IsSuccessStatusCode)
             {
-                return (true, "Password reset request sent. Check your email for further instructions.");
+                return (true, "Письмо со ссылкой для сброса пароля отправлено. " + AuthMessages.ResetSpamHint);
             }
             else
             {
-                return (false, responseMessage);
+                return (false, AuthMessages.Describe(response.StatusCode, responseMessage));
             }
         }
 
@@ -190,6 +215,8 @@ namespace UnrealFrontiersLauncher
                 UseShellExecute = true
             });
 
+            LoginFlow.Begin(LoginFlow.Discord);
+
             // Indicate that the method triggered the process successfully
             return Task.FromResult((true, "Discord authentication initiated. Follow the browser instructions."));
         }
@@ -220,6 +247,65 @@ namespace UnrealFrontiersLauncher
             }
         }
 
+        /// <summary>The providers to show next to Discord. None when the backend has none enabled or cannot be reached.</summary>
+        public async Task<IReadOnlyList<OAuthProvider>> GetOAuthProvidersAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/auth/oauth/providers");
+                return response.IsSuccessStatusCode ? OAuth.ParseProviders(await response.Content.ReadAsStringAsync()) : [];
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                Console.WriteLine($"OAuth providers unavailable: {e.Message}");
+                return [];
+            }
+        }
+
+        /// <summary>Opens the provider's sign-in in the system browser; the player returns to the launcher through uflauncher://.</summary>
+        public void StartOAuth(string provider)
+        {
+            if (!OAuth.IsValidName(provider)) throw new ArgumentException("Not a provider name.", nameof(provider));
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = OAuth.StartUrl(AppStaticData.ServerURL, provider),
+                UseShellExecute = true
+            });
+        }
+
+        /// <summary>A new player's second step: the nickname for the registration session the callback gave.</summary>
+        public async Task<(bool Success, string Message, string? Code, string? Nickname)> CompleteOAuthSession(string sessionId, string nickname)
+        {
+            var payload = new { sessionId, nickname };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsync("/auth/oauth/complete_session", content);
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                return (false, AuthMessages.NoConnection, null, null);
+            }
+
+            var body = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                return (false, AuthMessages.Describe(response.StatusCode, body), AuthResponses.ErrorCode(body), null);
+
+            try
+            {
+                var data = JsonSerializer.Deserialize<JsonElement>(body);
+                ApplyTokens(data.GetProperty("accessToken").GetString()!, data.GetProperty("refreshToken").GetString()!);
+                return (true, "", null, data.GetProperty("nickname").GetString());
+            }
+            catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException)
+            {
+                return (false, AuthMessages.ForStatus(HttpStatusCode.InternalServerError), null, null);
+            }
+        }
+
         public async Task<string> SendResetPasswordEmail(string email)
         {
             try
@@ -230,23 +316,15 @@ namespace UnrealFrontiersLauncher
                 var response = await _httpClient.PostAsync("/auth/send_reset_password_email", content);
 
                 if (response.IsSuccessStatusCode)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var responseObject = JsonSerializer.Deserialize<JsonElement>(responseContent);
-                    var message = responseObject.GetProperty("message").GetString()!;
+                    return "Письмо со ссылкой для сброса пароля отправлено. " + AuthMessages.ResetSpamHint;
 
-                    return message;
-                }
-                else
-                {
-                    Console.WriteLine($"Error: {response.StatusCode}");
-                    return "Не удалось отправить письмо";
-                }
+                Console.WriteLine($"Error: {response.StatusCode}");
+                return AuthMessages.Describe(response.StatusCode, await response.Content.ReadAsStringAsync());
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
                 Console.WriteLine($"Password reset request failed: {ex.Message}");
-                return "Не удалось связаться с сервером. Проверьте соединение и попробуйте позже.";
+                return AuthMessages.NoConnection;
             }
         }
         
