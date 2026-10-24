@@ -66,7 +66,6 @@ namespace UnrealFrontiersLauncher
             services.AddSingleton<HttpClientService>();
             services.AddSingleton<AuthService>();
             services.AddSingleton<ServerService>();
-            services.AddSingleton<TicketService>();
             services.AddSingleton<GameLauncher>();
             services.AddSingleton<InstanceManager>();
             services.AddSingleton<PlayerProfileProvider>();

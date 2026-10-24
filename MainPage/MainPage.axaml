@@ -149,6 +149,14 @@
                     <!-- Launcher settings: compact round gear in the profile
                          card's top-right corner, half-outside the card edge. -->
                     <Button Classes="uf-gear" Width="32" Height="32"
+                            Click="OnReportProblemClicked"
+                            ToolTip.Tip="Сообщить о проблеме"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,-8,28,0">
+                        <Svg Path="/Assets/Images/svg/help.svg" Width="16" Height="16"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Classes="uf-gear" Width="32" Height="32"
                             Click="OnGlobalSettingsClicked"
                             ToolTip.Tip="Настройки лаунчера"
                             HorizontalAlignment="Right" VerticalAlignment="Top"
