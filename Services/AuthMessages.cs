@@ -73,6 +73,7 @@ public static class AuthMessages
     public static string ForStatus(HttpStatusCode? status) => status switch
     {
         null or 0 => NoConnection,
+        HttpStatusCode.Unauthorized => "Нужно войти в аккаунт",
         >= (HttpStatusCode)500 => "Ошибка сервера, попробуйте позже",
         _ => $"Ошибка {(int)status}"
     };
