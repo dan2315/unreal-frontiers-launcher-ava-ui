@@ -227,7 +227,30 @@ public partial class MainPage : UserControl
     private async void OnLaunchFailed(string message)
     {
         SetLaunchEnabled(true);
-        await _popUpService.ShowOkDialogAsync("Не удалось запустить", message);
+
+        var report = await _popUpService.ShowYesNoDialogAsync("Не удалось запустить",
+            message + "\n\nСообщить о проблеме? Текст ошибки скопируется, и откроется страница обращений на сайте.");
+        if (!report) return;
+
+        // The support page is on the site: the error text goes to the clipboard to be pasted into the report.
+        if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+            await clipboard.SetTextAsync(message);
+        OpenSupportPage();
+    }
+
+    // ---- Report a problem (the site has the form) ----
+
+    private void OnReportProblemClicked(object? sender, RoutedEventArgs e)
+    {
+        ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
+        OpenSupportPage();
+    }
+
+    private async void OpenSupportPage()
+    {
+        if (!SiteLinks.OpenInBrowser(SiteLinks.ReportUrl(AppStaticData.ServerURL)))
+            await _popUpService.ShowOkDialogAsync("Сообщить о проблеме", "Не удалось открыть браузер. Страница обращений: " + SiteLinks.ReportUrl(AppStaticData.ServerURL));
     }
 
     private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)
