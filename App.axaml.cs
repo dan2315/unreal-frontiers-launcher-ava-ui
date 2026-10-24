@@ -63,11 +63,17 @@ public class App : Application
         Autoupdater.OnSetStatus?.Invoke("Connecting to server...");
         var backendReachable = await BackendConnectionDetector.ConnectionStatus();
 
-        if (!backendReachable)
+        while (!backendReachable)
         {
-            Services.GetRequiredService<PlayerProfileProvider>().SetProfile(PlayerProfile.Default);
-            navigation.NavigateTo(mainPage);
-            return;
+            if (await OfflineMode.OfferAsync(Services.GetRequiredService<PopupService>()))
+            {
+                OfflineMode.Enter(Services.GetRequiredService<PlayerProfileProvider>());
+                navigation.NavigateTo(mainPage);
+                return;
+            }
+
+            Autoupdater.OnSetStatus?.Invoke("Connecting to server...");
+            backendReachable = await BackendConnectionDetector.ConnectionStatus();
         }
 
         autoupdatePage.TryAutoupdateOrOtherwise(() => _ = authPage.TryAutoAuth());

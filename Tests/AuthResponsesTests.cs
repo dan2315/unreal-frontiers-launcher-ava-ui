@@ -33,14 +33,13 @@ public class AuthResponsesTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.OK, ResendStatus.Sent)]
-    [InlineData(HttpStatusCode.Unauthorized, ResendStatus.InvalidCredentials)]
-    [InlineData(HttpStatusCode.BadRequest, ResendStatus.AlreadyVerified)]
-    [InlineData(HttpStatusCode.TooManyRequests, ResendStatus.TooManyRequests)]
-    [InlineData(HttpStatusCode.InternalServerError, ResendStatus.Failed)]
-    [InlineData(HttpStatusCode.BadGateway, ResendStatus.Failed)]
-    public void ResendStatusOf_MapsTheEndpointAnswers(HttpStatusCode status, ResendStatus expected)
+    [InlineData(null, "", LoginFailure.NoConnection)]
+    [InlineData(HttpStatusCode.OK, "", LoginFailure.None)]
+    [InlineData(HttpStatusCode.Forbidden, """{"error":"Please verify your email first"}""", LoginFailure.EmailNotVerified)]
+    [InlineData(HttpStatusCode.Unauthorized, """{"error":"Invalid credentials"}""", LoginFailure.Other)]
+    [InlineData(HttpStatusCode.InternalServerError, "oops", LoginFailure.Other)]
+    public void LoginFailureOf_TellsWhatTheLauncherMustDo(HttpStatusCode? status, string body, LoginFailure expected)
     {
-        Assert.Equal(expected, AuthResponses.ResendStatusOf(status));
+        Assert.Equal(expected, AuthResponses.LoginFailureOf(status, body));
     }
 }

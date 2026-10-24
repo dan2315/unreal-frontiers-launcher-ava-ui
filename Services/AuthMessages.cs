@@ -27,6 +27,8 @@ public static class AuthMessages
         ["nickname_taken"] = "Этот ник уже занят. Выберите другой",
         ["nickname_required"] = "Укажите ник",
         ["already_registered"] = "Этот аккаунт уже зарегистрирован",
+        ["invalid_nickname"] = "Ник не подходит: от 3 до 16 символов, только латинские буквы, цифры и подчёркивание.",
+        ["weak_password"] = "Пароль слишком простой: нужны большая и маленькая буквы, цифра и минимум 8 символов.",
     };
 
     private static readonly Dictionary<string, string> ByText = new()

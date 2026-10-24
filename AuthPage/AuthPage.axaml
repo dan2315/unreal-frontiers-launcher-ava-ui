@@ -7,6 +7,20 @@
     <UserControl.Resources>
         <converters:TextToVisibilityConverter x:Key="TextToVisibilityConverter"/>
     </UserControl.Resources>
+    <UserControl.Styles>
+        <!-- The show/hide eye inside the password field: just the icon, no button chrome. -->
+        <Style Selector="ToggleButton.uf-eye">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Margin" Value="0,0,2,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="ToggleButton.uf-eye /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </UserControl.Styles>
     <Grid>
         <Grid.Background>
             <ImageBrush Stretch="UniformToFill" Source="/Assets/Images/backgorund2.png" />
@@ -35,7 +49,7 @@
                         <!-- The title block. An error flashes over it (it takes no room of its own), so nothing moves. -->
                         <Grid>
                             <StackPanel Spacing="6">
-                                <TextBlock Text="{Binding PageTitle}"
+                                <TextBlock Text="Войти"
                                            FontFamily="{StaticResource MontserratBold}"
                                            FontSize="22"
                                            Foreground="White"
@@ -58,10 +72,10 @@
                             </Border>
                         </Grid>
 
-                        <!-- Registered, but the email is not confirmed yet. -->
-                        <StackPanel Spacing="10" IsVisible="{Binding IsVerificationPending}">
+                        <!-- The email is not confirmed yet: what to do (the site can send the letter again). -->
+                        <StackPanel Spacing="10" IsVisible="{Binding IsEmailNotVerified}">
                             <Border Background="#33290F" BorderBrush="#E8B83A" BorderThickness="1" CornerRadius="10">
-                                <TextBlock Text="Аккаунт с этим email уже зарегистрирован, но почта не подтверждена. Найдите письмо от нас (проверьте «Спам») или отправьте его ещё раз."
+                                <TextBlock Text="Аккаунт есть, но почта не подтверждена. Найдите письмо от нас (проверьте «Спам»). Если его нет, откройте сайт, введите тот же email и пароль, и мы предложим отправить письмо ещё раз."
                                            Foreground="#F2D58A"
                                            FontSize="13"
                                            TextAlignment="Center"
@@ -69,16 +83,8 @@
                                            Padding="10,8"
                                            TextWrapping="Wrap"/>
                             </Border>
-                            <TextBlock Text="{Binding ResendMessage}"
-                                       Foreground="#B9BDC2"
-                                       FontSize="13"
-                                       TextAlignment="Center"
-                                       MinHeight="20"
-                                       FontFamily="{StaticResource MontserratRegular}"
-                                       TextWrapping="Wrap"/>
-                            <Button Content="Отправить ещё раз"
-                                    Click="ResendVerification"
-                                    IsEnabled="{Binding CanResend}"
+                            <Button Content="Открыть сайт"
+                                    Click="OpenRegister"
                                     Classes="uf-auth"
                                     FontFamily="{StaticResource MontserratBold}"
                                     FontSize="16"
@@ -97,84 +103,45 @@
 
                         <StackPanel Spacing="8" Margin="0,8,0,0" IsVisible="{Binding IsFormVisible}">
 
-                        <!-- Nickname Entry -->
-                        <StackPanel Spacing="4">
-                            <TextBox Text="{Binding NicknameEntry.Value}"
-                                     Watermark="Enter nickname"
-                                     VerticalContentAlignment="Center"
-                                     Classes="uf-field"
-                                     Foreground="White"
-                                     Height="42">
-                                <TextBox.InnerLeftContent>
-                                    <Svg Path="/Assets/Images/svg/user.svg" Width="18" Height="18" Margin="0,0,8,0"/>
-                                </TextBox.InnerLeftContent>
-                            </TextBox>
-                            <TextBlock Text="{Binding NicknameEntry.ValidationMessage}"
-                                       FontFamily="{StaticResource MontserratRegular}"
-                                       FontSize="12" Foreground="#FF9B9E"
-                                       IsVisible="{Binding NicknameEntry.IsVisible}" />
-                        </StackPanel>
+                        <!-- Nickname or email -->
+                        <TextBox x:Name="NicknameBox"
+                                 Text="{Binding Nickname}"
+                                 Watermark="Ник или email"
+                                 VerticalContentAlignment="Center"
+                                 Classes="uf-field"
+                                 Foreground="White"
+                                 Height="42">
+                            <TextBox.InnerLeftContent>
+                                <Svg Path="/Assets/Images/svg/user.svg" Width="18" Height="18" Margin="0,0,8,0"/>
+                            </TextBox.InnerLeftContent>
+                        </TextBox>
 
-                        <!-- Email Entry -->
-                        <StackPanel Spacing="4"
-                                    IsVisible="{Binding IsRegisterMode}">
-                            <TextBox Text="{Binding EmailEntry.Value}"
-                                     Watermark="Enter email"
-                                     VerticalContentAlignment="Center"
-                                     Classes="uf-field"
-                                     Foreground="White"
-                                     Height="42">
-                                <TextBox.InnerLeftContent>
-                                    <Svg Path="/Assets/Images/svg/mail.svg" Width="18" Height="18" Margin="0,0,8,0"/>
-                                </TextBox.InnerLeftContent>
-                            </TextBox>
-                            <TextBlock Text="{Binding EmailEntry.ValidationMessage}"
-                                       FontFamily="{StaticResource MontserratRegular}"
-                                       FontSize="12" Foreground="#FF9B9E"
-                                       IsVisible="{Binding EmailEntry.IsVisible}" />
-                        </StackPanel>
-
-                        <!-- Password Entry -->
-                        <StackPanel Spacing="4">
-                            <TextBox Text="{Binding PasswordEntry.Value}"
-                                     Watermark="Enter password"
-                                     VerticalContentAlignment="Center"
-                                     PasswordChar="•"
-                                     Classes="uf-field"
-                                     Foreground="White"
-                                     Height="42">
-                                <TextBox.InnerLeftContent>
-                                    <Svg Path="/Assets/Images/svg/key.svg" Width="18" Height="18" Margin="0,0,8,0"/>
-                                </TextBox.InnerLeftContent>
-                            </TextBox>
-                            <TextBlock Text="{Binding PasswordEntry.ValidationMessage}"
-                                       FontFamily="{StaticResource MontserratRegular}"
-                                       FontSize="12" Foreground="#FF9B9E"
-                                       IsVisible="{Binding PasswordEntry.IsVisible}" />
-                        </StackPanel>
-
-                        <!-- Repeat Password Entry -->
-                        <StackPanel Spacing="4"
-                                    IsVisible="{Binding IsRegisterMode}">
-                            <TextBox Text="{Binding RepeatPasswordEntry.Value}"
-                                     Watermark="Repeat password"
-                                     VerticalContentAlignment="Center"
-                                     PasswordChar="•"
-                                     Classes="uf-field"
-                                     Foreground="White"
-                                     Height="42">
-                                <TextBox.InnerLeftContent>
-                                    <Svg Path="/Assets/Images/svg/key_check.svg" Width="18" Height="18" Margin="0,0,8,0"/>
-                                </TextBox.InnerLeftContent>
-                            </TextBox>
-                            <TextBlock Text="{Binding RepeatPasswordEntry.ValidationMessage}"
-                                       FontFamily="{StaticResource MontserratRegular}"
-                                       FontSize="12" Foreground="#FF9B9E"
-                                       IsVisible="{Binding RepeatPasswordEntry.IsVisible}" />
-                        </StackPanel>
+                        <!-- Password, with the show/hide eye -->
+                        <TextBox x:Name="PasswordBox"
+                                 Text="{Binding Password}"
+                                 Watermark="Пароль"
+                                 VerticalContentAlignment="Center"
+                                 PasswordChar="•"
+                                 Classes="uf-field"
+                                 Foreground="White"
+                                 Height="42">
+                            <TextBox.InnerLeftContent>
+                                <Svg Path="/Assets/Images/svg/key.svg" Width="18" Height="18" Margin="0,0,8,0"/>
+                            </TextBox.InnerLeftContent>
+                            <TextBox.InnerRightContent>
+                                <ToggleButton x:Name="PasswordEye" Classes="uf-eye"
+                                              ToolTip.Tip="Показать пароль"
+                                              Focusable="False">
+                                    <Grid>
+                                        <Svg x:Name="EyeShown" Path="/Assets/Images/svg/eye.svg" Width="18" Height="18"/>
+                                        <Svg x:Name="EyeHidden" Path="/Assets/Images/svg/eye_off.svg" Width="18" Height="18" IsVisible="False"/>
+                                    </Grid>
+                                </ToggleButton>
+                            </TextBox.InnerRightContent>
+                        </TextBox>
 
                         <Button x:Name="ActionButton"
-                                Content="{Binding ActionButtonText}"
+                                Content="Войти"
                                 Click="AuthAction"
                                 Classes="uf-auth"
                                 FontFamily="{StaticResource MontserratBold}"
@@ -184,7 +151,7 @@
                                 HorizontalContentAlignment="Center"/>
 
                         <!-- Discord, then the providers the backend has switched on (Google, Yandex): none of those is a fixed list. -->
-                        <ItemsControl ItemsSource="{Binding SocialButtons}" IsVisible="{Binding IsLoginMode}" Margin="-3,0">
+                        <ItemsControl ItemsSource="{Binding SocialButtons}" Margin="-3,0">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="1"/>
@@ -205,8 +172,8 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <Button Content="{Binding ToggleMessage}"
-                                Click="ToggleViewButton"
+                        <Button Content="Нет аккаунта?"
+                                Click="OpenRegister"
                                 Classes="uf-outline"
                                 FontFamily="{StaticResource MontserratBold}"
                                 FontSize="14"
@@ -220,7 +187,7 @@
                                    FontFamily="{StaticResource MontserratBold}"
                                    FontSize="14"
                                    Cursor="Hand"
-                                   PointerPressed="InitiatePasswordRecovery"/>
+                                   PointerPressed="OpenForgotPassword"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
