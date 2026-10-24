@@ -49,11 +49,13 @@ public partial class MainPage : UserControl
         _playerProfileProvider.OnProfileUpdate(() =>
         {
             _viewModel.OnPropertyChanged(nameof(_viewModel.PlayerName));
+            _ = _viewModel.RefreshSkinAsync(_authService);
         });
 
         Loaded += (_, _) =>
         {
             UiAnimations.ApplyLaunchStyle(LaunchButton);
+            _ = _viewModel.RefreshSkinAsync(_authService);
             _ = _viewModel.RefreshCatalogAsync();
         };
         UiAnimations.Changed += OnAnimationsChanged;
@@ -126,7 +128,10 @@ public partial class MainPage : UserControl
         ProfilePopup.IsVisible = !ProfilePopup.IsVisible;
         SetProfileChevron(ProfilePopup.IsVisible);
         if (ProfilePopup.IsVisible)
+        {
+            _ = _viewModel.RefreshSkinAsync(_authService);
             await UiAnimations.PopInAsync(ProfilePopup);
+        }
     }
 
     private void OnProfileOverlayPressed(object? sender, PointerPressedEventArgs e)
