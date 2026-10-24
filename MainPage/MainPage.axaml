@@ -217,6 +217,17 @@
                                 </StackPanel>
                             </Grid>
                         </Button>
+                        <Button Classes="uf-menu" Click="OnReportProblemClicked"
+                                HorizontalAlignment="Stretch">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Svg Grid.Column="0" Path="/Assets/Images/svg/help.svg" Height="15" Width="15"
+                                     VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Margin="10,0,0,0"
+                                           FontFamily="{StaticResource MontserratBold}"
+                                           FontSize="13" Foreground="White" VerticalAlignment="Center"
+                                           Text="Сообщить о проблеме"/>
+                            </Grid>
+                        </Button>
                         <Border Height="1" Background="#2E2C34" Margin="8,4"/>
                         <Button Classes="uf-menu uf-menu-danger" Click="OnLogoutClicked"
                                 HorizontalAlignment="Stretch">

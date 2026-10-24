@@ -22,6 +22,8 @@ public partial class MainPage : UserControl
     private readonly MainWindow _mainWindow;
     private readonly ServerService _serverService;
     private readonly ISystemInfo _systemInfo;
+    private readonly TicketService? _ticketService;
+    private string? _lastLaunchError;
     public PlayerProfile PlayerProfile => _playerProfileProvider.GetProfile();
 
     private MinecraftInstance? SelectedInstance => _instanceManager.selectedInstance;
@@ -30,7 +32,7 @@ public partial class MainPage : UserControl
     private readonly DispatcherTimer _progressTimer = new() { Interval = TimeSpan.FromMilliseconds(50) };
 
     public MainPage() {}
-    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow, AuthService authService, NavigationService navigationService, ISystemInfo systemInfo)
+    public MainPage(PopupService popUpService, GameLauncher gameLauncher, InstanceManager instanceManager, PlayerProfileProvider playerProfileProvider, ServerService serverService, MainWindow mainWindow, AuthService authService, NavigationService navigationService, ISystemInfo systemInfo, TicketService ticketService)
     {
         _playerProfileProvider = playerProfileProvider;
         _popUpService = popUpService;
@@ -41,6 +43,7 @@ public partial class MainPage : UserControl
         _authService = authService;
         _navigationService = navigationService;
         _systemInfo = systemInfo;
+        _ticketService = ticketService;
         _viewModel = new MainPageViewModel(this, _serverService, _instanceManager);
         DataContext = _viewModel;
 
@@ -227,7 +230,38 @@ public partial class MainPage : UserControl
     private async void OnLaunchFailed(string message)
     {
         SetLaunchEnabled(true);
-        await _popUpService.ShowOkDialogAsync("Не удалось запустить", message);
+        _lastLaunchError = message;
+
+        var report = await _popUpService.ShowYesNoDialogAsync("Не удалось запустить", message + "\n\nСообщить о проблеме?");
+        if (report)
+        {
+            var name = _viewModel.SelectedModpackName;
+            OpenTicketPanel("problem", string.IsNullOrEmpty(name) ? "Не удалось запустить игру" : $"Не удалось запустить {name}",
+                $"При запуске игры появилась ошибка:\n{message}\n\n");
+        }
+    }
+
+    // ---- Report a problem ----
+
+    private void OnReportProblemClicked(object? sender, RoutedEventArgs e)
+    {
+        ProfilePopup.IsVisible = false;
+        SetProfileChevron(false);
+        OpenTicketPanel();
+    }
+
+    private void OpenTicketPanel(string kind = "problem", string title = "", string body = "")
+    {
+        if (_ticketService == null) return;
+
+        var modpack = _viewModel.SelectedModpack;
+        var version = SelectedInstance?.InstalledVersion ?? SelectedInstance?.PackVersion;
+        var build = modpack == null ? null : string.IsNullOrEmpty(version) ? modpack.Name : $"{modpack.Name} v{version}";
+        var client = SupportInfo.BuildClient(Autoupdater.CurrentVersion.ToString(3), SupportInfo.CurrentOs(), build, _lastLaunchError);
+
+        var panel = new TicketPanel(_ticketService, modpack?.Value, modpack?.Name, client, kind, title, body);
+        panel.Closed += CloseSettingsOverlay;
+        ShowSettingsOverlay(panel);
     }
 
     private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)

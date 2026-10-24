@@ -27,6 +27,8 @@ public static class AuthMessages
         ["nickname_taken"] = "Этот ник уже занят. Выберите другой",
         ["nickname_required"] = "Укажите ник",
         ["already_registered"] = "Этот аккаунт уже зарегистрирован",
+        ["too_fast"] = "Обращения можно отправлять не чаще раза в минуту",
+        ["too_many_open"] = "У вас уже 5 открытых обращений: дождитесь ответа или закройте одно",
     };
 
     private static readonly Dictionary<string, string> ByText = new()
@@ -55,6 +57,7 @@ public static class AuthMessages
         ["Failed to send verification email. Please try again later."] = "Не удалось отправить письмо. Попробуйте позже",
         ["Failed to send password reset email. Please try again later."] = "Не удалось отправить письмо. Попробуйте позже",
         ["Internal server error"] = "Ошибка сервера, попробуйте позже",
+        ["Server not found"] = "Сервер не найден",
     };
 
     /// <param name="status">The HTTP status, or null when there was no answer at all.</param>
@@ -73,6 +76,7 @@ public static class AuthMessages
     public static string ForStatus(HttpStatusCode? status) => status switch
     {
         null or 0 => NoConnection,
+        HttpStatusCode.Unauthorized => "Нужно войти в аккаунт",
         >= (HttpStatusCode)500 => "Ошибка сервера, попробуйте позже",
         _ => $"Ошибка {(int)status}"
     };

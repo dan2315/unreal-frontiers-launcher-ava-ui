@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UnrealFrontiersLauncher.TicketPanel">
+    <Border Classes="uf-card" Padding="0" Width="520" MaxHeight="640" ClipToBounds="True">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Title -->
+        <Border Grid.Row="0" Background="#0C0B0E" BorderBrush="#232127" BorderThickness="0,0,0,1" Padding="16,12">
+            <StackPanel Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Border Width="32" Height="32" CornerRadius="10" Background="#26232C">
+                        <Svg Path="/Assets/Images/svg/help.svg" Width="18" Height="18"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Сообщить о проблеме"
+                                   FontFamily="{StaticResource MontserratBold}"
+                                   FontSize="16" Foreground="White"/>
+                        <TextBlock Text="Обращение увидите только вы и команда проекта"
+                                   FontFamily="{StaticResource MontserratRegular}"
+                                   FontSize="12" Foreground="#8E939B"/>
+                    </StackPanel>
+                </StackPanel>
+                <Border Height="2" Width="64" CornerRadius="1" Margin="0,8,0,0"
+                        HorizontalAlignment="Left"
+                        Background="{StaticResource UfAccentGradient}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Form -->
+        <ScrollViewer x:Name="FormView" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="8" Margin="20,14,20,12">
+                <TextBlock Text="Что у вас?" FontFamily="{StaticResource MontserratBold}" FontSize="13" Foreground="#B9BDC2"/>
+                <StackPanel x:Name="KindsPanel" Spacing="2"/>
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                    <TextBlock Text="Коротко" FontFamily="{StaticResource MontserratBold}" FontSize="13" Foreground="#B9BDC2"/>
+                    <TextBlock x:Name="TitleCounter" Grid.Column="1" FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#5E6068"/>
+                </Grid>
+                <TextBox x:Name="TitleBox" Classes="uf-field" MaxLength="120" Height="42"
+                         Watermark="Например: не запускается сборка"/>
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                    <TextBlock Text="Что случилось" FontFamily="{StaticResource MontserratBold}" FontSize="13" Foreground="#B9BDC2"/>
+                    <TextBlock x:Name="BodyCounter" Grid.Column="1" FontFamily="{StaticResource MontserratRegular}" FontSize="11" Foreground="#5E6068"/>
+                </Grid>
+                <TextBox x:Name="BodyBox" Classes="uf-field" MaxLength="4000" Height="140"
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         Watermark="Опишите, что вы делали и что пошло не так"/>
+
+                <TextBlock x:Name="ContextLabel" FontFamily="{StaticResource MontserratRegular}" FontSize="11"
+                           Foreground="#5E6068" TextWrapping="Wrap"/>
+                <TextBlock x:Name="ErrorLabel" FontFamily="{StaticResource MontserratRegular}" FontSize="12"
+                           Foreground="#FF9B9E" TextWrapping="Wrap" MinHeight="16"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Sent -->
+        <StackPanel x:Name="DoneView" Grid.Row="1" IsVisible="False" Spacing="10" Margin="20,24,20,18">
+            <TextBlock x:Name="DoneTitle" FontFamily="{StaticResource MontserratBold}" FontSize="16" Foreground="White" TextWrapping="Wrap"/>
+            <TextBlock Text="Ответ придёт в «Мои обращения» на сайте."
+                       FontFamily="{StaticResource MontserratRegular}" FontSize="13" Foreground="#B9BDC2" TextWrapping="Wrap"/>
+            <Button x:Name="OpenSiteButton" Classes="uf-outline" Click="OnOpenSiteClicked" HorizontalAlignment="Left"
+                    Content="Открыть обращение на сайте" FontFamily="{StaticResource MontserratBold}" FontSize="13"/>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <Border Grid.Row="2" Padding="16,12" BorderBrush="#232127" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                <Button x:Name="CancelButton" Classes="uf-ghost" Click="OnCloseClicked" MinWidth="100"
+                        HorizontalContentAlignment="Center" Content="Отмена"
+                        FontFamily="{StaticResource MontserratBold}" FontSize="14"/>
+                <Button x:Name="SubmitButton" Classes="uf-accent" Click="OnSubmitClicked" MinWidth="130"
+                        HorizontalContentAlignment="Center" Content="Отправить"
+                        FontFamily="{StaticResource MontserratBold}" FontSize="14"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+    </Border>
+</UserControl>
