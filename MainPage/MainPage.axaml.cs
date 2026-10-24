@@ -249,8 +249,8 @@ public partial class MainPage : UserControl
 
     private async void OpenSupportPage()
     {
-        if (!SiteLinks.OpenInBrowser(SiteLinks.SupportUrl(AppStaticData.ServerURL)))
-            await _popUpService.ShowOkDialogAsync("Сообщить о проблеме", "Не удалось открыть браузер. Страница обращений: " + SiteLinks.SupportUrl(AppStaticData.ServerURL));
+        if (!SiteLinks.OpenInBrowser(SiteLinks.ReportUrl(AppStaticData.ServerURL)))
+            await _popUpService.ShowOkDialogAsync("Сообщить о проблеме", "Не удалось открыть браузер. Страница обращений: " + SiteLinks.ReportUrl(AppStaticData.ServerURL));
     }
 
     private async void OnInstanceSelected(object? sender, SelectionChangedEventArgs e)

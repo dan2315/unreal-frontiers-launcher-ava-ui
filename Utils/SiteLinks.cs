@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 
 namespace UnrealFrontiersLauncher;
@@ -17,6 +17,9 @@ public static class SiteLinks
 
     /// <summary>Where a player reports a problem and follows the answers ("Мои обращения").</summary>
     public static string SupportUrl(string serverUrl) => $"{SiteUrl(serverUrl)}/support";
+
+    /// <summary>The same page with the "report a problem" form already open (kind: bug, problem, question or idea).</summary>
+    public static string ReportUrl(string serverUrl, string kind = "problem") => $"{SupportUrl(serverUrl)}?new=1&kind={Uri.EscapeDataString(kind)}";
 
     /// <returns>false when no browser could be started.</returns>
     public static bool OpenInBrowser(string url)

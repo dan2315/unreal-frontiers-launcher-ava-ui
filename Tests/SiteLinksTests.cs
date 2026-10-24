@@ -15,3 +15,15 @@ public class SiteLinksTests
     [InlineData("http://localhost:3200", "http://localhost:8180/support")]
     public void SupportUrl_IsThePlayersTicketPageOnTheSite(string server, string expected) => Assert.Equal(expected, SiteLinks.SupportUrl(server));
 }
+
+public class ReportUrlTests
+{
+    [Theory]
+    [InlineData("https://unrealfrontiers.com", "https://unrealfrontiers.com/support?new=1&kind=problem")]
+    [InlineData("http://localhost:3200", "http://localhost:8180/support?new=1&kind=problem")]
+    public void ReportUrl_OpensTheFormWithTheProblemKind(string server, string expected) => Assert.Equal(expected, SiteLinks.ReportUrl(server));
+
+    [Fact]
+    public void ReportUrl_TakesAnotherKind() =>
+        Assert.Equal("https://unrealfrontiers.com/support?new=1&kind=idea", SiteLinks.ReportUrl("https://unrealfrontiers.com", "idea"));
+}
