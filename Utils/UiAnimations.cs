@@ -102,6 +102,49 @@ namespace UnrealFrontiersLauncher
         /// NB: only Opacity is animated — Avalonia 11 ships no animator for
         /// RenderTransform, so keyframes targeting it crash at runtime.
         /// </summary>
+        /// <summary>How long an error stays when animations are off (no flash, no fade).</summary>
+        public static readonly TimeSpan StaticErrorDuration = TimeSpan.FromSeconds(4);
+
+        /// <summary>
+        /// Blinks the element in and fades it out in about a second. Call it again for the next error: the running one is
+        /// cancelled by the caller's token and this one starts over. With animations off the element just shows for a few seconds.
+        /// </summary>
+        public static async Task FlashFadeAsync(Control target, CancellationToken cancellationToken = default)
+        {
+            if (target == null) return;
+
+            try
+            {
+                if (!Enabled)
+                {
+                    target.Opacity = 1.0;
+                    await Task.Delay(StaticErrorDuration, cancellationToken);
+                    target.Opacity = 0.0;
+                    return;
+                }
+
+                var animation = new Animation
+                {
+                    Duration = TimeSpan.FromMilliseconds(1200),
+                    FillMode = FillMode.Forward,
+                    Children =
+                    {
+                        new KeyFrame { Cue = new Cue(0), Setters = { new Setter(Visual.OpacityProperty, 0.0) } },
+                        // The blink: in within a tenth of the time, then a short hold before the fade.
+                        new KeyFrame { Cue = new Cue(0.08), Setters = { new Setter(Visual.OpacityProperty, 1.0) } },
+                        new KeyFrame { Cue = new Cue(0.3), Setters = { new Setter(Visual.OpacityProperty, 1.0) } },
+                        new KeyFrame { Cue = new Cue(1), Setters = { new Setter(Visual.OpacityProperty, 0.0) } }
+                    }
+                };
+                await animation.RunAsync(target, cancellationToken);
+                target.Opacity = 0.0;
+            }
+            catch (OperationCanceledException)
+            {
+                // A newer error took over.
+            }
+        }
+
         public static Task PopInAsync(Control target, CancellationToken cancellationToken = default)
             => FadeInAsync(target, TimeSpan.FromMilliseconds(180), cancellationToken);
 

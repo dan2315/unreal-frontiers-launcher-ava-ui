@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -29,7 +30,19 @@ namespace UnrealFrontiersLauncher
             DataContext = viewModel;
             
             InitializeComponent();
+
+            // Every new error (even the same text again) flashes and fades out; a running animation is replaced.
+            viewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName != nameof(AuthPageViewModel.AuthErrorSeq)) return;
+
+                _errorFlash?.Cancel();
+                _errorFlash = new CancellationTokenSource();
+                _ = UiAnimations.FlashFadeAsync(ErrorBox, _errorFlash.Token);
+            };
         }
+
+        private CancellationTokenSource? _errorFlash;
 
 
         public async Task TryAutoAuth()

@@ -43,7 +43,7 @@
 
                         <!-- Auth Error. The slot keeps its height when empty, so an error does not move the form. -->
                         <Grid MinHeight="56" Margin="0,8,0,0" IsVisible="{Binding IsFormVisible}">
-                            <Border Background="#3A1518" BorderBrush="#E5484D" BorderThickness="1"
+                            <Border x:Name="ErrorBox" Opacity="0" Background="#3A1518" BorderBrush="#E5484D" BorderThickness="1"
                                     CornerRadius="10" VerticalAlignment="Top"
                                     IsVisible="{Binding AuthError, Converter={StaticResource TextToVisibilityConverter}}">
                                 <TextBlock Text="{Binding AuthError}"
@@ -59,7 +59,7 @@
                         <!-- Registered, but the email is not confirmed yet. -->
                         <StackPanel Spacing="10" IsVisible="{Binding IsVerificationPending}">
                             <Border Background="#33290F" BorderBrush="#E8B83A" BorderThickness="1" CornerRadius="10">
-                                <TextBlock Text="Аккаунт с этим email уже зарегистрирован, но почта не подтверждена."
+                                <TextBlock Text="Аккаунт с этим email уже зарегистрирован, но почта не подтверждена. Найдите письмо от нас (проверьте «Спам») или отправьте его ещё раз."
                                            Foreground="#F2D58A"
                                            FontSize="13"
                                            TextAlignment="Center"

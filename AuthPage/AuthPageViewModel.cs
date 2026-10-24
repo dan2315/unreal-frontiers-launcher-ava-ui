@@ -78,6 +78,27 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
     public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
 
+    private int _authErrorSeq;
+
+    /// <summary>Grows with every error shown, even the same text twice: the page restarts the flash-and-fade animation on each step.</summary>
+    public int AuthErrorSeq
+    {
+        get => _authErrorSeq;
+        private set
+        {
+            _authErrorSeq = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private void ShowError(string message)
+    {
+        _authError = message;
+        OnPropertyChanged(nameof(AuthError));
+        OnPropertyChanged(nameof(AuthErrorVisible));
+        AuthErrorSeq++;
+    }
+
     private bool _isVerificationPending;
     private string _resendMessage = "";
     private bool _isResending;
@@ -163,12 +184,11 @@ public class AuthPageViewModel : INotifyPropertyChanged
                     return;
                 }
 
-                AuthError = AuthResponses.ErrorMessage(response.Message);
+                ShowError(response.Message);
                 return;
             }
 
-            _popupService.ShowOkDialogAsync("Успех",
-                "Вам на почту отправлено письмо для подтверждения аккаунта");
+            _popupService.ShowOkDialogAsync("Успех", response.Message);
         }
         else if (IsLoginMode)
         {
@@ -177,8 +197,7 @@ public class AuthPageViewModel : INotifyPropertyChanged
 
             if (!response.Success)
             {
-                AuthError = response.Message;
-                Console.WriteLine(AuthError);
+                ShowError(response.Message);
                 return;
             }
 
@@ -198,11 +217,11 @@ public class AuthPageViewModel : INotifyPropertyChanged
             var result = await _authService.ResendVerification(EmailEntry.Value, PasswordEntry.Value);
             ResendMessage = result.Status switch
             {
-                ResendStatus.Sent => "Письмо отправлено. Проверьте почту.",
+                ResendStatus.Sent => "Письмо отправлено. " + AuthMessages.SpamHint,
                 ResendStatus.TooManyRequests => "Подождите минуту перед следующей отправкой.",
                 ResendStatus.AlreadyVerified => "Почта уже подтверждена. Можно войти.",
                 ResendStatus.InvalidCredentials => "Неверный пароль. Вернитесь к форме и введите его заново.",
-                _ => "Не удалось отправить письмо. Попробуйте позже."
+                _ => result.Message
             };
         }
         catch (System.Net.Http.HttpRequestException)
