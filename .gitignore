@@ -12,8 +12,6 @@ obj
 /.idea/.idea.unreal-frontiers-launcher/.idea/indexLayout.xml
 /unreal-frontiers-launcher.sln.DotSettings.user
 /.idea/.idea.unreal-frontiers-launcher/.idea/vcs.xml
-flatpak-builder
-.flatpak-builder/
 .avalonia-build-tasks/
 Packaging/publish/
 Packaging/Releases/
