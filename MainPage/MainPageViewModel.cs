@@ -105,6 +105,71 @@ public class MainPageViewModel : INotifyPropertyChanged
         get { return _pageReference.PlayerProfile?.Nickname; }
     }
 
+    // ---- The player's skin face; null shows the default Steve head under it ----
+
+    private Bitmap? _playerFace;
+    public Bitmap? PlayerFace
+    {
+        get => _playerFace;
+        private set
+        {
+            if (ReferenceEquals(_playerFace, value)) return;
+            _playerFace = value;
+            OnPropertyChanged(nameof(PlayerFace));
+        }
+    }
+
+    private bool _refreshingSkin;
+    private int _faceSkinId;
+
+    /// <summary>Reads the active skin (GET /skins/my) and draws its face; no skin, no picture or no connection keeps Steve.</summary>
+    public async Task RefreshSkinAsync(AuthService auth)
+    {
+        if (_refreshingSkin) return;
+        _refreshingSkin = true;
+        try
+        {
+            var token = await auth.GetFreshAccessTokenAsync();
+            var skin = token == null ? null : await SkinClient.FetchActiveAsync(SharedHttp.Api, AppStaticData.ServerURL, token);
+            if (skin == null)
+            {
+                _faceSkinId = 0;
+                PlayerFace = null;
+                return;
+            }
+            if (skin.Id == _faceSkinId && PlayerFace != null) return;
+
+            var cache = SkinClient.CachePath(AppStaticData.LauncherBasePath, skin.Id);
+            byte[]? png = System.IO.File.Exists(cache) ? await System.IO.File.ReadAllBytesAsync(cache) : null;
+            if (png == null)
+            {
+                png = await SkinClient.FetchPreviewAsync(SharedHttp.Api, AppStaticData.ServerURL, skin.PreviewUrl);
+                if (png == null) return;
+                try
+                {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(cache)!);
+                    await System.IO.File.WriteAllBytesAsync(cache, png);
+                }
+                catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException)
+                {
+                    Console.WriteLine($"Skin cache not saved: {e.Message}");
+                }
+            }
+
+            using var stream = new System.IO.MemoryStream(png);
+            PlayerFace = SkinFace.Compose(stream);
+            _faceSkinId = PlayerFace == null ? 0 : skin.Id;
+        }
+        catch (Exception e) when (e is not OutOfMemoryException)
+        {
+            Console.WriteLine($"Skin face not drawn: {e.Message}");
+        }
+        finally
+        {
+            _refreshingSkin = false;
+        }
+    }
+
     public MainPageViewModel(MainPage page, ServerService serverService, InstanceManager instanceManager)
     {
         _pageReference = page;
