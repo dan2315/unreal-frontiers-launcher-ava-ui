@@ -29,17 +29,17 @@
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center" />
                         <TextBox x:Name="UserInput"
-                                 Watermark="Type here..."
+                                 Watermark="Никнейм"
                                  Classes="uf-field"
                                  Height="42" />
                         <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,4,0,0">
-                            <Button Content="Submit"
+                            <Button Content="Продолжить"
                                     Classes="uf-accent"
                                     FontFamily="{StaticResource MontserratBold}"
                                     Padding="28,8"
                                     FontSize="15"
                                     Name="SubmitButton" />
-                            <Button Content="Cancel"
+                            <Button Content="Отмена"
                                     Classes="uf-ghost"
                                     FontFamily="{StaticResource MontserratBold}"
                                     Padding="28,8"

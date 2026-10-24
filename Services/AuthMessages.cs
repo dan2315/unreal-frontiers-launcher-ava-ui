@@ -15,10 +15,18 @@ public static class AuthMessages
     public const string SpamHint = "Если письма нет, загляните в «Спам»: пока оно часто попадает туда.";
     public const string ResetSpamHint = "Если его нет, загляните в «Спам».";
 
+    /// <summary>Shown when the browser did not come back after a Google/Yandex sign-in: the email may already belong to an account.</summary>
+    public const string OAuthTimeoutHint =
+        "Вход не завершился. Если у вас уже есть аккаунт с этим email — войдите паролем и привяжите Google/Яндекс в профиле на сайте.";
+
     // A new code from the backend goes here.
     private static readonly Dictionary<string, string> ByCode = new()
     {
         ["verification_pending"] = "Этот email уже зарегистрирован, но не подтверждён",
+        ["session_expired"] = "Сессия входа истекла, начните вход заново",
+        ["nickname_taken"] = "Этот ник уже занят. Выберите другой",
+        ["nickname_required"] = "Укажите ник",
+        ["already_registered"] = "Этот аккаунт уже зарегистрирован",
     };
 
     private static readonly Dictionary<string, string> ByText = new()
@@ -35,7 +43,8 @@ public static class AuthMessages
         ["Authentication token required"] = "Нужно войти в аккаунт",
         ["Set a password before unlinking Discord"] = "Сначала задайте пароль: без него в аккаунт будет не войти",
         ["Invalid or expired reset token"] = "Ссылка для сброса пароля недействительна или устарела",
-        ["Invalid or expired session"] = "Сессия входа истекла, попробуйте ещё раз",
+        ["Invalid or expired session"] = "Сессия входа истекла, начните вход заново",
+        ["Nickname already taken"] = "Этот ник уже занят. Выберите другой",
         ["Missing required fields"] = "Заполните все поля",
         ["New password is required"] = "Введите новый пароль",
         ["Nickname is required"] = "Введите ник",

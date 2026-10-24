@@ -183,31 +183,27 @@
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"/>
 
-                        <Grid ColumnDefinitions="*,*"
-                              IsVisible="{Binding IsLoginMode}">
-                            <Button Grid.Column="0" x:Name="StartDiscordAuthButton"
-                                    Click="InitiateDiscordAuth"
-                                    Classes="uf-discord"
-                                    Margin="0,0,5,0"
-                                    Height="40">
-                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                    <Svg Path="/Assets/Images/svg/discord_icon.svg" Height="20" Width="20"/>
-                                    <TextBlock FontFamily="{StaticResource MontserratBold}"
-                                               FontSize="13" VerticalAlignment="Center">Discord</TextBlock>
-                                </StackPanel>
-                            </Button>
-                            <Button Grid.Column="1"
-                                    Content="Google (WIP)"
-                                    IsEnabled="False"
-                                    Margin="5,0,0,0"
-                                    Height="40"
-                                    Background="#26232C"
-                                    Foreground="#7C828A"
-                                    FontFamily="{StaticResource MontserratRegular}"
-                                    FontSize="13"
-                                    BorderThickness="0"
-                                    CornerRadius="10"/>
-                        </Grid>
+                        <!-- Discord, then the providers the backend has switched on (Google, Yandex): none of those is a fixed list. -->
+                        <ItemsControl ItemsSource="{Binding SocialButtons}" IsVisible="{Binding IsLoginMode}" Margin="-3,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="local:SocialButton">
+                                    <Button Classes="uf-discord" Margin="3,0" Height="40"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                            Tag="{Binding Name}" Click="OnSocialClicked">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <Svg Path="{Binding IconPath}" IsVisible="{Binding HasIcon}" Height="20" Width="20"/>
+                                            <TextBlock Text="{Binding Title}" FontFamily="{StaticResource MontserratBold}"
+                                                       FontSize="13" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <Button Content="{Binding ToggleMessage}"
                                 Click="ToggleViewButton"

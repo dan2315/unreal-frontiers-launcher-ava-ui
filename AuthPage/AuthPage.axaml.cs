@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -16,7 +16,6 @@ namespace UnrealFrontiersLauncher
         private readonly PopupService _popupService;
         
         public Button ActionButtonRef => ActionButton;
-        public Button StartDiscordAuthButtonRef => StartDiscordAuthButton;
 
         public AuthPage(IServiceProvider serviceProvider)
         {
@@ -64,9 +63,10 @@ namespace UnrealFrontiersLauncher
             ((AuthPageViewModel) DataContext).AuthAction();
         }
 
-        public void InitiateDiscordAuth(object? sender, RoutedEventArgs  e) 
+        public void OnSocialClicked(object? sender, RoutedEventArgs e)
         {
-            ((AuthPageViewModel) DataContext).InitiateDiscordAuth(null);
+            if (sender is Button { Tag: string provider })
+                ((AuthPageViewModel) DataContext).StartSocial(provider);
         }
 
         public void ResendVerification(object? sender, RoutedEventArgs e)

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
+using System.Net;
 using System.Net.Http;
 using System;
 using System.Collections.Generic;
@@ -214,6 +215,8 @@ namespace UnrealFrontiersLauncher
                 UseShellExecute = true
             });
 
+            LoginFlow.Begin(LoginFlow.Discord);
+
             // Indicate that the method triggered the process successfully
             return Task.FromResult((true, "Discord authentication initiated. Follow the browser instructions."));
         }
@@ -241,6 +244,65 @@ namespace UnrealFrontiersLauncher
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Error details: {errorContent}");
                 return (false, null, null, null);
+            }
+        }
+
+        /// <summary>The providers to show next to Discord. None when the backend has none enabled or cannot be reached.</summary>
+        public async Task<IReadOnlyList<OAuthProvider>> GetOAuthProvidersAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/auth/oauth/providers");
+                return response.IsSuccessStatusCode ? OAuth.ParseProviders(await response.Content.ReadAsStringAsync()) : [];
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                Console.WriteLine($"OAuth providers unavailable: {e.Message}");
+                return [];
+            }
+        }
+
+        /// <summary>Opens the provider's sign-in in the system browser; the player returns to the launcher through uflauncher://.</summary>
+        public void StartOAuth(string provider)
+        {
+            if (!OAuth.IsValidName(provider)) throw new ArgumentException("Not a provider name.", nameof(provider));
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = OAuth.StartUrl(AppStaticData.ServerURL, provider),
+                UseShellExecute = true
+            });
+        }
+
+        /// <summary>A new player's second step: the nickname for the registration session the callback gave.</summary>
+        public async Task<(bool Success, string Message, string? Code, string? Nickname)> CompleteOAuthSession(string sessionId, string nickname)
+        {
+            var payload = new { sessionId, nickname };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.PostAsync("/auth/oauth/complete_session", content);
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                return (false, AuthMessages.NoConnection, null, null);
+            }
+
+            var body = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                return (false, AuthMessages.Describe(response.StatusCode, body), AuthResponses.ErrorCode(body), null);
+
+            try
+            {
+                var data = JsonSerializer.Deserialize<JsonElement>(body);
+                ApplyTokens(data.GetProperty("accessToken").GetString()!, data.GetProperty("refreshToken").GetString()!);
+                return (true, "", null, data.GetProperty("nickname").GetString());
+            }
+            catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException)
+            {
+                return (false, AuthMessages.ForStatus(HttpStatusCode.InternalServerError), null, null);
             }
         }
 
