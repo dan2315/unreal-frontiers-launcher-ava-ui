@@ -1,153 +1,79 @@
 using System;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using System.Net.Mail;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
-using ReactiveUI;
 
 namespace UnrealFrontiersLauncher;
 
+/// <summary>
+/// The sign-in form. Everything else about an account (registration, a forgotten password, a missing letter, linking)
+/// is done on the site, so this page only signs in and sends the player there.
+/// </summary>
 public class AuthPageViewModel : INotifyPropertyChanged
 {
     public AuthPage PageReference { get; set; }
-    public ValidatableEntry NicknameEntry { get; }
-    public ValidatableEntry EmailEntry { get; }
-    public ValidatableEntry PasswordEntry { get; }
-    public ValidatableEntry RepeatPasswordEntry {get; }
-    private bool _isRegisterMode;
 
-    private AuthService _authService;
+    private readonly AuthService _authService;
     private readonly PlayerProfileProvider _playerProfileProvider;
-    private NavigationService _navigationService;
-    private PopupService _popupService;
+    private readonly NavigationService _navigationService;
+    private readonly PopupService _popupService;
 
-    private string _authError;
-
-    public bool IsRegisterMode
-    {
-        get => _isRegisterMode;
-        set
-        {
-            _isRegisterMode = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PageTitle));
-            OnPropertyChanged(nameof(ActionButtonText));
-            OnPropertyChanged(nameof(ToggleMessage));
-            OnPropertyChanged(nameof(ToggleButtonText));
-            OnPropertyChanged(nameof(IsLoginMode));
-            NicknameEntry.OnPropertyChanged(nameof(NicknameEntry.IsVisible));            
-            EmailEntry.OnPropertyChanged(nameof(EmailEntry.IsVisible));
-            PasswordEntry.OnPropertyChanged(nameof(PasswordEntry.IsVisible));
-            RepeatPasswordEntry.OnPropertyChanged(nameof(RepeatPasswordEntry.IsVisible));
-        }
-    }
-
-    public string AuthError 
-    {
-        get { 
-            if (string.IsNullOrEmpty(_authError))
-                return null;
-
-            return _authError;
-            try
-            {
-                using var jsonDoc = JsonDocument.Parse(_authError);
-                if (jsonDoc.RootElement.TryGetProperty("error", out var errorElement))
-                {
-                    return errorElement.GetString();
-                }
-                return "Unknown error format.";
-            }
-            catch (JsonException)
-            {
-                return "Invalid error format.";
-            }
-        }
-        set {
-            if (_authError != value) {
-                _authError = value;
-                OnPropertyChanged(nameof(AuthError));
-                OnPropertyChanged(nameof(AuthErrorVisible));
-            }       
-        }
-    }
-
-    public bool AuthErrorVisible => !String.IsNullOrEmpty(_authError);
-
+    private string _nickname = "";
+    private string _password = "";
+    private string? _authError;
     private int _authErrorSeq;
+    private bool _isEmailNotVerified;
+    private bool _isSigningIn;
+
+    /// <summary>Nickname or email.</summary>
+    public string Nickname
+    {
+        get => _nickname;
+        set { _nickname = value ?? ""; OnPropertyChanged(); }
+    }
+
+    /// <summary>Not checked against the password rules: older accounts may have other passwords.</summary>
+    public string Password
+    {
+        get => _password;
+        set { _password = value ?? ""; OnPropertyChanged(); }
+    }
+
+    public string? AuthError => string.IsNullOrEmpty(_authError) ? null : _authError;
 
     /// <summary>Grows with every error shown, even the same text twice: the page restarts the flash-and-fade animation on each step.</summary>
     public int AuthErrorSeq
     {
         get => _authErrorSeq;
-        private set
-        {
-            _authErrorSeq = value;
-            OnPropertyChanged();
-        }
+        private set { _authErrorSeq = value; OnPropertyChanged(); }
     }
 
     private void ShowError(string message)
     {
         _authError = message;
         OnPropertyChanged(nameof(AuthError));
-        OnPropertyChanged(nameof(AuthErrorVisible));
         AuthErrorSeq++;
     }
 
-    private bool _isVerificationPending;
-    private string _resendMessage = "";
-    private bool _isResending;
-
-    /// <summary>The email is registered with this password but not confirmed yet: offer to send the letter again.</summary>
-    public bool IsVerificationPending
+    /// <summary>The account exists but its email is not confirmed: explain what to do instead of the form.</summary>
+    public bool IsEmailNotVerified
     {
-        get => _isVerificationPending;
+        get => _isEmailNotVerified;
         private set
         {
-            _isVerificationPending = value;
+            _isEmailNotVerified = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsFormVisible));
         }
     }
 
-    public bool IsFormVisible => !_isVerificationPending;
+    public bool IsFormVisible => !_isEmailNotVerified;
 
-    public string ResendMessage
-    {
-        get => _resendMessage;
-        private set
-        {
-            _resendMessage = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool IsResending
-    {
-        get => _isResending;
-        private set
-        {
-            _isResending = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(CanResend));
-        }
-    }
-
-    public bool CanResend => !_isResending;
-
-    public bool IsLoginMode => !IsRegisterMode;
-    public string PageTitle => IsRegisterMode ? "Регистрация" : "Войти";
-    public string ActionButtonText => IsRegisterMode ? "Создать аккаунт" : "Войти";
-    public string ToggleMessage => IsLoginMode ? "Нет аккаунта?" : "Аккаунт уже есть?";
-    public string ToggleButtonText => IsRegisterMode ? "Login" : "Sign Up";
+    public const string EmailNotVerifiedHint =
+        "Аккаунт есть, но почта не подтверждена. Найдите письмо от нас (проверьте «Спам»). " +
+        "Если его нет, откройте сайт, введите тот же email и пароль, и мы предложим отправить письмо ещё раз.";
 
     public AuthPageViewModel(AuthService authService, PlayerProfileProvider playerProfileProvider, NavigationService navigationService, PopupService popupService)
     {
@@ -155,94 +81,65 @@ public class AuthPageViewModel : INotifyPropertyChanged
         _playerProfileProvider = playerProfileProvider;
         _navigationService = navigationService;
         _popupService = popupService;
-        NicknameEntry = new ValidatableEntry(ValidateNickname, this);
-        EmailEntry = new ValidatableEntry(ValidateEmail, this);
-        PasswordEntry = new ValidatableEntry(ValidatePassword, this);
-        RepeatPasswordEntry = new ValidatableEntry(ValidateRepeatPassword, this);
-        IsRegisterMode = false;
         SocialButtons.Add(new SocialButton(LoginFlow.Discord, "Discord", "/Assets/Images/svg/discord_icon.svg"));
         _ = LoadSocialProvidersAsync();
     }
-    
+
     public async void AuthAction()
     {
-        if (IsRegisterMode)
+        if (_isSigningIn) return;
+        _isSigningIn = true;
+        try
         {
-            NicknameEntry.Validate();
-            EmailEntry.Validate();
-            PasswordEntry.Validate();
-            RepeatPasswordEntry.Validate();
-            
-            bool valid = NicknameEntry.IsValid && EmailEntry.IsValid && PasswordEntry.IsValid && RepeatPasswordEntry.IsValid;
-
-            if (!valid) return;
-            var response = await _authService.CreateAccount(NicknameEntry.Value, EmailEntry.Value, PasswordEntry.Value);
-            PageReference.ActionButtonRef.IsEnabled = true;
-                
-            if(!response.Success) 
+            while (true)
             {
-                if (response.Code == AuthResponses.VerificationPending)
+                var response = await _authService.Login(Nickname, Password);
+                if (response.Success)
                 {
-                    AuthError = null;
-                    ResendMessage = "";
-                    IsVerificationPending = true;
+                    _authService.GrantAccess(_playerProfileProvider, new AuthPage.AccessData { nickname = response.Nickname });
+                    _navigationService.NavigateTo<MainPage>();
+                    return;
+                }
+
+                if (response.Failure == LoginFailure.NoConnection)
+                {
+                    if (await OfflineMode.OfferAsync(_popupService))
+                    {
+                        OfflineMode.Enter(_playerProfileProvider);
+                        _navigationService.NavigateTo<MainPage>();
+                        return;
+                    }
+                    continue;
+                }
+
+                if (response.Failure == LoginFailure.EmailNotVerified)
+                {
+                    _authError = null;
+                    OnPropertyChanged(nameof(AuthError));
+                    IsEmailNotVerified = true;
                     return;
                 }
 
                 ShowError(response.Message);
                 return;
             }
-
-            _popupService.ShowOkDialogAsync("Успех", response.Message);
-        }
-        else if (IsLoginMode)
-        {
-            var response = await _authService.Login(NicknameEntry.Value, PasswordEntry.Value);
-            PageReference.ActionButtonRef.IsEnabled = true;
-
-            if (!response.Success)
-            {
-                ShowError(response.Message);
-                return;
-            }
-
-            _authService.GrantAccess(_playerProfileProvider, new AuthPage.AccessData { nickname = response.Nickname });
-            _navigationService.NavigateTo<MainPage>();
-        }
-    }
-
-    public async void ResendVerification()
-    {
-        if (IsResending) return;
-
-        IsResending = true;
-        ResendMessage = "";
-        try
-        {
-            var result = await _authService.ResendVerification(EmailEntry.Value, PasswordEntry.Value);
-            ResendMessage = result.Status switch
-            {
-                ResendStatus.Sent => "Письмо отправлено. " + AuthMessages.SpamHint,
-                ResendStatus.TooManyRequests => "Подождите минуту перед следующей отправкой.",
-                ResendStatus.AlreadyVerified => "Почта уже подтверждена. Можно войти.",
-                ResendStatus.InvalidCredentials => "Неверный пароль. Вернитесь к форме и введите его заново.",
-                _ => result.Message
-            };
-        }
-        catch (System.Net.Http.HttpRequestException)
-        {
-            ResendMessage = "Нет связи с сервером. Попробуйте позже.";
         }
         finally
         {
-            IsResending = false;
+            _isSigningIn = false;
         }
     }
 
-    public void BackToForm()
+    public void BackToForm() => IsEmailNotVerified = false;
+
+    public void OpenRegister() => OpenSite(SiteLinks.AuthUrl(AppStaticData.ServerURL, "register"));
+
+    public void OpenForgotPassword() => OpenSite(SiteLinks.AuthUrl(AppStaticData.ServerURL, "forgot"));
+
+    private void OpenSite(string url)
     {
-        IsVerificationPending = false;
-        ResendMessage = "";
+        if (!SiteLinks.OpenInBrowser(url))
+            ShowError("Не удалось открыть браузер");
     }
 
     /// <summary>The sign-in buttons under the form: Discord always, then the providers the backend has switched on.</summary>
@@ -295,90 +192,10 @@ public class AuthPageViewModel : INotifyPropertyChanged
         }));
     }
 
-    public void ToggleView()
-    {
-        Console.WriteLine("Toggle Happened");
-        IsRegisterMode = !IsRegisterMode;
-    }
-
-    public void InitiatePasswordRecovery()
-    {
-        var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
-        {
-            var message = await _authService.SendResetPasswordEmail(email);
-            await _popupService.ShowOkDialogAsync("Восстановление пароля", message);
-            _navigationService.GetBack();
-        });
-        _navigationService.NavigateTo(entryModal);
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public (bool IsValid, string Message) ValidateEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-            return (false, "Почта не может быть пустой.");
-
-        string emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-        if (!Regex.IsMatch(email, emailRegex, RegexOptions.IgnoreCase))
-        {
-            return (false, "Неверный формат почты.");
-        }
-
-        return (true, "");
-    }
-
-    public (bool IsValid, string Message) ValidatePassword(string password)
-    {
-        if (string.IsNullOrWhiteSpace(password))
-            return (false, "Ну придумай пароль.");
-
-        if (password.Length < 8)
-            return (false, "Пароль должен быть минимум 8 символов.");
-
-        if (!password.Any(char.IsUpper))
-            return (false, "Добавь большую букву.");
-
-        if (!password.Any(char.IsLower))
-            return (false, "Добавь маленькую букву.");
-
-        if (!password.Any(char.IsDigit))
-            return (false, "Добавь цифру.");
-
-        return (true, "");
-    }
-
-    public (bool IsValid, string Message) ValidateNickname(string nickname)
-    {
-        if (string.IsNullOrWhiteSpace(nickname))
-            return (false, "А как ты будешь играть без имени?");
-
-        if (nickname.Length < 3)
-            return (false, "Минимум 3 символа.");
-
-        if (nickname.Length > 16)
-            return (false, "Максимум 16 символов.");
-
-        var regex = new System.Text.RegularExpressions.Regex("^[a-zA-Z0-9_]+$");
-        if (!regex.IsMatch(nickname))
-            return (false, "Напрудил каких-то не тех буковок.");
-
-        return (true, "");
-    }
-
-    private (bool, string) ValidateRepeatPassword(string repeatedPassword)
-    {
-        if (string.IsNullOrWhiteSpace(repeatedPassword))
-            return (false, "Поле не может быть пустым.");
-
-        if (repeatedPassword != PasswordEntry.Value) 
-            return (false, "Пароли не совпадают.");
-
-        return (true, "");
     }
 }
 

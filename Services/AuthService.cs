@@ -25,51 +25,7 @@ namespace UnrealFrontiersLauncher
             SetAccessToken(tokens.accessToken);
         }
 
-        public async Task<(bool Success, string Message, string? Code)> CreateAccount(string nickname, string email, string password)
-        {
-            var payload = new { nickname, email, password };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            HttpResponseMessage response;
-            try
-            {
-                response = await _httpClient.PostAsync("/auth/create_account", content);
-            }
-            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
-            {
-                return (false, AuthMessages.NoConnection, null);
-            }
-
-            var responseMessage = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                return (true, "Аккаунт создан. Мы отправили письмо — подтвердите email и войдите. " + AuthMessages.SpamHint, null);
-            }
-            else
-            {
-                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), AuthResponses.ErrorCode(responseMessage));
-            }
-        }
-
-        public async Task<(ResendStatus Status, string Message)> ResendVerification(string email, string password)
-        {
-            var payload = new { email, password };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            HttpResponseMessage response;
-            try
-            {
-                response = await _httpClient.PostAsync("/auth/resend_verification", content);
-            }
-            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
-            {
-                return (ResendStatus.Failed, AuthMessages.NoConnection);
-            }
-
-            var body = await response.Content.ReadAsStringAsync();
-            return (AuthResponses.ResendStatusOf(response.StatusCode), AuthMessages.Describe(response.StatusCode, body));
-        }
-
-        public async Task<(bool Success, string Message, string? AccessToken, string? RefreshToken, string? Nickname)> Login(string nicknameOrEmail, string password)
+        public async Task<(bool Success, string Message, string? AccessToken, string? RefreshToken, string? Nickname, LoginFailure Failure)> Login(string nicknameOrEmail, string password)
         {
             var payload = new { nicknameOrEmail, password };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -80,7 +36,7 @@ namespace UnrealFrontiersLauncher
             }
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
             {
-                return (false, AuthMessages.NoConnection, null, null, null);
+                return (false, AuthMessages.NoConnection, null, null, null, LoginFailure.NoConnection);
             }
 
             var responseMessage = await response.Content.ReadAsStringAsync();
@@ -94,53 +50,20 @@ namespace UnrealFrontiersLauncher
                 string refreshToken = data.GetProperty("refreshToken").GetString()!;
 
                 ApplyTokens(accessToken, refreshToken);
-                return (true, "Login successful.", accessToken, refreshToken, nickname);
+                return (true, "Login successful.", accessToken, refreshToken, nickname, LoginFailure.None);
             }
             else
             {
-                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), null, null, null);
+                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), null, null, null, AuthResponses.LoginFailureOf(response.StatusCode, responseMessage));
             }
         }
 
-        public async Task<(bool Success, string Message, bool IsVerified)> CheckAccountVerified(string email)
-        {
-            var response = await _httpClient.GetAsync($"/auth/check_verification?email={Uri.EscapeDataString(email)}");
-            var responseMessage = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var data = JsonSerializer.Deserialize<JsonElement>(responseMessage);
-                bool isVerified = data.GetProperty("verified").GetBoolean();
-                string message = data.GetProperty("message").GetString();
-                return (true, message, isVerified);
-            }
-            else
-            {
-                return (false, AuthMessages.Describe(response.StatusCode, responseMessage), false);
-            }
-        }
-
-
-        public async Task<(bool Success, string Message)> RequestPasswordReset(string email)
-        {
-            var payload = new { email };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/auth/request_password_reset", content);
-
-            var responseMessage = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                return (true, "Письмо со ссылкой для сброса пароля отправлено. " + AuthMessages.ResetSpamHint);
-            }
-            else
-            {
-                return (false, AuthMessages.Describe(response.StatusCode, responseMessage));
-            }
-        }
+        /// <summary>The last token check got no answer from the backend (as opposed to an answer that refused the tokens).</summary>
+        public bool BackendUnreachable { get; private set; }
 
         public async Task<(bool, string?)> TryAuthWithTokens()
         {
+            BackendUnreachable = false;
             (string accessToken, string refreshToken) = _tokenStorage.LoadTokens();
             if (accessToken.Length == 0 && refreshToken.Length == 0) return (false, null);
 
@@ -173,6 +96,7 @@ namespace UnrealFrontiersLauncher
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
             {
                 Console.WriteLine($"Token authentication failed: {ex.Message}");
+                BackendUnreachable = ex is HttpRequestException or TaskCanceledException;
             }
 
             return (false, null);
@@ -306,28 +230,6 @@ namespace UnrealFrontiersLauncher
             }
         }
 
-        public async Task<string> SendResetPasswordEmail(string email)
-        {
-            try
-            {
-                var payload = new { email };
-
-                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("/auth/send_reset_password_email", content);
-
-                if (response.IsSuccessStatusCode)
-                    return "Письмо со ссылкой для сброса пароля отправлено. " + AuthMessages.ResetSpamHint;
-
-                Console.WriteLine($"Error: {response.StatusCode}");
-                return AuthMessages.Describe(response.StatusCode, await response.Content.ReadAsStringAsync());
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                Console.WriteLine($"Password reset request failed: {ex.Message}");
-                return AuthMessages.NoConnection;
-            }
-        }
-        
         
         public void GrantAccessAndProceed(PlayerProfileProvider profileProvider, NavigationService navigationService, NameValueCollection queryParams)
         {
@@ -347,6 +249,8 @@ namespace UnrealFrontiersLauncher
                 SetAccessToken(parameters.accessToken);
             }
 
+            OfflineMode.Leave();
+            if (parameters.nickname != null) LastPlayer.Save(parameters.nickname);
             profileProvider.SetProfile(new PlayerProfile(parameters.nickname ?? PlayerProfile.Default.Nickname));
         }
         

@@ -162,22 +162,13 @@ public partial class MainPage : UserControl
         _navigationService.NavigateTo<AuthPage>();
     }
 
-    private void OnAddPasswordClicked(object? sender, RoutedEventArgs e)
+    // Everything about the account (password, linked Google/Yandex/Discord, skins) is managed on the site.
+    private void OnAccountClicked(object? sender, RoutedEventArgs e)
     {
         ProfilePopup.IsVisible = false;
         SetProfileChevron(false);
-        var entryModal = new EntryModal(_navigationService, "Укажите почту, куда отправить ресет пароля", async (email) =>
-        {
-            var message = await _authService.SendResetPasswordEmail(email);
-            await _popUpService.ShowOkDialogAsync("Восстановление пароля", message);
-            _navigationService.GetBack();
-        });
-        _navigationService.NavigateTo(entryModal);
-    }
-
-    private async void OnConnectDiscordClicked(object? sender, RoutedEventArgs e)
-    {
-        await _authService.DiscordAuth(PlayerProfile?.Nickname);
+        if (!SiteLinks.OpenInBrowser(SiteLinks.ProfileUrl(AppStaticData.ServerURL)))
+            _ = _popUpService.ShowOkDialogAsync("Аккаунт", "Не удалось открыть браузер.");
     }
 
     // ---- Launch ----

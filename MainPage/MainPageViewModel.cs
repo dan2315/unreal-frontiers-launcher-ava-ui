@@ -119,6 +119,11 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
     }
 
+    // ---- Connection state shown in the profile menu ----
+
+    public string ConnectionText => OfflineMode.IsActive ? "Офлайн" : "В сети";
+    public IBrush ConnectionColor => OfflineMode.IsActive ? Brushes.Gray : new SolidColorBrush(Color.Parse("#4CC24C"));
+
     private bool _refreshingSkin;
     private int _faceSkinId;
 
@@ -126,6 +131,12 @@ public class MainPageViewModel : INotifyPropertyChanged
     public async Task RefreshSkinAsync(AuthService auth)
     {
         if (_refreshingSkin) return;
+        if (OfflineMode.IsActive)
+        {
+            _faceSkinId = 0;
+            PlayerFace = null;
+            return;
+        }
         _refreshingSkin = true;
         try
         {
@@ -175,6 +186,11 @@ public class MainPageViewModel : INotifyPropertyChanged
         _pageReference = page;
         _serverService = serverService;
         _instanceManager = instanceManager;
+        OfflineMode.Changed += () =>
+        {
+            OnPropertyChanged(nameof(ConnectionText));
+            OnPropertyChanged(nameof(ConnectionColor));
+        };
         Modpacks = new ObservableCollection<Modpack>();
 
         ReconcileModpacks(ModpackCatalog.Merge(null, _instanceManager.Instances.ToList()));

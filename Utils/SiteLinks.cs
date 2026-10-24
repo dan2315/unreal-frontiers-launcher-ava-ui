@@ -21,6 +21,12 @@ public static class SiteLinks
     /// <summary>The same page with the "report a problem" form already open (kind: bug, problem, question or idea).</summary>
     public static string ReportUrl(string serverUrl, string kind = "problem") => $"{SupportUrl(serverUrl)}?new=1&kind={Uri.EscapeDataString(kind)}";
 
+    /// <summary>The site's sign-in window on one tab: "register", "forgot" or "login". Everything about the account is done there.</summary>
+    public static string AuthUrl(string serverUrl, string tab) => $"{SiteUrl(serverUrl)}/?auth={Uri.EscapeDataString(tab)}";
+
+    /// <summary>The player's profile on the site: password, linked Google/Yandex/Discord, skins.</summary>
+    public static string ProfileUrl(string serverUrl) => $"{SiteUrl(serverUrl)}/profile";
+
     /// <returns>false when no browser could be started.</returns>
     public static bool OpenInBrowser(string url)
     {

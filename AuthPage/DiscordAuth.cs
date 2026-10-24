@@ -68,7 +68,7 @@ class DiscordAuth
                 authService.GrantAccess(profileProvider, new() {nickname = response.nickname, accessToken = response.accessToken});
                 navigation.NavigateTo<MainPage>();
             }
-        });
+        }, AccountRules.ValidateNickname);
         navigation.NavigateTo(entryModal);
         return Task.CompletedTask;
     }
