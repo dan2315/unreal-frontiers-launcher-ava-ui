@@ -66,9 +66,14 @@ namespace UnrealFrontiersLauncher
                 // Console/close behaviour is global (Preferences), RAM stays per-instance.
                 var globalBehaviour = Preferences.Preferences.Get();
                 var accessToken = await _authService.GetFreshAccessTokenAsync();
+                // CmlLib marks offline sessions as Microsoft accounts ("msa"). The game then takes the placeholder
+                // token to Mojang's services and gets 401s; its block list is retried on the render thread on chat
+                // messages every two minutes, freezing the game. "legacy" makes it use the offline services.
+                var session = MSession.CreateOfflineSession(playerProfile.Nickname);
+                session.UserType = "legacy";
                 var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
                 {
-                    Session = MSession.CreateOfflineSession(playerProfile.Nickname),
+                    Session = session,
                     MaximumRamMb = launchConfiguration.Ram,
                 });
                 ApplyGameEnvironment(process, accessToken);
