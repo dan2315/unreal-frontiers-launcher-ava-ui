@@ -85,6 +85,7 @@
                              ItemsSource="{Binding Modpacks}"
                              SelectedItem="{Binding SelectedModpack}"
                              SelectionChanged="OnInstanceSelected"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              Background="Transparent"
                              BorderThickness="0">
                         <ListBox.ItemTemplate>
@@ -100,23 +101,94 @@
                                     <!-- NB: hover fade transitions are applied at
                                          runtime via UiAnimations.ApplyCardTransitions,
                                          so the master switch can kill them. -->
-                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+                                    <!-- The header is as tall as the icon: the name at its top, the line under it at its bottom. -->
+                                    <Grid RowDefinitions="20,20,Auto" ColumnDefinitions="Auto,*,Auto">
                                         <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
                                                 Width="40" Height="40" CornerRadius="10"
                                                 ClipToBounds="True" Margin="0,0,12,0"
                                                 Background="#141218">
                                             <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
                                         </Border>
-                                        <TextBlock Grid.Row="0" Grid.Column="1"
-                                                   Text="{Binding Name}"
-                                                   FontSize="14" TextTrimming="CharacterEllipsis"
-                                                   Foreground="{Binding TextColor}"
-                                                   FontFamily="{StaticResource MontserratBold}"/>
+                                        <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,Auto" VerticalAlignment="Top">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       FontSize="14" TextTrimming="CharacterEllipsis"
+                                                       Foreground="{Binding TextColor}"
+                                                       FontFamily="{StaticResource MontserratBold}"/>
+                                            <TextBlock Grid.Column="1" Margin="8,0,0,0"
+                                                       Text="{Binding PlayerCount}"
+                                                       FontSize="12" VerticalAlignment="Center"
+                                                       Foreground="{Binding PlayerCountColor}"
+                                                       FontFamily="{StaticResource MontserratBold}"/>
+                                        </Grid>
                                         <TextBlock Grid.Row="1" Grid.Column="1"
+                                                   VerticalAlignment="Bottom"
                                                    Text="{Binding Subtitle}"
                                                    FontSize="11" TextTrimming="CharacterEllipsis"
                                                    Foreground="#8E939B"
                                                    FontFamily="{StaticResource MontserratRegular}"/>
+                                        <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
+                                                Classes="uf-ghost" IsVisible="{Binding IsGroup}"
+                                                Width="28" Height="28" Padding="0" Margin="6,0,-4,0"
+                                                VerticalAlignment="Center"
+                                                Click="OnGroupExpandClicked"
+                                                AutomationProperties.AutomationId="GroupExpand"
+                                                AutomationProperties.Name="{Binding ExpandTip}"
+                                                ToolTip.Tip="{Binding ExpandTip}">
+                                            <Svg Path="/Assets/Images/svg/chevron_up.svg" Width="14" Height="14"
+                                                 Opacity="0.7" RenderTransformOrigin="50%,50%">
+                                                <Svg.RenderTransform>
+                                                    <RotateTransform Angle="{Binding ChevronAngle}"/>
+                                                </Svg.RenderTransform>
+                                            </Svg>
+                                        </Button>
+                                        <!-- The network's servers, under the row -->
+                                        <ItemsControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                                      IsVisible="{Binding ShowNestedServers}"
+                                                      ItemsSource="{Binding GroupServers}"
+                                                      Margin="0,10,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="ufl:GroupServerRow">
+                                                    <!-- Each server as its own small card: icon, name, genre, status and online. -->
+                                                    <Border Background="#16141B" BorderBrush="#2E2C34" BorderThickness="1"
+                                                            CornerRadius="10" Margin="0,6,0,0" ClipToBounds="True"
+                                                            ToolTip.Tip="{Binding Tip}">
+                                                        <Grid ColumnDefinitions="3,Auto,*,Auto">
+                                                            <Border Grid.Column="0" Background="{Binding AccentBrush}"/>
+                                                            <Border Grid.Column="1" Width="34" Height="34" CornerRadius="8" ClipToBounds="True"
+                                                                    Margin="9,8,10,8" Background="{Binding TileBackground}">
+                                                                <Grid>
+                                                                    <TextBlock Text="{Binding Initial}" IsVisible="{Binding !HasIcon}"
+                                                                               FontFamily="{StaticResource MontserratBold}" FontSize="16"
+                                                                               Foreground="{Binding AccentBrush}"
+                                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    <Image Source="{Binding Icon}" IsVisible="{Binding HasIcon}" Stretch="UniformToFill"/>
+                                                                </Grid>
+                                                            </Border>
+                                                            <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Name}" FontSize="13" Foreground="White"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           FontFamily="{StaticResource MontserratBold}"/>
+                                                                <TextBlock Text="{Binding Kind}" IsVisible="{Binding HasKind}"
+                                                                           FontSize="10" Foreground="{Binding AccentBrush}"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           FontFamily="{StaticResource MontserratBold}"/>
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="3" Spacing="1" Margin="8,0,10,0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Online}" HorizontalAlignment="Right" FontSize="12"
+                                                                           Foreground="{StaticResource UfMintBrush}"
+                                                                           FontFamily="{StaticResource MontserratBold}"/>
+                                                                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                                                                    <Ellipse Width="6" Height="6" Fill="{Binding StatusBrush}" VerticalAlignment="Center"/>
+                                                                    <TextBlock Text="{Binding StatusText}" FontSize="9" Foreground="#8E939B"
+                                                                               FontFamily="{StaticResource MontserratRegular}" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
