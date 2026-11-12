@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -61,7 +62,9 @@ public class Modpack : INotifyPropertyChanged
         }
     }
 
-    public Bitmap Icon { get; set; }
+    private Bitmap _packIcon;
+    // A network shows its own icon; the pack's icon belongs to the server it was made for.
+    public Bitmap Icon => Group != null ? GroupIcon(Group.Id) : _packIcon;
     private string _value;
     public string Value
     {
@@ -71,7 +74,7 @@ public class Modpack : INotifyPropertyChanged
             if (_value != value)
             {
                 _value = value;
-                Icon = LoadIcon(_value);
+                _packIcon = LoadIcon(_value);
                 OnPropertyChanged(nameof(Icon));
             }
         }
@@ -80,14 +83,82 @@ public class Modpack : INotifyPropertyChanged
     // Raw catalog data, kept so an offline instance can be materialized on demand.
     public CatalogEntry Entry { get; private set; }
 
-    public void Apply(CatalogEntry entry, bool nameIsAmbiguous)
+    private bool _nameIsAmbiguous;
+
+    public void Apply(CatalogEntry entry, bool nameIsAmbiguous, ServerGroup? group = null)
     {
         Entry = entry;
-        Name = nameIsAmbiguous ? $"{entry.Name} ({entry.Id})" : entry.Name;
-        Subtitle = BuildSubtitle(entry);
+        _nameIsAmbiguous = nameIsAmbiguous;
         StatusText = StatusLabel(entry.Status);
         StatusColor = StatusBrush(entry.Status);
+        ApplyGroup(group);
         _ = LoadRemoteIconAsync(entry.ImageUrl);
+    }
+
+    // ---- Network of servers on this pack: one row in the list that opens into its servers ----
+
+    public ServerGroup? Group { get; private set; }
+    public bool IsGroup => Group != null;
+    public IReadOnlyList<GroupServerRow> GroupServers { get; private set; } = [];
+
+    // The network's row in the list opens into its servers.
+    private bool _isExpanded;
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (_isExpanded == value) return;
+            _isExpanded = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowNestedServers));
+            OnPropertyChanged(nameof(ChevronAngle));
+            OnPropertyChanged(nameof(ExpandTip));
+        }
+    }
+
+    public bool ShowNestedServers => IsGroup && IsExpanded;
+    public double ChevronAngle => IsExpanded ? 0 : 180;
+    public string ExpandTip => IsExpanded ? "Свернуть серверы" : "Показать серверы";
+
+    /// <summary>The server whose news the card shows.</summary>
+    public string NewsServerId => Group?.PrimaryServerId ?? Value;
+
+    public void ApplyGroup(ServerGroup? group)
+    {
+        Group = group;
+        var entry = Entry;
+        if (group == null)
+        {
+            Name = _nameIsAmbiguous ? $"{entry.Name} ({entry.Id})" : entry.Name;
+            Subtitle = BuildSubtitle(entry);
+            GroupServers = [];
+        }
+        else
+        {
+            Name = group.Name;
+            // One pack for the whole network: its game version and loader say nothing to the player.
+            Subtitle = entry.Version.Length > 0 ? $"Сеть · {ServersCount(group.Servers.Count)} · v{entry.Version}" : $"Сеть · {ServersCount(group.Servers.Count)}";
+            GroupServers = group.Servers.Select(server => new GroupServerRow(server, BundledIcon(server.Id) ?? (server.Id == Value ? _packIcon : null))).ToList();
+            _hasPlayerData = true;
+            CurrentPlayers = group.Online;
+            MaxPlayers = group.MaxPlayers;
+            OnPropertyChanged(nameof(PlayerCount));
+            OnPropertyChanged(nameof(PlayerCountColor));
+        }
+        OnPropertyChanged(nameof(Group));
+        OnPropertyChanged(nameof(Icon));
+        OnPropertyChanged(nameof(IsGroup));
+        OnPropertyChanged(nameof(ShowNestedServers));
+        OnPropertyChanged(nameof(GroupServers));
+    }
+
+    private static string ServersCount(int count)
+    {
+        var lastTwo = count % 100;
+        var last = count % 10;
+        var word = lastTwo is >= 11 and <= 14 ? "серверов" : last == 1 ? "сервер" : last is >= 2 and <= 4 ? "сервера" : "серверов";
+        return $"{count} {word}";
     }
 
     private static string BuildSubtitle(CatalogEntry entry)
@@ -119,11 +190,21 @@ public class Modpack : INotifyPropertyChanged
 
     private static readonly string AssetRoot = $"avares://{typeof(Modpack).Assembly.GetName().Name}/Assets/Images/";
 
-    private static Bitmap LoadIcon(string id)
+    private static Bitmap LoadIcon(string id) => BundledIcon(id) ?? new Bitmap(AssetLoader.Open(new Uri(AssetRoot + "logo_badge.png")));
+
+    /// <summary>The icon shipped with the launcher for a pack or a server (Assets/Images/ModpackIcons/{id}_icon.png), or null.</summary>
+    public static Bitmap? BundledIcon(string id)
     {
-        var iconUri = new Uri($"{AssetRoot}ModpackIcons/{id}_icon.png");
-        var uri = AssetLoader.Exists(iconUri) ? iconUri : new Uri(AssetRoot + "logo_badge.png");
-        return new Bitmap(AssetLoader.Open(uri));
+        var uri = new Uri($"{AssetRoot}ModpackIcons/{id}_icon.png");
+        return AssetLoader.Exists(uri) ? new Bitmap(AssetLoader.Open(uri)) : null;
+    }
+
+    private static readonly Dictionary<string, Bitmap> GroupIcons = new();
+
+    private static Bitmap GroupIcon(string id)
+    {
+        if (!GroupIcons.TryGetValue(id, out var icon)) GroupIcons[id] = icon = LoadIcon(id);
+        return icon;
     }
 
     private string? _iconUrl;
@@ -138,7 +219,7 @@ public class Modpack : INotifyPropertyChanged
         try
         {
             using var stream = new System.IO.MemoryStream(await SharedHttp.Api.GetByteArrayAsync(uri));
-            Icon = new Bitmap(stream);
+            _packIcon = new Bitmap(stream);
             OnPropertyChanged(nameof(Icon));
         }
         catch (Exception ex)
@@ -184,7 +265,8 @@ public class Modpack : INotifyPropertyChanged
     private bool _playerDataUnavailable;
     // "—" while loading or when the server is unreachable, so the row
     // and the online bar below it never shift or disappear.
-    public string PlayerCount => _hasPlayerData ? $"{CurrentPlayers}/{MaxPlayers}" : "—";
+    // A network whose front server gives no limit shows just the players.
+    public string PlayerCount => !_hasPlayerData ? "—" : MaxPlayers > 0 ? $"{CurrentPlayers}/{MaxPlayers}" : $"{CurrentPlayers}";
 
     // Mint when live, muted gray while loading or unavailable.
     public IBrush PlayerCountColor => _hasPlayerData
@@ -241,7 +323,11 @@ public class Modpack : INotifyPropertyChanged
 
     public async Task UpdatePlayerCount(ServerService server)
     {
+        // A network's online is the sum the group list gives.
+        if (IsGroup) return;
         var (success, currentPlayers, maxPlayers) = await server.GetPlayerCount(Value);
+        // The pack may have turned into a network while the request was out.
+        if (IsGroup) return;
         if (success)
         {
             _hasPlayerData = true;

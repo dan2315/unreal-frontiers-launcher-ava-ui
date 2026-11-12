@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -173,10 +174,29 @@ public partial class MainPage : UserControl
 
     // ---- Launch ----
 
-    private async void OnLaunchButtonClicked(object sender, RoutedEventArgs e)
+    private void OnLaunchButtonClicked(object sender, RoutedEventArgs e)
+    {
+        // A network: into its front server, which sends the player where they were last.
+        var group = _viewModel.SelectedModpack?.Group;
+        if (group == null)
+        {
+            _ = LaunchAsync("Запустить Minecraft с выбранной сборкой?", null);
+            return;
+        }
+        _ = LaunchAsync($"Запустить Minecraft и зайти в «{group.Name}»?", new JoinTarget(group.Name, group.Address));
+    }
+
+    private void OnGroupExpandClicked(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is Modpack modpack) modpack.IsExpanded = !modpack.IsExpanded;
+        e.Handled = true;
+    }
+
+    private async Task LaunchAsync(string question, JoinTarget? join)
     {
         var instance = SelectedInstance;
         if (instance == null) return;
+        if (LaunchButton is { IsEnabled: false }) return;
 
         var profile = PlayerProfile;
         if (profile == null)
@@ -185,7 +205,7 @@ public partial class MainPage : UserControl
             return;
         }
 
-        bool answer = await _popUpService.ShowYesNoDialogAsync("Запуск игры", "Запустить Minecraft с выбранной сборкой?");
+        bool answer = await _popUpService.ShowYesNoDialogAsync("Запуск игры", question);
         if (!answer) return;
 
         SetLaunchEnabled(false);
@@ -198,7 +218,8 @@ public partial class MainPage : UserControl
             OnDownloadFileChanged,
             () => SetLaunchEnabled(true),
             OnLaunchFailed,
-            _mainWindow);
+            _mainWindow,
+            join);
         _progressTimer.Stop();
         RenderLaunchProgress();
     }

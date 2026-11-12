@@ -85,7 +85,7 @@ public class MainPageViewModel : INotifyPropertyChanged
     public async Task RefreshNewsAsync()
     {
         var request = ++_newsRequest;
-        var serverId = SelectedModpack?.Value;
+        var serverId = SelectedModpack?.NewsServerId;
 
         NewsMessage = "Загружаем новости…";
         var items = await NewsClient.FetchAsync(SharedHttp.Api, AppStaticData.ServerURL, serverId);
@@ -211,7 +211,9 @@ public class MainPageViewModel : INotifyPropertyChanged
         _refreshingCatalog = true;
         try
         {
+            var groupsTask = RefreshGroupsAsync(apply: false);
             var remote = await ModpackCatalog.FetchRemoteAsync(AppStaticData.GetModpackListURL(), SharedHttp.Api);
+            await groupsTask;
             var entries = ModpackCatalog.Merge(remote, _instanceManager.Instances.ToList());
 
             CatalogMessage = remote == null ? "Could not load the server list. Showing installed and default modpacks."
@@ -261,7 +263,7 @@ public class MainPageViewModel : INotifyPropertyChanged
                 if (existingIndex != i) Modpacks.Move(existingIndex, Math.Min(i, Modpacks.Count - 1));
             }
 
-            modpack.Apply(entry, duplicateNames.Contains(entry.Name));
+            modpack.Apply(entry, duplicateNames.Contains(entry.Name), ServerGroups.ForPack(_groups, entry.Id));
         }
 
         var wanted = entries.Select(entry => entry.Id).ToHashSet(StringComparer.Ordinal);
@@ -276,11 +278,37 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
     }
 
+    // ---- Networks of servers (GET /server-management/groups); none known keeps the plain list ----
+
+    private IReadOnlyList<ServerGroup>? _groups;
+
+    /// <summary>Reads the groups. A failed read keeps what was known, so a hiccup does not reshape the list.</summary>
+    private async Task RefreshGroupsAsync(bool apply)
+    {
+        var groups = await ServerGroups.FetchAsync(SharedHttp.Api, AppStaticData.ServerURL);
+        if (groups != null) _groups = groups;
+        if (!apply || groups == null) return;
+
+        foreach (var modpack in Modpacks.Where(modpack => modpack.Entry != null))
+        {
+            var wasGroup = modpack.IsGroup;
+            modpack.ApplyGroup(ServerGroups.ForPack(_groups, modpack.Value));
+            if (modpack == SelectedModpack && wasGroup != modpack.IsGroup)
+            {
+                OnPropertyChanged(nameof(SelectedModpackName));
+                _ = RefreshNewsAsync();
+            }
+        }
+    }
+
     private async Task PollPlayerCountsAsync()
     {
         using var timer = new PeriodicTimer(PlayerCountPollInterval);
+        var first = true;
         do
         {
+            if (!first) await RefreshGroupsAsync(apply: true);
+            first = false;
             await Task.WhenAll(Modpacks.ToList().Select(modpack => modpack.UpdatePlayerCount(_serverService)));
         }
         while (await timer.WaitForNextTickAsync());

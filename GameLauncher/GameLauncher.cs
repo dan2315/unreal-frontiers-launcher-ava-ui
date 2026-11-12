@@ -36,7 +36,8 @@ namespace UnrealFrontiersLauncher
             Action<string> onFileChanged,
             Action onGameQuit,
             Action<string> onError,
-            MainWindow mainWindow)
+            MainWindow mainWindow,
+            JoinTarget? join = null)
         {
             try
             {
@@ -71,18 +72,26 @@ namespace UnrealFrontiersLauncher
                 // messages every two minutes, freezing the game. "legacy" makes it use the offline services.
                 var session = MSession.CreateOfflineSession(playerProfile.Nickname);
                 session.UserType = "legacy";
-                var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+                var launchOption = new MLaunchOption
                 {
                     Session = session,
                     MaximumRamMb = launchConfiguration.Ram,
-                });
+                };
+                if (join != null)
+                {
+                    // Straight into the server (quick play on new versions, --server on old ones).
+                    var (ip, port) = MinecraftInstance.SplitAddress(join.Address);
+                    launchOption.ServerIp = ip;
+                    launchOption.ServerPort = int.TryParse(port, out var number) ? number : 25565;
+                }
+                var process = await launcher.InstallAndBuildProcessAsync(versionName, launchOption);
                 ApplyGameEnvironment(process, accessToken);
 
                 progress.BeginStage(2);
                 await InstallPackAsync(minecraftInstance, progress, onFileChanged);
                 progress.Finish();
 
-                new ServerListManager(minecraftInstance).EnsureCorrespondingServerEntryExist();
+                new ServerListManager(minecraftInstance).EnsureCorrespondingServerEntryExist(join?.Name, join?.Address);
 
                 Console.WriteLine("Executing command:");
                 Console.WriteLine(process.StartInfo.FileName + " " + process.StartInfo.Arguments);
@@ -202,4 +211,10 @@ namespace UnrealFrontiersLauncher
             return path;
         }
     }
+}
+
+namespace UnrealFrontiersLauncher
+{
+    /// <summary>A server the game connects to right after it starts, and the name it gets in the game's server list.</summary>
+    public sealed record JoinTarget(string Name, string Address);
 }
